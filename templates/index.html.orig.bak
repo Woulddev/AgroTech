@@ -1,0 +1,2588 @@
+<!DOCTYPE html>
+<html lang="az" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Priva VP9508 — Operations Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/static/chart.umd.min.js"></script>
+<script>if (typeof Chart === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>');</script>
+
+<style>
+  :root {
+    --bg-base: #090d14;
+    --bg-sidebar: #0e131d;
+    --bg-surface: #111724;
+    --bg-card: #141c2c;
+    --bg-card-hover: #192438;
+    --bg-input: #0e1422;
+    --border: #1e283d;
+    --border-bright: #2d3d5c;
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    --accent-lime: #c8f560;
+    --accent-teal: #00f0aa;
+    --accent-cyan: #38bdf8;
+    --accent-blue: #3b82f6;
+    --accent-purple: #a855f7;
+    --accent-amber: #f59e0b;
+    --accent-red: #ef4444;
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    
+    --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  }
+
+  :root[data-theme="light"] {
+    --bg-base: #f0f4f9;
+    --bg-sidebar: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f6f9fc;
+    --bg-input: #eef2f7;
+    --border: #d5deea;
+    --border-bright: #b8c7db;
+    
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --accent-lime: #4d7c0f;
+    --accent-teal: #0d9488;
+    --accent-cyan: #0284c7;
+    --accent-blue: #2563eb;
+    --accent-purple: #7e22ce;
+    --accent-amber: #d97706;
+    --accent-red: #dc2626;
+    
+    --shadow-card: 0 10px 25px -10px rgba(0, 0, 0, 0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ══════════════════════════════════════════
+     SLIM SIDEBAR (LEFT NAVIGATION RAIL)
+  ══════════════════════════════════════════ */
+  aside.sidebar-rail {
+    width: 68px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 0;
+    gap: 20px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+  }
+
+  .rail-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--accent-lime);
+    color: #0b0f17;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    box-shadow: 0 0 16px rgba(200, 245, 96, 0.35);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .rail-logo:hover {
+    transform: scale(1.05);
+  }
+
+  .rail-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+    align-items: center;
+    flex: 1;
+  }
+
+  .rail-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .rail-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .rail-btn.active {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border-color: var(--border-bright);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  .rail-btn.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;
+    top: 10px;
+    bottom: 10px;
+    width: 3px;
+    border-radius: 0 4px 4px 0;
+    background: var(--accent-lime);
+  }
+
+  .rail-bottom {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+  }
+
+  /* ══════════════════════════════════════════
+     MAIN WRAPPER & HEADER
+  ══════════════════════════════════════════ */
+  .app-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header.top-header {
+    background: var(--bg-surface);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 90;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-left-capsules {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .status-capsule {
+    padding: 5px 11px;
+    border-radius: 20px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .status-capsule strong {
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+  }
+  .dot-pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent-teal);
+    box-shadow: 0 0 8px var(--accent-teal);
+  }
+
+  .header-search-wrap {
+    flex: 1;
+    max-width: 440px;
+    position: relative;
+  }
+  .header-search {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 7px 36px 7px 14px;
+    color: var(--text-primary);
+    font-size: 11.5px;
+    outline: none;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .header-search:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.12);
+  }
+  .search-shortcut-hint {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+    background: var(--bg-surface);
+    padding: 2px 5px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .header-right-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .icon-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s;
+  }
+  .icon-action-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-bright);
+  }
+  .badge-notify-count {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background: var(--accent-red);
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 700;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-surface);
+  }
+
+  .user-profile-pill {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 4px 10px 4px 6px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    cursor: pointer;
+  }
+  .user-avatar-circle {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #2a3449;
+    color: var(--accent-lime);
+    font-weight: 700;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .user-meta-txt {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    line-height: 1.2;
+  }
+  .user-name-txt {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .user-role-txt {
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+
+  /* ══════════════════════════════════════════
+     SUBHEADER & TAB BAR
+  ══════════════════════════════════════════ */
+  .subheader-bar {
+    padding: 20px 32px 14px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .subhead-title-wrap h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+  .subhead-title-wrap p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 3px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .subheader-actions-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ctrl-select-pill {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 600;
+    outline: none;
+    cursor: pointer;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .ctrl-select-pill:focus {
+    border-color: var(--accent-cyan);
+  }
+
+  .btn-accent-primary {
+    background: var(--accent-lime);
+    color: #090d14;
+    border: none;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(200, 245, 96, 0.25);
+    transition: all 0.2s;
+  }
+  .btn-accent-primary:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+  }
+
+  /* Tab Navigation Row (From Screenshot 2) */
+  .tab-nav-row {
+    padding: 0 32px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .nav-tab-pill {
+    padding: 7px 16px;
+    border-radius: 20px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-tab-pill:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .nav-tab-pill.active {
+    background: var(--bg-surface);
+    border-color: var(--border-bright);
+    color: var(--accent-lime);
+  }
+
+  /* ══════════════════════════════════════════
+     CONTAINER & VIEWS
+  ══════════════════════════════════════════ */
+  .view-container {
+    padding: 24px 32px 60px;
+    flex: 1;
+  }
+
+  .dashboard-view-panel {
+    display: none;
+  }
+  .dashboard-view-panel.active {
+    display: block;
+  }
+
+  /* ══════════════════════════════════════════
+     TAB 1: OPERATIONS DASHBOARD (SCREENSHOT 1)
+  ══════════════════════════════════════════ */
+  .operations-split-grid {
+    display: grid;
+    grid-template-columns: 420px 1fr;
+    gap: 22px;
+  }
+  @media (max-width: 1280px) {
+    .operations-split-grid { grid-template-columns: 1fr; }
+  }
+
+  .col-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .dash-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+  }
+
+  .dash-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    gap: 10px;
+  }
+  .dash-card-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dash-card-link {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-cyan);
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .dash-card-link:hover {
+    text-decoration: underline;
+  }
+
+  /* Quick Actions (Screenshot 1 top left) */
+  .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .btn-quick-act {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 10px;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .btn-quick-act:hover {
+    background: var(--bg-card-hover);
+    color: var(--text-primary);
+    border-color: var(--accent-lime);
+  }
+  .btn-quick-act svg {
+    color: var(--accent-lime);
+  }
+
+  /* Alert Priority Queue (Screenshot 1 middle left) */
+  .alert-queue-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .alert-queue-item {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    transition: transform 0.15s;
+  }
+  .alert-queue-item:hover {
+    transform: translateX(2px);
+  }
+  .alert-queue-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+  }
+  .alert-queue-item.warning {
+    border-color: rgba(245, 158, 11, 0.35);
+  }
+  .alert-queue-item.warning::before {
+    background: var(--accent-amber);
+  }
+  .alert-queue-item.critical {
+    border-color: rgba(239, 68, 68, 0.35);
+  }
+  .alert-queue-item.critical::before {
+    background: var(--accent-red);
+  }
+
+  .alert-header-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .alert-title-txt {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .alert-pill-badge {
+    font-size: 9px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase;
+  }
+  .alert-pill-badge.warning {
+    background: rgba(245, 158, 11, 0.18);
+    color: var(--accent-amber);
+  }
+  .alert-pill-badge.critical {
+    background: rgba(239, 68, 68, 0.18);
+    color: var(--accent-red);
+  }
+  .alert-desc-p {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.35;
+  }
+  .alert-check-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(0, 240, 170, 0.12);
+    color: var(--accent-teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  /* Recent Activity Feed (Screenshot 1 bottom left) */
+  .activity-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .activity-feed-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    gap: 10px;
+  }
+  .activity-feed-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .activity-feed-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .activity-text-col {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.25;
+    min-width: 0;
+  }
+  .activity-main-txt {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .activity-time-txt {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .activity-badge-code {
+    font-size: 9.5px;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--accent-cyan);
+    white-space: nowrap;
+  }
+
+  /* RIGHT COLUMN: TREND CHARTS (SCREENSHOT 1) */
+  .trend-chart-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+  }
+  .trend-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .trend-title-col h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .trend-title-col p {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .trend-actions-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .trend-canvas-wrap {
+    position: relative;
+    height: 240px;
+    width: 100%;
+  }
+
+  /* Circular & Arc Gauges (Screenshot 3) */
+  .gauges-grid-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 900px) {
+    .gauges-grid-row { grid-template-columns: 1fr; }
+  }
+
+  .gauge-box-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px 18px 18px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .gauge-box-card:hover {
+    border-color: var(--border-bright);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  }
+  .gauge-box-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .gauge-svg-wrap {
+    width: 160px;
+    height: 90px;
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+  .gauge-center-val {
+    margin-top: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+  }
+  .gauge-sub-pill {
+    margin-top: 6px;
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: rgba(0, 240, 170, 0.12);
+    color: var(--accent-teal);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* ══════════════════════════════════════════
+     TAB 2: BÖLMƏLƏR / ZONALAR (CARGO SCREENSHOT 2)
+  ══════════════════════════════════════════ */
+  .compartments-summary-bar {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .comp-stat-pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+  }
+  .comp-stat-pill strong {
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .cargo-layout-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 1100px) {
+    .cargo-layout-grid { grid-template-columns: 1fr; }
+  }
+
+  .compartment-boxes-matrix {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 14px;
+  }
+  .comp-cell-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .comp-cell-card:hover, .comp-cell-card.selected {
+    border-color: var(--accent-lime);
+    background: var(--bg-card-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  .comp-cell-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .comp-tag-code {
+    font-size: 10px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-muted);
+  }
+  .comp-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-teal);
+  }
+  .comp-title-txt {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+  .comp-metrics-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .comp-metric-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .comp-metric-line span.val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    color: var(--accent-cyan);
+  }
+  .comp-progress-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.08);
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .comp-progress-fill {
+    height: 100%;
+    background: var(--accent-teal);
+    border-radius: 2px;
+  }
+
+  /* Compartment Inspector Drawer (Right of Cargo Grid) */
+  .cargo-inspector-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .inspector-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .inspector-meta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .insp-box {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px;
+  }
+  .insp-lbl {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+  }
+  .insp-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-top: 2px;
+  }
+
+  /* ══════════════════════════════════════════
+     TAB 3: ALL SENSORS & SPARKLINE CARDS
+  ══════════════════════════════════════════ */
+  .sensors-filter-strip {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+  }
+  .sensor-filter-btn {
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .sensor-filter-btn:hover, .sensor-filter-btn.active {
+    background: rgba(200, 245, 96, 0.12);
+    border-color: var(--accent-lime);
+    color: var(--accent-lime);
+  }
+
+  .sensors-grid-matrix {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px;
+  }
+  @media (min-width: 1500px) {
+    .sensors-grid-matrix { grid-template-columns: repeat(4, 1fr); }
+  }
+  .sensor-card-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--card-accent, var(--accent-teal));
+    border-radius: var(--radius-md);
+    padding: 16px 16px 14px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+  .sensor-card-item::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 60%, rgba(56,189,248,0.03));
+    pointer-events: none;
+  }
+  .sensor-card-item:hover {
+    border-color: var(--card-accent, var(--accent-teal));
+    background: var(--bg-card-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+  }
+  .sensor-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  .sensor-name-lbl {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.2px;
+  }
+  .sensor-unit-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--accent-teal);
+    background: rgba(0, 240, 170, 0.12);
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  .sensor-avg-big {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  .sensor-avg-big .unit-suffix {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .sensor-stats-triplet {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .sensor-stat-mini {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .sensor-stat-mini .s-lbl {
+    font-size: 9px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .sensor-stat-mini .s-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .sensor-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .sensor-card-footer .view-link {
+    color: var(--accent-lime);
+    font-weight: 600;
+    transition: color 0.15s;
+  }
+  .sensor-card-item:hover .view-link {
+    color: var(--accent-cyan);
+  }
+
+  /* ══════════════════════════════════════════
+     TAB 4: ADMIN & THRESHOLDS
+  ══════════════════════════════════════════ */
+  .admin-grid-two {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+  @media (max-width: 960px) {
+    .admin-grid-two { grid-template-columns: 1fr; }
+  }
+
+  .form-group-line {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+  .form-group-line label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .admin-input-txt {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 8px 12px;
+    color: var(--text-primary);
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    outline: none;
+  }
+  .admin-input-txt:focus {
+    border-color: var(--accent-lime);
+  }
+
+  .threshold-table-scroll {
+    max-height: 400px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+  }
+  .threshold-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11.5px;
+  }
+  .threshold-table th, .threshold-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+  }
+  .threshold-table th {
+    background: var(--bg-input);
+    color: var(--text-muted);
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  /* ══════════════════════════════════════════
+     POPUP MODAL (DETAILED DRILLDOWN & EXPORT)
+  ══════════════════════════════════════════ */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 8, 14, 0.85);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 24px;
+  }
+  .modal-backdrop.open {
+    display: flex;
+  }
+  .modal-dialog {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 1050px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-header {
+    padding: 20px 26px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-body {
+    padding: 24px 26px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .modal-chart-area {
+    height: 320px;
+    position: relative;
+    width: 100%;
+  }
+
+  /* SVG Icons Helpers */
+  .icon-svg {
+    width: 18px;
+    height: 18px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SLIM SIDEBAR (LEFT NAVIGATION RAIL)
+══════════════════════════════════════════ -->
+<aside class="sidebar-rail">
+  <div class="rail-logo" title="Priva Connext Telemetriya" onclick="switchTab('dashboard')">
+    <svg class="icon-svg" style="width:20px;height:20px;stroke:#090d14;stroke-width:2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  </div>
+
+  <nav class="rail-nav">
+    <button class="rail-btn active" id="rail-tab-dashboard" title="Operations Dashboard" onclick="switchTab('dashboard')">
+      <svg class="icon-svg" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+    </button>
+    <button class="rail-btn" id="rail-tab-compartments" title="Bölmələr & Zonalar (Cargo Layout)" onclick="switchTab('compartments')">
+      <svg class="icon-svg" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+    </button>
+    <button class="rail-btn" id="rail-tab-sensors" title="Bütün Sensorlar" onclick="switchTab('sensors')">
+      <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+    </button>
+    <button class="rail-btn" id="rail-tab-admin" title="Admin & Qaydalar" onclick="switchTab('admin')">
+      <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+    </button>
+  </nav>
+
+  <div class="rail-bottom">
+    <button class="rail-btn" title="Tema Dəyiş" onclick="toggleTheme()">
+      <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+    <button class="rail-btn" title="Haqqında" onclick="alert('Priva Integro / Connext VP9508\n6+ illik sensor datalogu (2020-2026)\n371 kanal · ~6.5M ölçüm')">
+      <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+    </button>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════
+     MAIN APPLICATION AREA
+══════════════════════════════════════════ -->
+<main class="app-main">
+  
+  <!-- Header Bar -->
+  <header class="top-header">
+    <div class="header-left-capsules">
+      <div class="status-capsule">
+        <span class="dot-pulse"></span>
+        <span>Aktiv: <strong>39/39</strong></span>
+      </div>
+      <div class="status-capsule">
+        <span>Bölmələr: <strong>4 Zona</strong></span>
+      </div>
+      <div class="status-capsule">
+        <span>Ölçmələr: <strong>~6.5M</strong></span>
+      </div>
+      <div class="status-capsule">
+        <span>Orta Temp: <strong>18.7°C</strong></span>
+      </div>
+      <div class="status-capsule">
+        <span>Hədəf Uyğunluğu: <strong>96.5%</strong></span>
+      </div>
+    </div>
+
+    <!-- Center Search Bar -->
+    <div class="header-search-wrap">
+      <input type="text" id="global-search-input" class="header-search" placeholder="Sensor, göstərici və ya kanal axtar... (məs: temp, co2)">
+      <span class="search-shortcut-hint">⌘K</span>
+    </div>
+
+    <!-- Right User Meta -->
+    <div class="header-right-user">
+      <button class="icon-action-btn" title="Bildirişlər (Alerts)" onclick="switchTab('dashboard')">
+        <svg class="icon-svg" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="badge-notify-count" id="header-alert-count">3</span>
+      </button>
+
+      <div class="user-profile-pill" onclick="switchTab('admin')">
+        <div class="user-avatar-circle">OP</div>
+        <div class="user-meta-txt">
+          <span class="user-name-txt">İstixana Operatoru</span>
+          <span class="user-role-txt">Priva Connext</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subheader with Dashboard Title and Controls -->
+  <div class="subheader-bar">
+    <div class="subhead-title-wrap">
+      <h1>Operations Dashboard</h1>
+      <p id="subhead-subtitle">Priva VP9508 · Real-vaxt iqlim telemetriyası & avtomatlaşdırma</p>
+    </div>
+
+    <div class="subheader-actions-wrap">
+      <select id="period-dropdown" class="ctrl-select-pill" onchange="onPeriodChange(this.value)">
+        <option value="7d" selected>Son 7 gün</option>
+        <option value="30d">Son 30 gün</option>
+        <option value="1d">Bu gün (24 Saat Saatlıq)</option>
+        <option value="all">Bütün dövr (2020-2026)</option>
+      </select>
+      <button class="btn-accent-primary" onclick="openManualEntryModal()">
+        <svg class="icon-svg" style="width:14px;height:14px;stroke-width:2.5" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Manual Ölçmə</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Tab Navigation Bar (Under Title Bar) -->
+  <div class="tab-nav-row">
+    <button class="nav-tab-pill active" id="subtab-dashboard" onclick="switchTab('dashboard')">
+      <svg class="icon-svg" style="width:14px;height:14px" viewBox="0 0 24 24"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+      <span>İcmal (Dashboard)</span>
+    </button>
+    <button class="nav-tab-pill" id="subtab-compartments" onclick="switchTab('compartments')">
+      <svg class="icon-svg" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+      <span>Bölmələr (Zonalar)</span>
+    </button>
+    <button class="nav-tab-pill" id="subtab-sensors" onclick="switchTab('sensors')">
+      <svg class="icon-svg" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      <span>Bütün Sensorlar (39)</span>
+    </button>
+    <button class="nav-tab-pill" id="subtab-admin" onclick="switchTab('admin')">
+      <svg class="icon-svg" style="width:14px;height:14px" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Admin & Qaydalar</span>
+    </button>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       VIEWS
+  ══════════════════════════════════════════ -->
+  <div class="view-container">
+
+    <!-- ──────────────────────────────────────────
+         TAB 1: OPERATIONS DASHBOARD (SCREENSHOT 1)
+    ────────────────────────────────────────── -->
+    <div id="view-dashboard" class="dashboard-view-panel active">
+      <div class="operations-split-grid">
+        
+        <!-- LEFT COLUMN (420px) -->
+        <div class="col-stack">
+          
+          <!-- Quick Actions -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <span class="dash-card-title">
+                <svg class="icon-svg" style="width:15px;height:15px;color:var(--accent-lime)" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Quick Actions
+              </span>
+            </div>
+            <div class="quick-actions-grid">
+              <button class="btn-quick-act" onclick="openManualEntryModal()">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                <span>Manual Data</span>
+              </button>
+              <button class="btn-quick-act" onclick="switchTab('admin')">
+                <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                <span>Hədd Qaydası</span>
+              </button>
+              <button class="btn-quick-act" onclick="openDrilldown('10')">
+                <svg class="icon-svg" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                <span>Detallı Qrafik</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Alert Priority Queue -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <span class="dash-card-title">
+                <svg class="icon-svg" style="width:15px;height:15px;color:var(--accent-amber)" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                Alert Priority Queue
+              </span>
+              <a class="dash-card-link" onclick="switchTab('admin')">See all</a>
+            </div>
+            
+            <div class="alert-queue-wrap" id="alert-queue-items">
+              <!-- Warning Item -->
+              <div class="alert-queue-item warning" onclick="openDrilldown('14')">
+                <div style="flex:1;min-width:0">
+                  <div class="alert-header-row">
+                    <span class="alert-title-txt">Bölmə 1 Rütubət Həddi</span>
+                    <span class="alert-pill-badge warning">Warning</span>
+                  </div>
+                  <p class="alert-desc-p">Sensor #14: Rütubət 88.5% (Tövsiyə: 60-85%). Ventilyasiya klapanı açılması tələb olunur.</p>
+                </div>
+                <div class="alert-check-icon" title="Təsdiq et">✓</div>
+              </div>
+
+              <!-- Critical Item 1 -->
+              <div class="alert-queue-item critical" onclick="openDrilldown('22')">
+                <div style="flex:1;min-width:0">
+                  <div class="alert-header-row">
+                    <span class="alert-title-txt">Isıtma Boru Temperaturu Kritik</span>
+                    <span class="alert-pill-badge critical">Critical</span>
+                  </div>
+                  <p class="alert-desc-p">Sensor #22: 74.2°C təyin olunmuş 70.0°C maksimal kritik həddi aşdı.</p>
+                </div>
+                <div class="alert-check-icon" title="Təsdiq et">✓</div>
+              </div>
+
+              <!-- Critical Item 2 -->
+              <div class="alert-queue-item critical" onclick="openDrilldown('290')">
+                <div style="flex:1;min-width:0">
+                  <div class="alert-header-row">
+                    <span class="alert-title-txt">CO₂ Konsentrasiyası Çatışmazlığı</span>
+                    <span class="alert-pill-badge critical">Critical</span>
+                  </div>
+                  <p class="alert-desc-p">Sensor #290: 390 ppm (Minimum tələb: 450 ppm). Dozaj klapanını yoxlayın.</p>
+                </div>
+                <div class="alert-check-icon" title="Təsdiq et">✓</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Activity -->
+          <div class="dash-card">
+            <div class="dash-card-header">
+              <span class="dash-card-title">
+                <svg class="icon-svg" style="width:15px;height:15px;color:var(--accent-cyan)" viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                Recent Activity
+              </span>
+              <a class="dash-card-link" onclick="switchTab('sensors')">See all</a>
+            </div>
+
+            <div class="activity-feed-list">
+              <div class="activity-feed-row">
+                <div class="activity-feed-left">
+                  <div class="activity-feed-icon">🌤️</div>
+                  <div class="activity-text-col">
+                    <span class="activity-main-txt">Meteoroloji Stansiya Yeniləndi</span>
+                    <span class="activity-time-txt">2026-04-25 14:00</span>
+                  </div>
+                </div>
+                <span class="activity-badge-code">CH-00</span>
+              </div>
+
+              <div class="activity-feed-row">
+                <div class="activity-feed-left">
+                  <div class="activity-feed-icon">💨</div>
+                  <div class="activity-text-col">
+                    <span class="activity-main-txt">Bölmə 2 Havalandırma 35% açıldı</span>
+                    <span class="activity-time-txt">2026-04-25 13:45</span>
+                  </div>
+                </div>
+                <span class="activity-badge-code">CH-27</span>
+              </div>
+
+              <div class="activity-feed-row">
+                <div class="activity-feed-left">
+                  <div class="activity-feed-icon">🔥</div>
+                  <div class="activity-text-col">
+                    <span class="activity-main-txt">Qazanxana bufer çəni temperaturu stabilləşdi</span>
+                    <span class="activity-time-txt">2026-04-25 13:10</span>
+                  </div>
+                </div>
+                <span class="activity-badge-code">CH-22</span>
+              </div>
+
+              <div class="activity-feed-row">
+                <div class="activity-feed-left">
+                  <div class="activity-feed-icon">⚗️</div>
+                  <div class="activity-text-col">
+                    <span class="activity-main-txt">Su keyfiyyəti EC/pH avtomatik kalibrasiya</span>
+                    <span class="activity-time-txt">2026-04-25 12:00</span>
+                  </div>
+                </div>
+                <span class="activity-badge-code">CH-366</span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: MAIN CHARTS & GAUGES -->
+        <div class="col-stack">
+          
+          <!-- Trend Chart 1: Fleet / Climate Utilization Bar Chart -->
+          <div class="trend-chart-card">
+            <div class="trend-header-row">
+              <div class="trend-title-col">
+                <h3>
+                  <svg class="icon-svg" style="width:16px;height:16px;color:var(--accent-teal)" viewBox="0 0 24 24"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+                  İstixana Temperatur və İqlim Trendi
+                </h3>
+                <p>Seçilmiş dövr üzrə orta dinamika və pik hədlər</p>
+              </div>
+
+              <div class="trend-actions-group">
+                <select id="main-metric-selector" class="ctrl-select-pill" onchange="renderMainBarChart()">
+                  <option value="10">İstixana Bölmə 1 Temp (°C)</option>
+                  <option value="0">Xarici Hava Temperaturu (°C)</option>
+                  <option value="14">Nisbi Rütubət Bölmə 1 (%)</option>
+                  <option value="22">Isıtma Boru Temperaturu (°C)</option>
+                  <option value="292">CO₂ Konsentrasiyası (ppm)</option>
+                </select>
+                <button class="icon-action-btn" title="Detallı Tam Ekran Analiz" onclick="openDrilldown(document.getElementById('main-metric-selector').value)">
+                  <svg class="icon-svg" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="trend-canvas-wrap">
+              <canvas id="main-bar-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Trend Chart 2: On-Time / Humidity Delivery Performance Smooth Wave -->
+          <div class="trend-chart-card">
+            <div class="trend-header-row">
+              <div class="trend-title-col">
+                <h3>
+                  <svg class="icon-svg" style="width:16px;height:16px;color:var(--accent-purple)" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+                  24-Saatlıq İqlim və Rütubət Balansı
+                </h3>
+                <p>Optimal diapazon (60% - 80%) daxilində stabil paylanma</p>
+              </div>
+
+              <div class="trend-actions-group">
+                <button class="icon-action-btn" title="Yenilə" onclick="renderMainAreaChart()">
+                  <svg class="icon-svg" style="width:14px;height:14px" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="trend-canvas-wrap">
+              <canvas id="main-area-chart"></canvas>
+            </div>
+          </div>
+
+          <!-- Live Gauges -->
+          <div class="gauges-grid-row">
+            <!-- Gauge 1: Temp -->
+            <div class="gauge-box-card">
+              <span class="gauge-box-title">İstixana Temperaturu</span>
+              <div class="gauge-svg-wrap">
+                <svg width="160" height="90" viewBox="0 0 160 90">
+                  <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="#1e283d" stroke-width="10" stroke-linecap="round"/>
+                  <path d="M 20 80 A 60 60 0 0 1 110 30" fill="none" stroke="url(#tempGrad)" stroke-width="10" stroke-linecap="round"/>
+                  <defs>
+                    <linearGradient id="tempGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#00f0aa"/>
+                      <stop offset="100%" stop-color="#38bdf8"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+              <div class="gauge-center-val">18.7°C</div>
+              <span class="gauge-sub-pill">● Optimal diapazon</span>
+            </div>
+
+            <!-- Gauge 2: Humidity -->
+            <div class="gauge-box-card">
+              <span class="gauge-box-title">Nisbi Rütubət (RH)</span>
+              <div class="gauge-svg-wrap">
+                <svg width="160" height="90" viewBox="0 0 160 90">
+                  <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="#1e283d" stroke-width="10" stroke-linecap="round"/>
+                  <path d="M 20 80 A 60 60 0 0 1 100 25" fill="none" stroke="#a855f7" stroke-width="10" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="gauge-center-val">64.3%</div>
+              <span class="gauge-sub-pill" style="color:var(--accent-purple);background:rgba(168,85,247,0.12)">● Standart RH</span>
+            </div>
+
+            <!-- Gauge 3: CO2 -->
+            <div class="gauge-box-card">
+              <span class="gauge-box-title">CO₂ Qatılığı</span>
+              <div class="gauge-svg-wrap">
+                <svg width="160" height="90" viewBox="0 0 160 90">
+                  <path d="M 20 80 A 60 60 0 0 1 140 80" fill="none" stroke="#1e283d" stroke-width="10" stroke-linecap="round"/>
+                  <path d="M 20 80 A 60 60 0 0 1 80 20" fill="none" stroke="#f59e0b" stroke-width="10" stroke-linecap="round"/>
+                </svg>
+              </div>
+              <div class="gauge-center-val">520 ppm</div>
+              <span class="gauge-sub-pill" style="color:var(--accent-amber);background:rgba(245,158,11,0.12)">● Dozaj aktivdir</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ──────────────────────────────────────────
+         TAB 2: BÖLMƏLƏR / ZONALAR (CARGO SCREENSHOT 2)
+    ────────────────────────────────────────── -->
+    <div id="view-compartments" class="dashboard-view-panel">
+      <!-- Top Overview Bar -->
+      <div class="compartments-summary-bar">
+        <div class="comp-stat-pill">
+          <span>Ümumi Zonalar: <strong>4 İstehsal Bölməsi</strong></span>
+        </div>
+        <div class="comp-stat-pill">
+          <span>İstilik Gücü: <strong>100% Hazır</strong></span>
+        </div>
+        <div class="comp-stat-pill">
+          <span>Havalandırma: <strong>Avtomatik</strong></span>
+        </div>
+        <div class="comp-stat-pill">
+          <span>CO₂ Dozaj: <strong>Normativ</strong></span>
+        </div>
+      </div>
+
+      <!-- Cargo Layout Grid -->
+      <div class="cargo-layout-grid">
+        <!-- Matrix of Compartment Boxes -->
+        <div class="compartment-boxes-matrix">
+          
+          <div class="comp-cell-card selected" onclick="inspectCompartment(this, 'CMP-01', 'İstixana Bölmə 1', '10', '14', '22', '26')">
+            <div class="comp-cell-top">
+              <span class="comp-tag-code">CMP-01</span>
+              <span class="comp-status-dot"></span>
+            </div>
+            <div class="comp-title-txt">İstixana Bölmə 1</div>
+            <div class="comp-metrics-list">
+              <div class="comp-metric-line"><span>Temperatur:</span><span class="val">18.6°C</span></div>
+              <div class="comp-metric-line"><span>Rütubət:</span><span class="val">64.3%</span></div>
+              <div class="comp-metric-line"><span>Ventilyasiya:</span><span class="val">20.8%</span></div>
+            </div>
+            <div class="comp-progress-bar"><div class="comp-progress-fill" style="width:78%"></div></div>
+          </div>
+
+          <div class="comp-cell-card" onclick="inspectCompartment(this, 'CMP-02', 'İstixana Bölmə 2', '11', '15', '23', '27')">
+            <div class="comp-cell-top">
+              <span class="comp-tag-code">CMP-02</span>
+              <span class="comp-status-dot"></span>
+            </div>
+            <div class="comp-title-txt">İstixana Bölmə 2</div>
+            <div class="comp-metrics-list">
+              <div class="comp-metric-line"><span>Temperatur:</span><span class="val">18.8°C</span></div>
+              <div class="comp-metric-line"><span>Rütubət:</span><span class="val">62.4%</span></div>
+              <div class="comp-metric-line"><span>Ventilyasiya:</span><span class="val">21.0%</span></div>
+            </div>
+            <div class="comp-progress-bar"><div class="comp-progress-fill" style="width:82%"></div></div>
+          </div>
+
+          <div class="comp-cell-card" onclick="inspectCompartment(this, 'CMP-03', 'İstixana Bölmə 3', '12', '16', '22', '26')">
+            <div class="comp-cell-top">
+              <span class="comp-tag-code">CMP-03</span>
+              <span class="comp-status-dot"></span>
+            </div>
+            <div class="comp-title-txt">İstixana Bölmə 3</div>
+            <div class="comp-metrics-list">
+              <div class="comp-metric-line"><span>Temperatur:</span><span class="val">18.7°C</span></div>
+              <div class="comp-metric-line"><span>Rütubət:</span><span class="val">63.1%</span></div>
+              <div class="comp-metric-line"><span>Ventilyasiya:</span><span class="val">19.5%</span></div>
+            </div>
+            <div class="comp-progress-bar"><div class="comp-progress-fill" style="width:75%"></div></div>
+          </div>
+
+          <div class="comp-cell-card" onclick="inspectCompartment(this, 'CMP-04', 'İstixana Bölmə 4', '13', '17', '23', '27')">
+            <div class="comp-cell-top">
+              <span class="comp-tag-code">CMP-04</span>
+              <span class="comp-status-dot"></span>
+            </div>
+            <div class="comp-title-txt">İstixana Bölmə 4</div>
+            <div class="comp-metrics-list">
+              <div class="comp-metric-line"><span>Temperatur:</span><span class="val">18.9°C</span></div>
+              <div class="comp-metric-line"><span>Rütubət:</span><span class="val">61.8%</span></div>
+              <div class="comp-metric-line"><span>Ventilyasiya:</span><span class="val">22.4%</span></div>
+            </div>
+            <div class="comp-progress-bar"><div class="comp-progress-fill" style="width:85%"></div></div>
+          </div>
+
+          <div class="comp-cell-card" onclick="inspectCompartment(this, 'HEAT-01', 'Qazanxana & Isıtma', '22', '23', '150', '324')">
+            <div class="comp-cell-top">
+              <span class="comp-tag-code">HEAT-01</span>
+              <span class="comp-status-dot" style="background:var(--accent-amber)"></span>
+            </div>
+            <div class="comp-title-txt">Isıtma Şəbəkəsi</div>
+            <div class="comp-metrics-list">
+              <div class="comp-metric-line"><span>Boru Temp:</span><span class="val">20.7°C</span></div>
+              <div class="comp-metric-line"><span>Su Temp:</span><span class="val">36.6°C</span></div>
+              <div class="comp-metric-line"><span>Qaz Sərfi:</span><span class="val">112 m³/h</span></div>
+            </div>
+            <div class="comp-progress-bar"><div class="comp-progress-fill" style="width:65%;background:var(--accent-amber)"></div></div>
+          </div>
+
+          <div class="comp-cell-card" onclick="inspectCompartment(this, 'METEO-01', 'Xarici Hava Stansiyası', '0', '1', '2', '4')">
+            <div class="comp-cell-top">
+              <span class="comp-tag-code">METEO-01</span>
+              <span class="comp-status-dot" style="background:var(--accent-cyan)"></span>
+            </div>
+            <div class="comp-title-txt">Xarici Hava Stansiyası</div>
+            <div class="comp-metrics-list">
+              <div class="comp-metric-line"><span>Xarici Temp:</span><span class="val">11.0°C</span></div>
+              <div class="comp-metric-line"><span>Külək Sürəti:</span><span class="val">4.9 m/s</span></div>
+              <div class="comp-metric-line"><span>Radiasiya:</span><span class="val">Aktiv</span></div>
+            </div>
+            <div class="comp-progress-bar"><div class="comp-progress-fill" style="width:40%;background:var(--accent-cyan)"></div></div>
+          </div>
+
+        </div>
+
+        <!-- Right Side Inspector Panel -->
+        <div class="cargo-inspector-panel">
+          <div class="dash-card-header" style="margin-bottom:0">
+            <span class="inspector-title" id="insp-header-name">Bölmə 1 İcmal Detalı</span>
+            <span class="activity-badge-code" id="insp-header-code">CMP-01</span>
+          </div>
+
+          <div class="inspector-meta-row">
+            <div class="insp-box">
+              <div class="insp-lbl">Hava Temperaturu</div>
+              <div class="insp-val" id="insp-temp">18.63 °C</div>
+            </div>
+            <div class="insp-box">
+              <div class="insp-lbl">Rütubət Səviyyəsi</div>
+              <div class="insp-val" id="insp-hum">64.27 %</div>
+            </div>
+            <div class="insp-box">
+              <div class="insp-lbl">Boru Temperaturu</div>
+              <div class="insp-val" id="insp-pipe">20.69 °C</div>
+            </div>
+            <div class="insp-box">
+              <div class="insp-lbl">Havalandırma Açıqlığı</div>
+              <div class="insp-val" id="insp-vent">20.78 %</div>
+            </div>
+          </div>
+
+          <div style="height:140px;position:relative;width:100%">
+            <canvas id="insp-mini-chart"></canvas>
+          </div>
+
+          <button class="btn-accent-primary" style="justify-content:center;width:100%" onclick="openDrilldown(currentInspectedSensorId)">
+            Detallı Analiz Pəncərəsini Aç
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ──────────────────────────────────────────
+         TAB 3: BÜTÜN SENSORLAR (ALL 39 CHANNELS)
+    ────────────────────────────────────────── -->
+    <div id="view-sensors" class="dashboard-view-panel">
+      <!-- Group Filter Chips -->
+      <div class="sensors-filter-strip">
+        <button class="sensor-filter-btn active" onclick="filterSensorGroup('', this)">Hamısı (39)</button>
+        <button class="sensor-filter-btn" onclick="filterSensorGroup('greenhouse_temp', this)">İstixana Temperaturu (4)</button>
+        <button class="sensor-filter-btn" onclick="filterSensorGroup('humidity', this)">Rütubət (4)</button>
+        <button class="sensor-filter-btn" onclick="filterSensorGroup('weather', this)">Xarici Hava (6)</button>
+        <button class="sensor-filter-btn" onclick="filterSensorGroup('heating', this)">Isıtma Sistemi (7)</button>
+        <button class="sensor-filter-btn" onclick="filterSensorGroup('ventilation', this)">Ventilyasiya (2)</button>
+        <button class="sensor-filter-btn" onclick="filterSensorGroup('co2', this)">CO₂ Sistemi (3)</button>
+        <button class="sensor-filter-btn" onclick="filterSensorGroup('water', this)">Su Sistemi (2)</button>
+        <button class="sensor-filter-btn" onclick="filterSensorGroup('water_quality', this)">Su Keyfiyyəti (6)</button>
+        <button class="sensor-filter-btn" onclick="filterSensorGroup('energy', this)">Enerji (3)</button>
+      </div>
+
+      <!-- Sensor Cards Grid -->
+      <div class="sensors-grid-matrix" id="sensors-card-container">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+
+    <!-- ──────────────────────────────────────────
+         TAB 4: ADMIN & THRESHOLD RULES
+    ────────────────────────────────────────── -->
+    <div id="view-admin" class="dashboard-view-panel">
+      <!-- Admin Analytics Summary Row -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px">
+        <div class="dash-card" style="padding:16px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:6px">Cəmi Sensor Kanalları</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--accent-lime)">39</div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-top:4px">10 Qrup · 371 Fiziki Kanal</div>
+        </div>
+        <div class="dash-card" style="padding:16px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:6px">Aktiv Threshold Qaydaları</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--accent-amber)" id="admin-threshold-count">6</div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-top:4px">Min/Max hədd monitorinqi</div>
+        </div>
+        <div class="dash-card" style="padding:16px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:6px">Manual Overlay Data</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--accent-cyan)" id="admin-manual-count">1</div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-top:4px">Planlanan / ideal dəyərlər</div>
+        </div>
+        <div class="dash-card" style="padding:16px">
+          <div style="font-size:10px;color:var(--text-muted);text-transform:uppercase;font-weight:700;margin-bottom:6px">Tarix Əhatəsi (Data Coverage)</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;color:var(--accent-teal)">6+ il</div>
+          <div style="font-size:10px;color:var(--text-secondary);margin-top:4px">2020-01-25 → 2026-04-25</div>
+        </div>
+      </div>
+
+      <div class="admin-grid-two">
+        
+        <!-- Threshold Limits Manager -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <span class="dash-card-title">
+              <svg class="icon-svg" style="width:15px;height:15px;color:var(--accent-lime)" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Hədd (Threshold) və Alert Qaydaları
+            </span>
+          </div>
+
+          <form id="threshold-form" onsubmit="handleSaveThreshold(event)">
+            <input type="hidden" id="admin-thresh-id">
+            
+            <div class="form-group-line">
+              <label>Kanal Seçin</label>
+              <select id="admin-thresh-channel" class="admin-input-txt" required>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="form-group-line">
+                <label>Minimum Hədd (Min)</label>
+                <input type="number" step="any" id="admin-thresh-min" class="admin-input-txt" placeholder="məs: 14.0">
+              </div>
+              <div class="form-group-line">
+                <label>Maksimum Hədd (Max)</label>
+                <input type="number" step="any" id="admin-thresh-max" class="admin-input-txt" placeholder="məs: 28.0">
+              </div>
+            </div>
+
+            <div class="form-group-line">
+              <label>Qayda Başlığı / Qeyd</label>
+              <input type="text" id="admin-thresh-lbl" class="admin-input-txt" placeholder="məs: Bölmə 1 Kritik Temperatur">
+            </div>
+
+            <button type="submit" class="btn-accent-primary" style="width:100%;justify-content:center;margin-top:6px">
+              Qaydanı Saxla
+            </button>
+          </form>
+
+          <div class="threshold-table-scroll" style="margin-top:20px">
+            <table class="threshold-table">
+              <thead>
+                <tr>
+                  <th>Kanal</th>
+                  <th>Min</th>
+                  <th>Max</th>
+                  <th>Status</th>
+                  <th>Əməliyyat</th>
+                </tr>
+              </thead>
+              <tbody id="admin-threshold-tbody">
+                <!-- Loaded via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Manual Data & Import -->
+        <div class="dash-card">
+          <div class="dash-card-header">
+            <span class="dash-card-title">
+              <svg class="icon-svg" style="width:15px;height:15px;color:var(--accent-cyan)" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              Manual Overlay & CSV/Excel Import
+            </span>
+          </div>
+
+          <form id="manual-data-form" onsubmit="handleSaveManualData(event)">
+            <div class="form-group-line">
+              <label>Sensor Kanalı</label>
+              <select id="admin-manual-channel" class="admin-input-txt" required>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+              <div class="form-group-line">
+                <label>Tarix</label>
+                <input type="date" id="admin-manual-date" class="admin-input-txt" value="2026-04-24" required>
+              </div>
+              <div class="form-group-line">
+                <label>Saat</label>
+                <input type="time" id="admin-manual-time" class="admin-input-txt" value="12:00" required>
+              </div>
+            </div>
+
+            <div class="form-group-line">
+              <label>Manual / Planlanan Dəyər</label>
+              <input type="number" step="any" id="admin-manual-val" class="admin-input-txt" placeholder="məs: 22.5" required>
+            </div>
+
+            <button type="submit" class="btn-accent-primary" style="width:100%;justify-content:center">
+              Manual Dəyəri Əlavə Et
+            </button>
+            <div id="manual-save-status" style="font-size:11px;color:var(--accent-teal);margin-top:6px;text-align:center"></div>
+          </form>
+
+          <!-- File Import -->
+          <div style="margin-top:24px;padding-top:16px;border-top:1px solid var(--border)">
+            <div class="dash-card-title" style="margin-bottom:12px;font-size:12.5px">Toplu Fayl İdxalı (CSV / JSON / Excel)</div>
+            <input type="file" id="admin-import-file" class="admin-input-txt" style="width:100%" accept=".csv,.json,.xlsx,.xlsm">
+            <div style="display:flex;gap:10px;margin-top:10px">
+              <button type="button" class="ctrl-select-pill" onclick="handleImportPreview()" style="flex:1;text-align:center">Faylı Yoxla (Preview)</button>
+              <button type="button" class="btn-accent-primary" onclick="handleImportSubmit()" style="flex:1;justify-content:center">İdxal Et</button>
+            </div>
+            <div id="import-preview-result" style="font-size:11px;color:var(--text-secondary);margin-top:8px"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>
+
+
+<!-- ══════════════════════════════════════════
+     POPUP MODAL (DETAILED DRILLDOWN & EXPORT)
+══════════════════════════════════════════ -->
+<div id="modal-drilldown" class="modal-backdrop" onclick="if(event.target===this)closeDrilldown()">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div>
+        <h2 id="m-title" style="font-size:17px;font-weight:700">Sensor Detallı Analizi</h2>
+        <p id="m-sub" style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;margin-top:3px"></p>
+      </div>
+      <button class="icon-action-btn" onclick="closeDrilldown()" title="Bağla">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Modal Controls Row -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="sensor-filter-btn active" id="m-gran-monthly" onclick="setDrilldownGran('monthly', this)">Aylıq</button>
+          <button class="sensor-filter-btn" id="m-gran-daily" onclick="setDrilldownGran('daily', this)">Gündəlik</button>
+          <button class="sensor-filter-btn" id="m-gran-hourly" onclick="setDrilldownGran('hourly', this)">Saatlıq (00:00-23:00)</button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="date" id="m-date-from" class="ctrl-select-pill" onchange="renderDrilldownGraph()">
+          <span style="color:var(--text-muted)">→</span>
+          <input type="date" id="m-date-to" class="ctrl-select-pill" onchange="renderDrilldownGraph()">
+          
+          <button class="ctrl-select-pill" onclick="exportChartCsv('modal-chart-canvas')" title="CSV Fayl Yüklə">📥 CSV</button>
+          <button class="ctrl-select-pill" onclick="exportChartPng('modal-chart-canvas')" title="Qrafiki Şəkil Kimi Saxla">📷 PNG</button>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="modal-chart-area">
+        <canvas id="modal-chart-canvas"></canvas>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <div class="insp-box"><div class="insp-lbl">Orta Dəyər</div><div class="insp-val" id="m-avg">—</div></div>
+        <div class="insp-box"><div class="insp-lbl">Minimum Dəyər</div><div class="insp-val" id="m-min">—</div></div>
+        <div class="insp-box"><div class="insp-lbl">Maksimum Dəyər</div><div class="insp-val" id="m-max">—</div></div>
+        <div class="insp-box"><div class="insp-lbl">Cəmi Ölçüm</div><div class="insp-val" id="m-cnt">—</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.__INITIAL_CHANNELS__ = {{ channels | tojson if channels is defined else '{}' }};
+</script>
+<script>
+// ─── GLOBAL APPLICATION STATE ───
+let SD = (window.__INITIAL_CHANNELS__ && Object.keys(window.__INITIAL_CHANNELS__).length > 0) ? window.__INITIAL_CHANNELS__ : {};
+let CI = {}; // Chart Instances registry
+let currentTab = 'dashboard';
+let currentSelectedSensor = '10';
+let currentInspectedSensorId = '10';
+let currentDrilldownId = null;
+let currentDrilldownGran = 'monthly';
+let currentPeriod = '7d';
+
+const GC = {
+  weather: '#00d4aa',
+  greenhouse_temp: '#ff6b6b',
+  humidity: '#4ecdc4',
+  heating: '#f7b731',
+  ventilation: '#a29bfe',
+  co2: '#6c5ce7',
+  curtain: '#fd79a8',
+  water: '#0984e3',
+  water_quality: '#00b894',
+  energy: '#e17055'
+};
+
+const GL = {
+  weather: 'Xarici Hava',
+  greenhouse_temp: 'İstixana Temperaturu',
+  humidity: 'Rütubət',
+  heating: 'Isıtma Sistemi',
+  ventilation: 'Ventilyasiya',
+  co2: 'CO₂ Sistemi',
+  curtain: 'Pərdə Sistemi',
+  water: 'Su Temperaturu',
+  water_quality: 'Su Keyfiyyəti',
+  energy: 'Enerji / Qaz'
+};
+
+// ─── INITIALIZATION ───
+async function init() {
+  initTheme();
+  await loadChannels();
+  populateDropdowns();
+  renderMainBarChart();
+  renderMainAreaChart();
+  renderSensorCards('');
+  loadThresholds();
+
+  // Search input filter
+  document.getElementById('global-search-input')?.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (q) {
+      switchTab('sensors');
+      renderSensorCards(q);
+    }
+  });
+
+  // Keyboard shortcut Cmd/Ctrl + K to focus search
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      document.getElementById('global-search-input')?.focus();
+    }
+  });
+}
+
+// ─── DATA LOADING ───
+async function loadChannels() {
+  try {
+    const res = await fetch('/api/channels');
+    SD = await res.json();
+  } catch (e) {
+    console.error('Error fetching channels:', e);
+  }
+}
+
+function cleanUnit(unit) {
+  return (unit || '').replace(/C/g, '°C').replace(/m\/h/g, 'm³/h').replace(/\uFFFD/g, '°');
+}
+
+// ─── TAB NAVIGATION ───
+function switchTab(tabId) {
+  currentTab = tabId;
+  document.querySelectorAll('.dashboard-view-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.rail-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.nav-tab-pill').forEach(b => b.classList.remove('active'));
+
+  document.getElementById(`view-${tabId}`)?.classList.add('active');
+  document.getElementById(`rail-tab-${tabId}`)?.classList.add('active');
+  document.getElementById(`subtab-${tabId}`)?.classList.add('active');
+
+  if (tabId === 'dashboard') {
+    renderMainBarChart();
+    renderMainAreaChart();
+  } else if (tabId === 'compartments') {
+    renderInspectorMiniChart();
+  }
+}
+
+// ─── POPULATE ADMIN DROPDOWNS ───
+function populateDropdowns() {
+  const tSel = document.getElementById('admin-thresh-channel');
+  const mSel = document.getElementById('admin-manual-channel');
+  if (!tSel || !mSel) return;
+
+  const entries = Object.entries(SD).sort((a,b) => parseInt(a[0]) - parseInt(b[0]));
+  const html = entries.map(([id, info]) => `<option value="${id}">${id} · ${escapeHtml(info.name)} (${cleanUnit(info.unit)})</option>`).join('');
+  tSel.innerHTML = html;
+  mSel.innerHTML = html;
+}
+
+// ─── CHART 1: MAIN COLUMN BAR CHART (FLEET UTILIZATION STYLE) ───
+async function renderMainBarChart() {
+  const ctx = document.getElementById('main-bar-chart');
+  if (!ctx) return;
+
+  const chId = document.getElementById('main-metric-selector')?.value || '10';
+  const ch = SD[chId];
+  if (!ch) return;
+
+  const unit = cleanUnit(ch.unit);
+  let labels = [], dataVals = [];
+
+  try {
+    const res = await fetch(`/api/channel/${chId}`);
+    const full = await res.json();
+    const daily = full.daily || {};
+    const keys = Object.keys(daily);
+
+    let count = 7;
+    if (currentPeriod === '30d') count = 30;
+    else if (currentPeriod === 'all') count = 90;
+    else if (currentPeriod === '1d') count = 1;
+
+    const sliceKeys = keys.slice(-count);
+    labels = sliceKeys.map(k => k.slice(5)); // 'MM-DD'
+    dataVals = sliceKeys.map(k => daily[k]);
+
+  } catch (err) {
+    labels = ['2 Bzr', '3 B.e', '4 Ç.a', '5 Çər', '6 Cüm', '7 Şən', '8 Bzr'];
+    dataVals = [18.2, 18.5, 18.4, 22.4, 19.1, 18.9, 19.5];
+  }
+
+  // Find max value to highlight active bar in glowing cyan (Mockup 1 style)
+  const maxIdx = dataVals.indexOf(Math.max(...dataVals));
+  const bgColors = dataVals.map((_, idx) => idx === maxIdx ? '#38bdf8' : 'rgba(0, 240, 170, 0.35)');
+  const borderColors = dataVals.map((_, idx) => idx === maxIdx ? '#38bdf8' : '#00f0aa');
+
+  if (CI['main-bar-chart']) CI['main-bar-chart'].destroy();
+
+  CI['main-bar-chart'] = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: `${ch.name} (${unit})`,
+        data: dataVals,
+        backgroundColor: bgColors,
+        borderColor: borderColors,
+        borderWidth: 1.5,
+        borderRadius: 8,
+        borderSkipped: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111724',
+          borderColor: '#2d3d5c',
+          borderWidth: 1,
+          titleColor: '#94a3b8',
+          bodyColor: '#f8fafc',
+          callbacks: {
+            label: (c) => ` Dəyər: ${c.parsed.y} ${unit}`
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: cssVar('--text-muted'), font: { family: 'JetBrains Mono', size: 10 } }
+        },
+        y: {
+          grid: { color: 'rgba(255, 255, 255, 0.04)' },
+          ticks: { color: cssVar('--text-muted'), font: { family: 'JetBrains Mono', size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+// ─── CHART 2: ON-TIME PERFORMANCE SMOOTH AREA WAVE (MOCKUP 1 STYLE) ───
+async function renderMainAreaChart() {
+  const ctx = document.getElementById('main-area-chart');
+  if (!ctx) return;
+
+  const chId = '14'; // Humidity CMP1
+  const ch = SD[chId] || { name: 'REL HUMIDITY', unit: '%' };
+  const unit = cleanUnit(ch.unit);
+
+  let labels = [], dataVals = [];
+  try {
+    const res = await fetch(`/api/channel/${chId}`);
+    const full = await res.json();
+    const daily = full.daily || {};
+    const keys = Object.keys(daily).slice(-30);
+    labels = keys.map(k => k.slice(5));
+    dataVals = keys.map(k => daily[k]);
+  } catch (err) {
+    labels = Array.from({length: 20}, (_, i) => `G-${i+1}`);
+    dataVals = [64, 65, 62, 68, 70, 69, 72, 68, 64, 66, 65, 63, 67, 69, 68, 70, 71, 65, 64, 66];
+  }
+
+  if (CI['main-area-chart']) CI['main-area-chart'].destroy();
+
+  CI['main-area-chart'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        label: `Rütubət Balansı (%)`,
+        data: dataVals,
+        borderColor: '#a855f7',
+        backgroundColor: 'rgba(168, 85, 247, 0.15)',
+        fill: true,
+        tension: 0.4,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#111724',
+          borderColor: '#2d3d5c',
+          borderWidth: 1,
+          titleColor: '#94a3b8',
+          bodyColor: '#f8fafc'
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: cssVar('--text-muted'), font: { family: 'JetBrains Mono', size: 10 }, maxTicksLimit: 10 }
+        },
+        y: {
+          grid: { color: 'rgba(255, 255, 255, 0.04)' },
+          ticks: { color: cssVar('--text-muted'), font: { family: 'JetBrains Mono', size: 10 } }
+        }
+      }
+    }
+  });
+}
+
+// ─── CARGO COMPARTMENTS INSPECTOR ───
+function inspectCompartment(el, code, name, tId, hId, pId, vId) {
+  document.querySelectorAll('.comp-cell-card').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+
+  document.getElementById('insp-header-name').textContent = `${name} İcmalı`;
+  document.getElementById('insp-header-code').textContent = code;
+
+  const tVal = SD[tId] ? `${SD[tId].avg_val.toFixed(2)} ${cleanUnit(SD[tId].unit)}` : '18.6 °C';
+  const hVal = SD[hId] ? `${SD[hId].avg_val.toFixed(2)} ${cleanUnit(SD[hId].unit)}` : '64.2 %';
+  const pVal = SD[pId] ? `${SD[pId].avg_val.toFixed(2)} ${cleanUnit(SD[pId].unit)}` : '20.7 °C';
+  const vVal = SD[vId] ? `${SD[vId].avg_val.toFixed(2)} ${cleanUnit(SD[vId].unit)}` : '20.8 %';
+
+  document.getElementById('insp-temp').textContent = tVal;
+  document.getElementById('insp-hum').textContent = hVal;
+  document.getElementById('insp-pipe').textContent = pVal;
+  document.getElementById('insp-vent').textContent = vVal;
+
+  currentInspectedSensorId = tId;
+  renderInspectorMiniChart();
+}
+
+function renderInspectorMiniChart() {
+  const ctx = document.getElementById('insp-mini-chart');
+  if (!ctx) return;
+  if (CI['insp-mini-chart']) CI['insp-mini-chart'].destroy();
+
+  CI['insp-mini-chart'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '23:00'],
+      datasets: [{
+        data: [17.8, 17.5, 18.2, 21.4, 20.1, 18.9, 18.2],
+        borderColor: '#00f0aa',
+        backgroundColor: 'rgba(0, 240, 170, 0.12)',
+        fill: true,
+        tension: 0.35,
+        borderWidth: 2,
+        pointRadius: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#64748b', font: { size: 9 } } },
+        y: { grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#64748b', font: { size: 9 } } }
+      }
+    }
+  });
+}
+
+// ─── TAB 3: RENDER SENSOR CARDS ───
+let currentSensorGroupFilter = '';
+
+function filterSensorGroup(group, btn) {
+  currentSensorGroupFilter = group;
+  document.querySelectorAll('.sensor-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderSensorCards(document.getElementById('global-search-input')?.value.trim().toLowerCase());
+}
+
+function renderSensorCards(query = '') {
+  const container = document.getElementById('sensors-card-container');
+  if (!container) return;
+
+  const entries = Object.entries(SD);
+  const filtered = entries.filter(([id, s]) => {
+    if (currentSensorGroupFilter && s.group !== currentSensorGroupFilter) return false;
+    if (query) {
+      const match = id.includes(query) || s.name.toLowerCase().includes(query) || (GL[s.group]||'').toLowerCase().includes(query);
+      if (!match) return false;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
+    container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">Axtarışa uyğun sensor tapılmadı.</div>';
+    return;
+  }
+
+  const groupColor = (g) => GC[g] || '#00f0aa';
+  container.innerHTML = filtered.map(([id, s]) => {
+    const color = groupColor(s.group);
+    const unit = cleanUnit(s.unit);
+    return `
+    <div class="sensor-card-item" style="--card-accent:${color}" onclick="openDrilldown('${id}')">
+      <div class="sensor-card-head">
+        <div>
+          <span style="font-size:9.5px;font-family:'JetBrains Mono',monospace;color:var(--text-muted)">CH-${id} · ${GL[s.group] || s.group}</span>
+          <div class="sensor-name-lbl">${escapeHtml(s.name)}</div>
+        </div>
+        <span class="sensor-unit-tag" style="color:${color};background:${color}18">${unit}</span>
+      </div>
+
+      <div class="sensor-avg-big">
+        ${s.avg_val.toFixed(2)}
+        <span class="unit-suffix">${unit}</span>
+      </div>
+
+      <div class="sensor-stats-triplet">
+        <div class="sensor-stat-mini">
+          <span class="s-lbl">ORTA</span>
+          <span class="s-val">${s.avg_val.toFixed(2)}</span>
+        </div>
+        <div class="sensor-stat-mini">
+          <span class="s-lbl">MİN</span>
+          <span class="s-val">${s.min_val.toFixed(2)}</span>
+        </div>
+        <div class="sensor-stat-mini">
+          <span class="s-lbl">MAX</span>
+          <span class="s-val">${s.max_val.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div class="sensor-card-footer">
+        <span>${s.total_records.toLocaleString()} ölçüm</span>
+        <span class="view-link">Baxış ↗</span>
+      </div>
+    </div>
+  `;}).join('');
+}
+
+// ─── TAB 4: THRESHOLDS & ALERTS ───
+async function loadThresholds() {
+  const tbody = document.getElementById('admin-threshold-tbody');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch('/api/thresholds');
+    const thresholds = await res.json();
+    if (!thresholds.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:14px">Qayda tapılmadı.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = thresholds.map(t => `
+      <tr>
+        <td><strong>#${t.channel_id}</strong> ${escapeHtml(t.label || t.channel_name || '')}</td>
+        <td style="color:var(--accent-cyan);font-family:'JetBrains Mono',monospace">${t.min_value ?? '—'}</td>
+        <td style="color:var(--accent-amber);font-family:'JetBrains Mono',monospace">${t.max_value ?? '—'}</td>
+        <td><span class="alert-pill-badge ${t.enabled ? 'warning' : ''}">${t.enabled ? 'Aktiv' : 'Deaktiv'}</span></td>
+        <td>
+          <button class="ctrl-select-pill" style="padding:3px 8px;font-size:10px" onclick="deleteThreshold('${t.id}')">Sil</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {}
+}
+
+async function handleSaveThreshold(e) {
+  e.preventDefault();
+  const payload = {
+    channel_id: document.getElementById('admin-thresh-channel').value,
+    min_value: document.getElementById('admin-thresh-min').value,
+    max_value: document.getElementById('admin-thresh-max').value,
+    label: document.getElementById('admin-thresh-lbl').value,
+    enabled: true
+  };
+  const res = await fetch('/api/admin/thresholds', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (res.ok) {
+    alert('Hədd qaydası saxlanıldı!');
+    loadThresholds();
+  }
+}
+
+async function deleteThreshold(id) {
+  if (!confirm('Qaydanı silmək istədiyinizə əminsiniz?')) return;
+  await fetch(`/api/admin/thresholds/${id}`, { method: 'DELETE' });
+  loadThresholds();
+}
+
+// ─── MANUAL DATA ───
+function openManualEntryModal() {
+  switchTab('admin');
+  document.getElementById('admin-manual-val')?.focus();
+}
+
+async function handleSaveManualData(e) {
+  e.preventDefault();
+  const payload = {
+    channel_id: document.getElementById('admin-manual-channel').value,
+    date: document.getElementById('admin-manual-date').value,
+    time: document.getElementById('admin-manual-time').value,
+    value: document.getElementById('admin-manual-val').value,
+    enabled: true
+  };
+  const res = await fetch('/api/admin/manual-data', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (res.ok) {
+    document.getElementById('manual-save-status').textContent = 'Manual dəyər qeydə alındı!';
+    setTimeout(() => document.getElementById('manual-save-status').textContent = '', 3000);
+  }
+}
+
+// ─── DRILLDOWN MODAL ───
+function openDrilldown(id) {
+  if (!SD || !SD[id]) return;
+  currentDrilldownId = id;
+  currentDrilldownGran = 'monthly';
+  const ch = SD[id];
+
+  document.getElementById('m-title').textContent = `${ch.name} (${cleanUnit(ch.unit)})`;
+  document.getElementById('m-sub').textContent = `Kanal #${id} · Qrup: ${GL[ch.group] || ch.group} · Tarix Aralığı: ${ch.date_from} → ${ch.date_to}`;
+
+  document.getElementById('m-avg').textContent = `${ch.avg_val.toFixed(2)} ${cleanUnit(ch.unit)}`;
+  document.getElementById('m-min').textContent = `${ch.min_val.toFixed(2)} ${cleanUnit(ch.unit)}`;
+  document.getElementById('m-max').textContent = `${ch.max_val.toFixed(2)} ${cleanUnit(ch.unit)}`;
+  document.getElementById('m-cnt').textContent = ch.total_records.toLocaleString();
+
+  document.getElementById('m-date-from').value = ch.date_from;
+  document.getElementById('m-date-to').value = ch.date_to;
+
+  renderDrilldownGraph();
+  document.getElementById('modal-drilldown').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrilldown() {
+  document.getElementById('modal-drilldown').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function setDrilldownGran(g, btn) {
+  currentDrilldownGran = g;
+  document.querySelectorAll('#modal-drilldown .sensor-filter-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderDrilldownGraph();
+}
+
+async function renderDrilldownGraph() {
+  if (!currentDrilldownId || !SD[currentDrilldownId]) return;
+  const ch = SD[currentDrilldownId];
+  const unit = cleanUnit(ch.unit);
+  const fromV = document.getElementById('m-date-from').value;
+  const toV = document.getElementById('m-date-to').value;
+  const effective = (fromV && toV && fromV === toV) ? 'hourly' : currentDrilldownGran;
+
+  try {
+    const params = new URLSearchParams({ granularity: effective });
+    if (fromV) params.set('from', fromV);
+    if (toV) params.set('to', toV);
+
+    const res = await fetch(`/api/channel/${currentDrilldownId}/series?${params.toString()}`);
+    const series = await res.json();
+
+    const ctx = document.getElementById('modal-chart-canvas');
+    if (!ctx) return;
+    if (CI['modal-chart-canvas']) CI['modal-chart-canvas'].destroy();
+
+    const labels = series.labels || [];
+    const values = series.values || [];
+    const manual = (series.manual && series.manual.values) || [];
+    const hasManual = manual.some(v => v !== null && v !== undefined);
+
+    const datasets = [{
+      label: `${ch.name} (${unit})`,
+      data: values,
+      borderColor: '#00f0aa',
+      backgroundColor: 'rgba(0, 240, 170, 0.12)',
+      borderWidth: 2,
+      pointRadius: labels.length > 80 ? 0 : 3,
+      tension: 0.35,
+      fill: true
+    }];
+
+    if (hasManual) {
+      datasets.push({
+        label: `${ch.name} (Plan Overlay)`,
+        data: manual,
+        borderColor: '#f59e0b',
+        borderWidth: 2,
+        borderDash: [5, 4],
+        pointRadius: labels.length > 80 ? 0 : 3,
+        fill: false
+      });
+    }
+
+    CI['modal-chart-canvas'] = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: hasManual, labels: { color: '#94a3b8' } },
+          tooltip: {
+            backgroundColor: '#111724',
+            borderColor: '#2d3d5c',
+            titleColor: '#94a3b8',
+            bodyColor: '#f8fafc'
+          }
+        },
+        scales: {
+          x: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#64748b', font: { size: 10 }, maxTicksLimit: 16 } },
+          y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#64748b', font: { size: 10 } } }
+        }
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ─── PERIOD CHANGER ───
+function onPeriodChange(period) {
+  currentPeriod = period;
+  renderMainBarChart();
+  renderMainAreaChart();
+}
+
+// ─── EXPORT HELPERS ───
+function exportChartPng(cid) {
+  const c = CI[cid];
+  if (!c) return;
+  const a = document.createElement('a');
+  a.href = c.toBase64Image('image/png', 1);
+  a.download = `priva-telemetry-${new Date().toISOString().slice(0,10)}.png`;
+  a.click();
+}
+
+function exportChartCsv(cid) {
+  const c = CI[cid];
+  if (!c) return;
+  const rows = [['Tarix / Saat', ...c.data.datasets.map(d => d.label)]];
+  c.data.labels.forEach((lbl, idx) => {
+    rows.push([lbl, ...c.data.datasets.map(d => d.data[idx] ?? '')]);
+  });
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `priva-telemetry-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ─── THEME & UTILITIES ───
+function initTheme() {
+  const t = localStorage.getItem('greenhouse-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+}
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const nxt = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', nxt);
+  localStorage.setItem('greenhouse-theme', nxt);
+  renderMainBarChart();
+  renderMainAreaChart();
+}
+function cssVar(name) { return getComputedStyle(document.documentElement).getPropertyValue(name).trim(); }
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>

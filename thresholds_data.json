@@ -1,0 +1,62 @@
+[
+  {
+    "id": "c09fbfc038ed4f74b5bfa16acf78d7bf",
+    "channel_id": "10",
+    "min_value": 14.0,
+    "max_value": 28.0,
+    "label": "İstixana Bölmə 1 Temperaturu",
+    "enabled": true,
+    "created_at": "2026-10-14T16:10:22Z",
+    "updated_at": "2026-10-14T16:10:22Z"
+  },
+  {
+    "id": "ae227bf307db4287b9277a012e323dc7",
+    "channel_id": "14",
+    "min_value": 60.0,
+    "max_value": 85.0,
+    "label": "İstixana Bölmə 1 Rütubət (RH)",
+    "enabled": true,
+    "created_at": "2026-10-14T16:10:22Z",
+    "updated_at": "2026-10-14T16:10:22Z"
+  },
+  {
+    "id": "4d804b3183e3482cac36c2e473731e4a",
+    "channel_id": "290",
+    "min_value": 450.0,
+    "max_value": 1200.0,
+    "label": "CO₂ Konsentrasiyası (ppm)",
+    "enabled": true,
+    "created_at": "2026-10-14T16:10:22Z",
+    "updated_at": "2026-10-14T16:10:22Z"
+  },
+  {
+    "id": "aa9b67e56f0442a3b6e8e2d780544b6a",
+    "channel_id": "22",
+    "min_value": 20.0,
+    "max_value": 70.0,
+    "label": "Isıtma Boru Temperaturu",
+    "enabled": true,
+    "created_at": "2026-10-14T16:10:22Z",
+    "updated_at": "2026-10-14T16:10:22Z"
+  },
+  {
+    "id": "21268ea5c6ef4c5f832bf139416c4c0a",
+    "channel_id": "0",
+    "min_value": -5.0,
+    "max_value": 35.0,
+    "label": "Xarici Temperatur Don/Hədd",
+    "enabled": true,
+    "created_at": "2026-10-14T16:10:22Z",
+    "updated_at": "2026-10-14T16:10:22Z"
+  },
+  {
+    "id": "bb987eea02ea44cbbccb3be5b4a6ac5c",
+    "channel_id": "1",
+    "min_value": 0.0,
+    "max_value": 18.0,
+    "label": "Külək Sürəti Təhlükəsizlik Həddi",
+    "enabled": true,
+    "created_at": "2026-10-14T16:10:22Z",
+    "updated_at": "2026-10-14T16:10:22Z"
+  }
+]

@@ -1,0 +1,3657 @@
+<!DOCTYPE html>
+<html lang="az" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroTech AI — Priva VP9508 Greenhouse Operations & Telemetry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="/static/chart.umd.min.js"></script>
+<script src="/static/hammer.min.js"></script>
+<script src="/static/chartjs-plugin-zoom.min.js"></script>
+
+<style>
+  :root {
+    --bg-base: #070a12;
+    --bg-sidebar: #0b0f1d;
+    --bg-surface: #0f1527;
+    --bg-card: #11182c;
+    --bg-card-hover: #162038;
+    --bg-input: #0a0e1c;
+    --border: #1b243b;
+    --border-bright: #283756;
+    
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    
+    --accent-blue: #3b82f6;
+    --accent-electric: #2563eb;
+    --accent-cyan: #00f2fe;
+    --accent-teal: #00f0aa;
+    --accent-purple: #a855f7;
+    --accent-lime: #a3e635;
+    --accent-amber: #f59e0b;
+    --accent-red: #ef4444;
+    
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 18px;
+    --radius-xl: 24px;
+    
+    --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+    --glow-blue: 0 0 25px rgba(59, 130, 246, 0.25);
+    --glow-cyan: 0 0 25px rgba(0, 242, 254, 0.25);
+  }
+
+  :root[data-theme="light"] {
+    --bg-base: #f1f5f9;
+    --bg-sidebar: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f8fafc;
+    --bg-input: #e2e8f0;
+    --border: #cbd5e1;
+    --border-bright: #94a3b8;
+    
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --accent-blue: #2563eb;
+    --accent-electric: #1d4ed8;
+    --accent-cyan: #0284c7;
+    --accent-teal: #0d9488;
+    --accent-purple: #7e22ce;
+    --accent-lime: #4d7c0f;
+    --accent-amber: #d97706;
+    --accent-red: #dc2626;
+    
+    --shadow-card: 0 10px 25px -10px rgba(0, 0, 0, 0.08);
+    --glow-blue: 0 0 20px rgba(37, 99, 235, 0.15);
+    --glow-cyan: 0 0 20px rgba(2, 132, 199, 0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-base);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ════ LEFT SIDEBAR (NeuroBank Style) ════ */
+  aside.sidebar-rail {
+    width: 250px;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 16px;
+    gap: 20px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+  }
+
+  .brand-logo-area {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0 8px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .brand-logo-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent-electric), var(--accent-cyan));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--glow-blue);
+  }
+  .brand-logo-txt {
+    font-size: 17px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+  .brand-logo-sub {
+    font-size: 10.5px;
+    color: var(--accent-cyan);
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  /* User Greeting Card (Screenshot 2 & 3) */
+  .user-greet-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .user-greet-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .user-avatar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .user-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .user-date-str {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .user-name-str {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .theme-toggle-btn {
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+  .theme-toggle-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-cyan);
+  }
+
+  /* Nav Links */
+  .rail-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    overflow-y: auto;
+  }
+  .nav-cat-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 12px 10px 4px;
+  }
+  .rail-link-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    width: 100%;
+  }
+  .rail-link-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border-color: var(--border);
+  }
+  .rail-link-btn.active {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-cyan);
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
+  }
+  .rail-link-btn svg {
+    width: 17px;
+    height: 17px;
+    flex-shrink: 0;
+  }
+
+  /* Pro Banner */
+  .pro-banner-card {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(0, 242, 254, 0.1));
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .pro-banner-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .pro-banner-desc {
+    font-size: 10.5px;
+    color: var(--text-secondary);
+  }
+
+  /* ════ MAIN CONTENT AREA ════ */
+  main.main-viewport {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  /* Top Bar Header */
+  header.top-header-bar {
+    height: 68px;
+    padding: 0 32px;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .header-left-capsules {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .status-capsule-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .status-dot-live {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent-teal);
+    box-shadow: 0 0 8px var(--accent-teal);
+    animation: pulseGlow 2s infinite;
+  }
+  @keyframes pulseGlow {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.85); }
+  }
+
+  .header-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .search-input-wrap {
+    position: relative;
+    width: 260px;
+  }
+  .search-input-txt {
+    width: 100%;
+    height: 36px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0 36px 0 14px;
+    color: var(--text-primary);
+    font-size: 12px;
+    outline: none;
+    transition: all 0.2s;
+  }
+  .search-input-txt:focus {
+    border-color: var(--accent-blue);
+    box-shadow: var(--glow-blue);
+  }
+  .search-kbd-hint {
+    position: absolute;
+    right: 12px;
+    top: 9px;
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-surface);
+    padding: 1px 5px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .bell-btn-wrap {
+    position: relative;
+  }
+  .icon-action-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .icon-action-btn:hover {
+    color: var(--text-primary);
+    border-color: var(--border-bright);
+  }
+  .badge-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--accent-red);
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 2px 6px;
+    min-width: 18px;
+    text-align: center;
+    line-height: 1;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+  }
+
+  /* ════ CONTENT VIEWS ════ */
+  .view-container {
+    padding: 28px 32px 60px;
+    display: none;
+  }
+  .view-container.active {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeInView 0.25s ease;
+  }
+  @keyframes fadeInView {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ════ BENTO GRID (NeuroBank Style) ════ */
+  .bento-grid-3col {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 1280px) {
+    .bento-grid-3col { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 860px) {
+    .bento-grid-3col { grid-template-columns: 1fr; }
+  }
+
+  .neuro-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 22px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+  .neuro-card:hover {
+    border-color: var(--border-bright);
+    box-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.8);
+  }
+
+  .neuro-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .neuro-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .neuro-card-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .arrow-card-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .arrow-card-btn:hover {
+    background: var(--accent-blue);
+    color: #ffffff;
+    border-color: var(--accent-blue);
+  }
+
+  /* Stat Row with Trend */
+  .neuro-stat-big {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .neuro-trend-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+  }
+  .neuro-trend-badge.up {
+    color: var(--accent-teal);
+    background: rgba(0, 240, 170, 0.12);
+  }
+  .neuro-trend-badge.down {
+    color: var(--accent-amber);
+    background: rgba(245, 158, 11, 0.12);
+  }
+
+  /* Table Style for Breakdown Card 1 */
+  .neuro-table-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .neuro-table-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--bg-surface);
+    font-size: 11.5px;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+  }
+  .neuro-row-idx {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    width: 20px;
+  }
+  .neuro-row-name {
+    flex: 1;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+  .neuro-row-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--accent-cyan);
+    margin-right: 12px;
+  }
+  .neuro-row-pill {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--accent-blue);
+    min-width: 65px;
+    text-align: center;
+  }
+
+  /* Spending Bar Layout (Screenshot 1 & 3) */
+  .bars-spending-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    align-items: flex-end;
+    height: 160px;
+    padding-top: 10px;
+  }
+  .spending-col-bar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar-pillar-fill {
+    width: 100%;
+    border-radius: 8px 8px 4px 4px;
+    background: linear-gradient(180deg, var(--accent-blue), rgba(37, 99, 235, 0.2));
+    transition: height 0.4s ease, filter 0.2s;
+    cursor: pointer;
+    position: relative;
+  }
+  .bar-pillar-fill:hover {
+    filter: brightness(1.25);
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  }
+  .bar-pct-top {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .bar-lbl-bot {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  /* Arc Gauge (Screenshot 1 Bottom Right) */
+  .arc-gauge-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 10px 0;
+  }
+  .arc-gauge-svg {
+    width: 200px;
+    height: 110px;
+  }
+  .arc-gauge-val-center {
+    position: absolute;
+    bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .arc-gauge-pct {
+    font-size: 24px;
+    font-weight: 800;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-cyan);
+  }
+  .arc-gauge-subtxt {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* AI Insights Card (Screenshot 1 & 3 bottom) */
+  .ai-insights-card {
+    background: linear-gradient(135deg, #0e1533, #090e24);
+    border: 1px solid rgba(59, 130, 246, 0.35);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    box-shadow: var(--shadow-card), inset 0 0 30px rgba(59, 130, 246, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .ai-insights-card::before {
+    content: '';
+    position: absolute;
+    right: -40px;
+    bottom: -40px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.25), transparent 70%);
+    pointer-events: none;
+  }
+  .ai-badge-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .ai-pill-tag {
+    background: rgba(59, 130, 246, 0.18);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: var(--accent-cyan);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .ai-insights-txt {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    max-width: 90%;
+  }
+
+  /* ════ SENSORS CATALOG (CATEGORIZED ACCORDION/GRID) ════ */
+  .cat-filter-chips-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+  .cat-chip-btn {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    padding: 8px 16px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .cat-chip-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border-color: var(--border-bright);
+  }
+  .cat-chip-btn.active {
+    background: var(--accent-electric);
+    color: #ffffff;
+    border-color: var(--accent-electric);
+    box-shadow: var(--glow-blue);
+  }
+
+  .sensors-grouped-container {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+  .category-section-block {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .category-header-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .category-header-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+  }
+
+  .sensor-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 18px;
+  }
+  .sensor-card-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  .sensor-card-item:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent-blue);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+  }
+  .sensor-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .sensor-code-tag {
+    font-size: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent-cyan);
+    font-weight: 600;
+  }
+  .sensor-az-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin-top: 2px;
+  }
+  .sensor-unit-badge {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    color: var(--accent-blue);
+    background: rgba(59, 130, 246, 0.12);
+    padding: 3px 8px;
+    border-radius: 6px;
+  }
+
+  .sensor-desc-box {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    background: var(--bg-surface);
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--accent-blue);
+    min-height: 52px;
+  }
+
+  .sensor-spark-box {
+    height: 44px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-sm);
+    padding: 2px 4px;
+  }
+
+  .sensor-stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding-top: 4px;
+    border-top: 1px solid var(--border);
+  }
+  .sensor-stat-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .stat-col-lbl {
+    font-size: 9px;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .stat-col-val {
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-primary);
+  }
+
+  /* ════ ADMIN PANEL (AGROTECH GATE) ════ */
+  .admin-gate-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 460px;
+    width: 100%;
+  }
+  .admin-login-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-xl);
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), var(--glow-blue);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+  }
+  .admin-pass-input {
+    width: 100%;
+    height: 46px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 0 16px;
+    font-size: 15px;
+    color: var(--text-primary);
+    text-align: center;
+    outline: none;
+    transition: all 0.2s;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .admin-pass-input:focus {
+    border-color: var(--accent-blue);
+    box-shadow: var(--glow-blue);
+  }
+  .btn-admin-submit {
+    width: 100%;
+    height: 46px;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--accent-electric), var(--accent-cyan));
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: filter 0.2s, box-shadow 0.2s;
+  }
+  .btn-admin-submit:hover {
+    filter: brightness(1.15);
+    box-shadow: var(--glow-blue);
+  }
+
+  /* Admin Dashboard Content */
+  .admin-dashboard-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  .admin-telemetry-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .admin-telemetry-table th, .admin-telemetry-table td {
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  .admin-telemetry-table th {
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: 0.5px;
+  }
+  .admin-telemetry-table tr:hover {
+    background: var(--bg-card-hover);
+  }
+
+  /* ════ MODAL DRILLDOWN ════ */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    z-index: 999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-backdrop.open {
+    display: flex;
+  }
+  .modal-dialog {
+    background: var(--bg-card);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-xl);
+    width: 100%;
+    max-width: 960px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+    display: flex;
+    flex-direction: column;
+  }
+  .modal-header {
+    padding: 22px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .modal-body {
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .modal-chart-area {
+    height: 360px;
+    width: 100%;
+    position: relative;
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    padding: 12px;
+    border: 1px solid var(--border);
+  }
+  .zoom-toolbar-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  /* ════ MOBIL OPTİMİZASİYASI & RESPONSIVE DİZAYN ════ */
+  .mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    background: rgba(11, 15, 29, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border-bright);
+    z-index: 998;
+    padding: 0 8px;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.6);
+  }
+
+  .mob-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: var(--radius-sm);
+    transition: all 0.2s ease;
+    flex: 1;
+    max-width: 72px;
+    touch-action: manipulation;
+  }
+
+  .mob-nav-item svg {
+    width: 20px;
+    height: 20px;
+    transition: transform 0.2s ease, stroke 0.2s ease;
+  }
+
+  .mob-nav-item.active {
+    color: var(--accent-cyan);
+  }
+
+  .mob-nav-item.active svg {
+    stroke: var(--accent-cyan);
+    transform: translateY(-2px);
+  }
+
+  .mob-nav-item.highlight {
+    color: #fff;
+    background: linear-gradient(135deg, var(--accent-electric), var(--accent-cyan));
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    max-width: 48px;
+    margin-top: -18px;
+    box-shadow: 0 4px 20px rgba(0, 242, 254, 0.4);
+  }
+
+  .mob-nav-item.highlight svg {
+    width: 22px;
+    height: 22px;
+    stroke: #ffffff;
+  }
+
+  /* ════ 24-SAATLIQ İNTERAKTİV QRAFİK ÇƏKMƏ ALƏTİ ════ */
+  .curve-drawer-container {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .curve-canvas-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    position: relative;
+    box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+  }
+
+  .curve-canvas-wrap {
+    position: relative;
+    width: 100%;
+    height: 320px;
+    background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.8), rgba(7, 10, 18, 0.95));
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    cursor: crosshair;
+    touch-action: none; /* toxunma ilə rahat çəkmək üçün */
+    overflow: hidden;
+  }
+
+  #curve-draw-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .curve-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .hourly-inputs-scroll {
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: thin;
+  }
+
+  .hourly-grid-24 {
+    display: grid;
+    grid-template-columns: repeat(24, minmax(68px, 1fr));
+    gap: 8px;
+    min-width: 1700px;
+  }
+
+  .hour-col-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 10px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    transition: border-color 0.2s;
+  }
+
+  .hour-col-card:hover, .hour-col-card:focus-within {
+    border-color: var(--accent-cyan);
+  }
+
+  .hour-col-lbl {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .hour-val-input {
+    width: 100%;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-align: center;
+    padding: 4px 2px;
+    outline: none;
+  }
+
+  .hour-val-input:focus {
+    border-color: var(--accent-cyan);
+    background: #0f172a;
+  }
+
+  .hour-slider-vertical {
+    -webkit-appearance: slider-vertical;
+    writing-mode: bt-lr;
+    width: 16px;
+    height: 90px;
+    cursor: pointer;
+  }
+
+  /* ════ XƏBƏRDARLIQ (ALERT) SİSTEMİ ════ */
+  .alert-banner-top {
+    background: linear-gradient(90deg, rgba(239, 68, 68, 0.18), rgba(245, 158, 11, 0.12));
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: var(--radius-md);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 20px;
+    animation: pulseBorder 3s infinite;
+  }
+
+  @keyframes pulseBorder {
+    0%, 100% { border-color: rgba(239, 68, 68, 0.4); }
+    50% { border-color: rgba(239, 68, 68, 0.85); box-shadow: 0 0 16px rgba(239, 68, 68, 0.25); }
+  }
+
+  .alert-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .alert-item-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-red);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: transform 0.2s, background 0.2s;
+  }
+
+  .alert-item-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateX(4px);
+  }
+
+  .alert-item-card.warn-amber {
+    border-left-color: var(--accent-amber);
+  }
+
+  /* ════ ANİMASİYALAR & GÖZƏL KEÇİDLƏR ════ */
+  .fade-in-scale {
+    animation: fadeInScale 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes fadeInScale {
+    from { opacity: 0; transform: scale(0.97) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .live-pulse-badge {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .live-pulse-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: var(--accent-teal);
+    box-shadow: 0 0 0 rgba(0, 240, 170, 0.7);
+    animation: pulseGlowTeal 2s infinite;
+  }
+
+  @keyframes pulseGlowTeal {
+    0% { box-shadow: 0 0 0 0 rgba(0, 240, 170, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 240, 170, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 240, 170, 0); }
+  }
+
+  /* ════ XƏBƏRDARLIQ MƏRKƏZİ VƏ 24S QRAFİK STILLƏRİ ════ */
+  .alert-banner-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(245, 158, 11, 0.05));
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: var(--radius-md);
+    margin-bottom: 20px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .alert-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .alert-item-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent-red);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  }
+
+  .alert-item-card:hover {
+    transform: translateX(4px);
+    border-color: var(--border-bright);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  /* 24s Qrafik Çəkmə (Curve Drawer & Hourly Grid) */
+  .curve-canvas-wrap {
+    width: 100%;
+    height: 320px;
+    background: radial-gradient(circle at 50% 20%, rgba(0, 242, 254, 0.06), transparent 70%), var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    position: relative;
+    cursor: crosshair;
+    touch-action: none;
+    overflow: hidden;
+  }
+
+  .hour-col-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 6px;
+    min-width: 58px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+
+  .hour-col-card:hover {
+    border-color: var(--accent-cyan);
+    background: var(--bg-card-hover);
+  }
+
+  .hour-col-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .hour-val-input {
+    width: 46px;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--accent-cyan);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+    padding: 4px 2px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .hour-val-input:focus {
+    outline: none;
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 8px rgba(0, 242, 254, 0.3);
+  }
+
+  /* Bento 2 Col Layout (AI & Alerts) */
+  .bento-grid-2col {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 20px;
+  }
+
+  /* Offcanvas Mobil Sidebar və Backdrop */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 998;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  .sidebar-backdrop.active {
+    display: block;
+    opacity: 1;
+  }
+
+  .sidebar-close-mob-btn {
+    display: none;
+    position: absolute;
+    top: 18px;
+    right: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-menu-burger-btn {
+    display: none;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, background 0.2s;
+    flex-shrink: 0;
+  }
+  .mobile-menu-burger-btn:hover {
+    border-color: var(--accent-cyan);
+    background: var(--bg-card-hover);
+  }
+
+  .header-mob-brand-group {
+    display: none;
+    align-items: center;
+    gap: 10px;
+  }
+
+  /* ════ MOBİL EKRAN UYĞUNLAŞMASI (MEDIA QUERIES) ════ */
+  @media (max-width: 900px) {
+    /* Soldan basanda açılan Offcanvas Bar */
+    aside.sidebar-rail {
+      display: flex !important;
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 280px !important;
+      height: 100vh !important;
+      z-index: 999 !important;
+      transform: translateX(-100%) !important;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+      box-shadow: 0 0 40px rgba(0, 0, 0, 0.8) !important;
+      overflow-y: auto !important;
+    }
+    aside.sidebar-rail.mobile-open {
+      transform: translateX(0) !important;
+    }
+    .sidebar-close-mob-btn {
+      display: flex !important;
+    }
+
+    /* Yuxarı Bar — Səliqəli və Yığcam */
+    header.top-header-bar {
+      height: 60px !important;
+      padding: 0 14px !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 10px !important;
+      position: sticky !important;
+      top: 0 !important;
+      z-index: 50 !important;
+    }
+    .mobile-menu-burger-btn {
+      display: flex !important;
+    }
+    .header-mob-brand-group {
+      display: flex !important;
+    }
+    .header-left-capsules {
+      display: none !important; /* Yuxarıdakı qarışıq kapsulalar mobildə gizlədildi */
+    }
+    .header-right-actions {
+      gap: 8px !important;
+      margin-left: auto !important;
+    }
+    .search-input-wrap {
+      display: none !important; /* Mobildə axtarış sensorlar səhifəsində rahat işləyir */
+    }
+    .header-right-actions button.cat-chip-btn {
+      padding: 6px 10px !important;
+      font-size: 11px !important;
+    }
+
+    /* Əsas Ekran və Kartların Düzəldilməsi (Yazıların sıxılmasının qarşısı alındı) */
+    main.main-viewport {
+      padding: 12px 12px 84px 12px !important;
+      width: 100% !important;
+      max-width: 100vw !important;
+      overflow-x: hidden !important;
+      min-width: 0 !important;
+    }
+    .view-container {
+      padding: 10px 0 24px 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      gap: 14px !important;
+    }
+
+    /* Bütün Gridlər Tək Sütun — Tam Enli */
+    .bento-grid-3col,
+    .bento-grid-2col,
+    .neuro-card-grid-top,
+    .neuro-card-grid-mid {
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      gap: 14px !important;
+    }
+
+    /* Kartlar və Yazılar */
+    .neuro-card,
+    .ai-insights-card {
+      width: 100% !important;
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+      padding: 16px !important;
+    }
+
+    .ai-insights-txt {
+      font-size: 13px !important;
+      line-height: 1.6 !important;
+      max-width: 100% !important;
+      white-space: normal !important;
+      word-wrap: break-word !important;
+    }
+
+    .neuro-table-row {
+      padding: 10px 8px !important;
+      font-size: 12px !important;
+    }
+    .neuro-row-name {
+      max-width: 140px !important;
+      font-size: 11.5px !important;
+    }
+
+    /* Mobil Alt Naviqasiya */
+    .mobile-bottom-nav {
+      display: flex !important;
+    }
+
+    .modal-dialog {
+      max-height: 92vh !important;
+      margin: 8px !important;
+      width: calc(100vw - 16px) !important;
+      padding: 16px !important;
+    }
+    .modal-chart-area {
+      height: 240px !important;
+    }
+    .curve-canvas-wrap {
+      height: 220px !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════ MOBİL ÜÇÜN ARXA FON (BACKDROP) ════ -->
+<div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleMobileSidebar()"></div>
+
+<!-- ════ LEFT SIDEBAR ════ -->
+<aside class="sidebar-rail" id="sidebar-rail">
+  <!-- Mobildə Bağlama Düyməsi (✕) -->
+  <button class="sidebar-close-mob-btn" onclick="toggleMobileSidebar()" title="Menyunu Bağla">✕</button>
+
+  <!-- Brand Area -->
+  <div class="brand-logo-area">
+    <div class="brand-logo-icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    </div>
+    <div>
+      <div class="brand-logo-txt">AgroTech AI</div>
+      <div class="brand-logo-sub">PRIVA VP9508 INTEGRO</div>
+    </div>
+  </div>
+
+  <!-- User Greeting Card (Baş aqronom silindi, operator statusu qoyuldu) -->
+  <div class="user-greet-card">
+    <div class="user-greet-top">
+      <div class="user-avatar-wrap">
+        <div class="user-avatar">🌱</div>
+        <div>
+          <div class="user-date-str" id="sidebar-current-date">15 OKTYABR 2026</div>
+          <div class="user-name-str" style="color:var(--accent-cyan);font-weight:700">Sistem İdarəetməsi</div>
+        </div>
+      </div>
+      <button class="theme-toggle-btn" onclick="toggleTheme()" title="Rejimi Dəyişdir">🌓</button>
+    </div>
+  </div>
+
+  <!-- Nav Links -->
+  <nav class="rail-nav">
+    <div class="nav-cat-label">Əsas Menyu</div>
+    <button class="rail-link-btn active" id="btn-tab-dashboard" onclick="handleMenuClick('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+      <span>İcmal (Dashboard)</span>
+    </button>
+    <button class="rail-link-btn" id="btn-tab-sensors" onclick="handleMenuClick('sensors')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>
+      <span>Sensorlar Kataloqu</span>
+    </button>
+    <button class="rail-link-btn" id="btn-tab-alerts" onclick="handleMenuClick('alerts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <span>⚠️ Xəbərdarlıqlar</span>
+    </button>
+    <button class="rail-link-btn" id="btn-tab-compartments" onclick="handleMenuClick('compartments')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg>
+      <span>Bölmələr & Zonalar</span>
+    </button>
+    <button class="rail-link-btn" id="btn-tab-analytics" onclick="handleMenuClick('analytics')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      <span>Telemetriya & Analiz</span>
+    </button>
+
+    <div class="nav-cat-label">Sistem & İdarəetmə</div>
+    <button class="rail-link-btn" id="btn-tab-admin" onclick="handleMenuClick('admin')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>Admin & Tənzimləmə</span>
+    </button>
+  </nav>
+
+  <!-- Datas Status Card in Sidebar -->
+  <div class="pro-banner-card" style="cursor:pointer" onclick="handleDatasSync()" title="Datas qovluğunu sinxronlaşdır">
+    <div class="pro-banner-title">📁 Priva Datas: 243 MB</div>
+    <div class="pro-banner-desc" id="sidebar-datas-text">C:\Users\user\Desktop\Datas qoşulub. Bütün datalar aktivdir.</div>
+  </div>
+</aside>
+
+<!-- ════ MAIN VIEWPORT ════ -->
+<main class="main-viewport">
+  <!-- Top Bar (Mobildə sadə və zərif, soldan açılan hamburger düyməsi ilə) -->
+  <header class="top-header-bar">
+    <!-- Mobil üçün Hamburger Menyu Düyməsi və Loqo -->
+    <div class="header-mob-brand-group">
+      <button class="mobile-menu-burger-btn" onclick="toggleMobileSidebar()" title="Menyunu Aç">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-weight:800;font-size:15px;color:var(--text-primary)">AgroTech AI</span>
+        <span class="status-dot-live" title="Sistem Canlıdır"></span>
+      </div>
+    </div>
+
+    <!-- Desktop Kapsulaları (Mobildə gizlədilir) -->
+    <div class="header-left-capsules">
+      <!-- Datas status badge -->
+      <div class="status-capsule-pill" onclick="handleDatasSync()" style="cursor:pointer" title="C:\Users\user\Desktop\Datas">
+        <span class="status-dot-live"></span>
+        <span>📁 Datas: <strong style="color:var(--accent-teal)">Qoşulub (243 MB)</strong></span>
+      </div>
+      <div class="status-capsule-pill">
+        <span>Aktiv Sensorlar: <strong>39 / 371</strong></span>
+      </div>
+      <div class="status-capsule-pill">
+        <span>🏢 İstehsal: <strong>4 Bölmə (CMP1-4)</strong></span>
+      </div>
+      <div class="status-capsule-pill">
+        <span>🌡️ Orta İstilik: <strong id="header-avg-temp" style="color:var(--accent-cyan)">20.4°C</strong></span>
+      </div>
+    </div>
+
+    <div class="header-right-actions">
+      <!-- Sürətli Data Əlavə Et Düyməsi -->
+      <button class="cat-chip-btn active" onclick="openQuickAddModal()" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--accent-electric),var(--accent-cyan));color:#fff;border:none;font-weight:700;padding:8px 14px">
+        <span>➕ Data Əlavə Et</span>
+      </button>
+
+      <div class="search-input-wrap">
+        <input type="text" id="global-search-input" class="search-input-txt" placeholder="Sensor axtar...">
+        <span class="search-kbd-hint">⌘K</span>
+      </div>
+
+      <div class="bell-btn-wrap">
+        <button class="icon-action-btn" title="Kritik Xəbərdarlıqlar" onclick="switchView('alerts')">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        </button>
+        <span class="badge-count" id="header-alert-badge" style="display:none">0</span>
+      </div>
+
+      <!-- Mobildə Rejim dəyişdirmə (Tema) -->
+      <button class="icon-action-btn" onclick="toggleTheme()" title="Rejimi Dəyişdir">🌓</button>
+    </div>
+  </header>
+
+  <!-- ════ VIEW 1: OPERATIONS DASHBOARD (NEUROBANK STYLE) ════ -->
+  <section id="view-dashboard" class="view-container active">
+    <!-- Row 1: 3 Bento Cards -->
+    <div class="bento-grid-3col">
+      <!-- Card 1: Breakdown Table Style -->
+      <div class="neuro-card">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">Əsas Sensor Göstəriciləri</div>
+            <div class="neuro-card-sub">Real vaxt statusu və hədəf uyğunluğu</div>
+          </div>
+          <button class="arrow-card-btn" onclick="switchView('sensors')">↗</button>
+        </div>
+
+        <div class="neuro-table-list">
+          <div class="neuro-table-row">
+            <span class="neuro-row-idx">01</span>
+            <span class="neuro-row-name">İstixana Temperaturu (CMP1-4)</span>
+            <span class="neuro-row-val" id="row-temp-val">20.4 °C</span>
+            <span class="neuro-row-pill">98% OPT</span>
+          </div>
+          <div class="neuro-table-row">
+            <span class="neuro-row-idx">02</span>
+            <span class="neuro-row-name">Daxili Rütubət (RH Balansı)</span>
+            <span class="neuro-row-val" id="row-hum-val">66.5 %</span>
+            <span class="neuro-row-pill">94% UYĞ</span>
+          </div>
+          <div class="neuro-table-row">
+            <span class="neuro-row-idx">03</span>
+            <span class="neuro-row-name">CO₂ Qatılığı (Konsentrasiya)</span>
+            <span class="neuro-row-val" id="row-co2-val">680 ppm</span>
+            <span class="neuro-row-pill">92% DOY</span>
+          </div>
+          <div class="neuro-table-row">
+            <span class="neuro-row-idx">04</span>
+            <span class="neuro-row-name">İstilik Borusu Temperaturu</span>
+            <span class="neuro-row-val" id="row-pipe-val">44.0 °C</span>
+            <span class="neuro-row-pill">88% AKT</span>
+          </div>
+          <div class="neuro-table-row">
+            <span class="neuro-row-idx">05</span>
+            <span class="neuro-row-name">Ventilyasiya Açılış Faizi</span>
+            <span class="neuro-row-val" id="row-vent-val">28.0 %</span>
+            <span class="neuro-row-pill">85% BAL</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Balance Overview Glowing Area Wave Chart -->
+      <div class="neuro-card">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">İqlim Balansı & Orta İstilik</div>
+            <div class="neuro-card-sub">Son 7 günlük dinamika</div>
+          </div>
+          <button class="arrow-card-btn" onclick="openDrilldown('10')">↗</button>
+        </div>
+
+        <div class="neuro-stat-big">
+          <span id="card-big-temp">20.4°C</span>
+          <span class="neuro-trend-badge up">↑ 0.8°C Hədəfə uyğun</span>
+        </div>
+
+        <div style="height: 140px; width: 100%; position: relative;">
+          <canvas id="chart-balance-overview"></canvas>
+        </div>
+      </div>
+
+      <!-- Card 3: Year-over-Year Dual Line Chart -->
+      <div class="neuro-card">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">Mövsümi Müqayisə & İllik Trend</div>
+            <div class="neuro-card-sub">Cari İl (2026) vs Keçən İl (2025)</div>
+          </div>
+          <button class="arrow-card-btn" onclick="switchView('analytics')">↗</button>
+        </div>
+
+        <div class="neuro-stat-big">
+          <span style="color:var(--accent-cyan)">+12.4%</span>
+          <span class="neuro-trend-badge up">İnkişaf indeksi</span>
+        </div>
+
+        <div style="height: 140px; width: 100%; position: relative;">
+          <canvas id="chart-yoy-comparison"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: 3 Bento Cards -->
+    <div class="bento-grid-3col">
+      <!-- Card 4: Spending Vertical Gradient Bars Style -->
+      <div class="neuro-card">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">Zonalar Üzrə İstilik Paylanması</div>
+            <div class="neuro-card-sub">CMP-01 ... CMP-04 İstehsal Blokları</div>
+          </div>
+          <button class="arrow-card-btn" onclick="switchView('compartments')">↗</button>
+        </div>
+
+        <div class="bars-spending-row">
+          <div class="spending-col-bar">
+            <span class="bar-pct-top">20.4°C</span>
+            <div class="bar-pillar-fill" style="height: 85%" onclick="openDrilldown('10')"></div>
+            <span class="bar-lbl-bot">CMP-01</span>
+          </div>
+          <div class="spending-col-bar">
+            <span class="bar-pct-top">20.1°C</span>
+            <div class="bar-pillar-fill" style="height: 80%" onclick="openDrilldown('11')"></div>
+            <span class="bar-lbl-bot">CMP-02</span>
+          </div>
+          <div class="spending-col-bar">
+            <span class="bar-pct-top">20.6°C</span>
+            <div class="bar-pillar-fill" style="height: 92%" onclick="openDrilldown('12')"></div>
+            <span class="bar-lbl-bot">CMP-03</span>
+          </div>
+          <div class="spending-col-bar">
+            <span class="bar-pct-top">20.3°C</span>
+            <div class="bar-pillar-fill" style="height: 78%" onclick="openDrilldown('13')"></div>
+            <span class="bar-lbl-bot">CMP-04</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5: Monthly Humidity Wave Chart -->
+      <div class="neuro-card">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">24 Saatlıq / Günlük Rütubət</div>
+            <div class="neuro-card-sub">Nisbi Rütubət (RH Balansı)</div>
+          </div>
+          <button class="arrow-card-btn" onclick="openDrilldown('14')">↗</button>
+        </div>
+
+        <div class="neuro-stat-big">
+          <span style="color:var(--accent-purple)">66.5%</span>
+          <span class="neuro-trend-badge up">Normal RH</span>
+        </div>
+
+        <div style="height: 140px; width: 100%; position: relative;">
+          <canvas id="chart-humidity-overview"></canvas>
+        </div>
+      </div>
+
+      <!-- Card 6: Semi-Circle Arc Gauge Meter (Earnings Style in Screenshot 1) -->
+      <div class="neuro-card">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">Hədəf Uyğunluğu & Doyum</div>
+            <div class="neuro-card-sub">Aqronomik hədəfə uyğunluq nisbəti</div>
+          </div>
+          <button class="arrow-card-btn" onclick="openDrilldown('290')">↗</button>
+        </div>
+
+        <div class="arc-gauge-wrap">
+          <svg class="arc-gauge-svg" viewBox="0 0 200 110">
+            <!-- Background track -->
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="16" stroke-linecap="round" />
+            <!-- Active gradient track -->
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#arcGlowGrad)" stroke-width="16" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="15" />
+            <defs>
+              <linearGradient id="arcGlowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#00f2fe" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="arc-gauge-val-center">
+            <span class="arc-gauge-pct">96.8%</span>
+            <span class="arc-gauge-subtxt">Optimal Vegetasiya</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: AgroTech AI Insights & Alert Priority Queue -->
+    <div class="bento-grid-2col">
+      <!-- AI Insights -->
+      <div class="ai-insights-card">
+        <div class="ai-badge-row">
+          <span class="ai-pill-tag">🤖 AgroTech AI İnsight & Aqronom Məsləhəti</span>
+          <button class="arrow-card-btn" onclick="openDrilldown('10')">↗</button>
+        </div>
+        <p class="ai-insights-txt">
+          Gecə istilik itkisini 35% azaltmaq üçün saat 20:30-da CMP-01 və CMP-02 pərdələrinin 80% bağlanması tövsiyə edilir. Gün ərzində toplanmış radiasiya (1,840 J/cm²) suvarma normasını 15% artırmağı zəruri edir. CO₂ dozajı optimal fotosintez üçün saat 09:00-14:00 aralığında 750 ppm səviyyəsində saxlanmalıdır.
+        </p>
+      </div>
+
+      <!-- Alert Queue -->
+      <div class="neuro-card">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">Canlı Hədd Aşmaları</div>
+            <div class="neuro-card-sub">Alert Priority Queue</div>
+          </div>
+          <button class="arrow-card-btn" onclick="switchView('admin')">Tənzimlə</button>
+        </div>
+
+        <div id="alert-queue-items" style="display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto">
+          <!-- Populated by loadAlertsQueue() -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ VIEW 2: SENSORS CATALOG (CATEGORIZED) ════ -->
+  <section id="view-sensors" class="view-container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="font-size:20px;font-weight:800">Bütün Sensorlar Kataloqu</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:2px">Bütün 39 sensor kanalı üzrə təyinat, aqronomik rol və canlı ölçümlər</p>
+      </div>
+
+      <!-- Category Filter Chips -->
+      <div class="cat-filter-chips-row">
+        <button class="cat-chip-btn active" onclick="filterCategory('', this)">Hamısı (39)</button>
+        <button class="cat-chip-btn" onclick="filterCategory('temp', this)">🌡️ Temperatur</button>
+        <button class="cat-chip-btn" onclick="filterCategory('humidity', this)">💧 Rütubət</button>
+        <button class="cat-chip-btn" onclick="filterCategory('co2', this)">🌿 CO₂ Sistemi</button>
+        <button class="cat-chip-btn" onclick="filterCategory('weather', this)">🌤️ Xarici Hava</button>
+        <button class="cat-chip-btn" onclick="filterCategory('energy', this)">⚡ Enerji & Qaz</button>
+        <button class="cat-chip-btn" onclick="filterCategory('water', this)">⚗️ Su & Keyfiyyət</button>
+      </div>
+    </div>
+
+    <!-- Categorized Sensors Container -->
+    <div id="categorized-sensors-root" class="sensors-grouped-container">
+      <!-- Populated by renderCategorizedSensors() -->
+    </div>
+  </section>
+
+  <!-- ════ VIEW 3: COMPARTMENTS & CARGO MATRIX ════ -->
+  <section id="view-compartments" class="view-container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="font-size:20px;font-weight:800">Bölmələr və Zonalar (Cargo Layout)</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:2px">4 İstehsal Bölməsi, Isıtma Mərkəzi və Xarici Hava Stansiyası</p>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="neuro-card" onclick="openDrilldown('10')">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">CMP-01 · 1-ci İstehsal Bölməsi</div>
+            <div class="neuro-card-sub">Temperatur, Rütubət, Boru, Ventilyasiya</div>
+          </div>
+          <button class="arrow-card-btn">↗</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center">
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Hava</span><span class="stat-col-val" style="color:var(--accent-cyan)">20.4°C</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Rütubət</span><span class="stat-col-val" style="color:var(--accent-purple)">66.5%</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Boru</span><span class="stat-col-val" style="color:var(--accent-amber)">44.0°C</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Vent</span><span class="stat-col-val">28.0%</span></div>
+        </div>
+      </div>
+
+      <div class="neuro-card" onclick="openDrilldown('11')">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">CMP-02 · 2-ci İstehsal Bölməsi</div>
+            <div class="neuro-card-sub">Temperatur, Rütubət, Boru, Ventilyasiya</div>
+          </div>
+          <button class="arrow-card-btn">↗</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center">
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Hava</span><span class="stat-col-val" style="color:var(--accent-cyan)">20.1°C</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Rütubət</span><span class="stat-col-val" style="color:var(--accent-purple)">65.2%</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Boru</span><span class="stat-col-val" style="color:var(--accent-amber)">43.5°C</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Vent</span><span class="stat-col-val">27.5%</span></div>
+        </div>
+      </div>
+
+      <div class="neuro-card" onclick="openDrilldown('12')">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">CMP-03 · 3-cü İstehsal Bölməsi</div>
+            <div class="neuro-card-sub">Temperatur, Rütubət, Boru, Ventilyasiya</div>
+          </div>
+          <button class="arrow-card-btn">↗</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center">
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Hava</span><span class="stat-col-val" style="color:var(--accent-cyan)">20.6°C</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Rütubət</span><span class="stat-col-val" style="color:var(--accent-purple)">67.0%</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Boru</span><span class="stat-col-val" style="color:var(--accent-amber)">45.0°C</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Vent</span><span class="stat-col-val">30.0%</span></div>
+        </div>
+      </div>
+
+      <div class="neuro-card" onclick="openDrilldown('13')">
+        <div class="neuro-card-header">
+          <div>
+            <div class="neuro-card-title">CMP-04 · 4-cü İstehsal Bölməsi</div>
+            <div class="neuro-card-sub">Temperatur, Rütubət, Boru, Ventilyasiya</div>
+          </div>
+          <button class="arrow-card-btn">↗</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:center">
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Hava</span><span class="stat-col-val" style="color:var(--accent-cyan)">20.3°C</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Rütubət</span><span class="stat-col-val" style="color:var(--accent-purple)">65.8%</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Boru</span><span class="stat-col-val" style="color:var(--accent-amber)">44.2°C</span></div>
+          <div class="neuro-stat-col"><span class="stat-col-lbl">Vent</span><span class="stat-col-val">28.5%</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ VIEW 4: TELEMETRY & ANALYTICS ════ -->
+  <section id="view-analytics" class="view-container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <h2 style="font-size:20px;font-weight:800">Telemetriya & Çoxkanallı Analitika</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:2px">Priva VP9508 6+ illik arxiv müqayisəsi və parametr korrelyasiyaları</p>
+      </div>
+    </div>
+
+    <div class="neuro-card" style="height:420px">
+      <div class="neuro-card-header">
+        <div>
+          <div class="neuro-card-title">Temperatur və Rütubət Korrelyasiyası</div>
+          <div class="neuro-card-sub">2020 — 2026 Arxiv Trendi</div>
+        </div>
+        <button class="arrow-card-btn" onclick="openDrilldown('10')">↗</button>
+      </div>
+      <div style="height:320px;width:100%;position:relative">
+        <canvas id="chart-multi-analytics"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ VIEW 5: ADMIN & TƏNZİMLƏMƏ (ŞİFRƏLİ: agrotech) ════ -->
+  <section id="view-admin" class="view-container">
+    <!-- Login Gate (agrotech) -->
+    <div id="admin-login-gate" class="admin-gate-wrap">
+      <div class="admin-login-box">
+        <div style="font-size:40px">🔐</div>
+        <div>
+          <h2 style="font-size:20px;font-weight:800">Admin & Tənzimləmə Girişi</h2>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:4px">
+            24 saatlıq qrafik tənzimləməsi, sensor limitləri və sistem konfiqurasiyası üçün şifrəni daxil edin.
+          </p>
+        </div>
+
+        <form onsubmit="handleAdminLogin(event)" style="display:flex;flex-direction:column;gap:14px">
+          <input type="password" id="admin-login-pass" class="admin-pass-input" placeholder="Admin şifrəsi..." required autofocus>
+          <button type="submit" class="btn-admin-submit">Giriş Et ➔</button>
+        </form>
+
+        <span style="font-size:11px;color:var(--text-muted)">Default şifrə: <code style="color:var(--accent-cyan)">agrotech</code></span>
+      </div>
+    </div>
+
+    <!-- Admin Main Controls (Protected: Qrafik Çəkmə və Sensor Hədləri İç-İçə) -->
+    <div id="admin-main-controls" class="admin-dashboard-layout" style="display:none">
+      <!-- Admin Header Bar -->
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;border-bottom:1px solid var(--border);padding-bottom:14px">
+        <div>
+          <h2 style="font-size:20px;font-weight:800">Admin İdarəetmə & Tənzimləmə Mərkəzi</h2>
+          <p style="font-size:12px;color:var(--text-muted);margin-top:2px">24 saatlıq hədəf qrafikləri, sensor hədləri və təhlükəsizlik limitləri</p>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <button class="cat-chip-btn" onclick="handleAdminLogout()" style="background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.3);color:var(--accent-red);font-weight:700">Çıxış (Logout) ➔</button>
+        </div>
+      </div>
+
+      <!-- Admin Sub-Navigation Tabs (İç-İçə Tablar) -->
+      <div style="display:flex;gap:10px;margin:6px 0 16px 0;border-bottom:1px solid var(--border);padding-bottom:12px;overflow-x:auto">
+        <button class="cat-chip-btn active" id="admin-subtab-schedule-btn" onclick="switchAdminSubTab('schedule')" style="padding:10px 18px;font-weight:700;font-size:13px">
+          24 Saatlıq Qrafik Tənzimləmə
+        </button>
+        <button class="cat-chip-btn" id="admin-subtab-thresh-btn" onclick="switchAdminSubTab('thresholds')" style="padding:10px 18px;font-weight:700;font-size:13px">
+          Sensor Limitləri & Təhlükəsizlik Hədləri
+        </button>
+        <button class="cat-chip-btn" id="admin-subtab-import-btn" onclick="switchAdminSubTab('import')" style="padding:10px 18px;font-weight:700;font-size:13px">
+          📂 Data Faylı Əlavə Et & Yoxla (CSV/JSON/XLSX)
+        </button>
+      </div>
+
+      <!-- ─── SUBVIEW 1: 24 SAATLIQ QRAFİK TƏNZİMLƏMƏ (EMOJİSİZ & ŞİFRƏLİ) ─── -->
+      <div id="admin-subview-schedule">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--text-primary)">24 Saatlıq Qrafik Tənzimləmə & Hədəf Əyrisi</h3>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:2px">
+              Barmağınızla və ya siçanla qrafikin üzərindən toxunub əyri xətt çəkin, yaxud saatlıq rəqəmləri əllə təyin edin.
+            </p>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="cat-chip-btn" onclick="applySchedulePreset('optimal')">Optimal Rejim (Gündüz/Gecə)</button>
+            <button class="cat-chip-btn" onclick="applySchedulePreset('energy')">Qənaət Rejimi</button>
+            <button class="cat-chip-btn" onclick="applySchedulePreset('growth')">Pik İnkişaf Rejimi</button>
+            <button class="cat-chip-btn active" onclick="saveActiveScheduleCurve()" style="background:linear-gradient(135deg,var(--accent-electric),var(--accent-teal));color:#fff;font-weight:700">Bu Saatlıq Rejimi Tətbiq Et</button>
+          </div>
+        </div>
+
+        <!-- Curve Canvas & Grid Card -->
+        <div class="curve-canvas-card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+            <div style="display:flex;align-items:center;gap:10px">
+              <label style="font-size:12px;font-weight:700;color:var(--text-secondary)">Tənzimlənən Sensor:</label>
+              <select id="schedule-sensor-select" class="admin-pass-input" style="height:36px;font-size:12px;width:240px;text-align:left" onchange="onScheduleSensorChange()"></select>
+              <span id="schedule-current-mode-tag" class="cat-chip-btn active" style="font-size:11px">Standart Rejim</span>
+            </div>
+            <div style="font-size:11px;color:var(--accent-cyan);font-family:'JetBrains Mono',monospace">
+              Toxunub xətt çəkin və ya aşağıdan saatlıq dəyərləri daxil edin
+            </div>
+          </div>
+
+          <!-- Canvas Wrap -->
+          <div class="curve-canvas-wrap" id="curve-canvas-wrap">
+            <canvas id="curve-draw-canvas"></canvas>
+          </div>
+
+          <!-- 24 Hours Grid Sliders & Numbers -->
+          <div style="margin-top:16px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+              <span style="font-size:12px;font-weight:700;color:var(--text-secondary)">Saatlıq Rəqəmlər və Slayderlər (00:00 - 23:00)</span>
+              <span style="font-size:11px;color:var(--text-muted)">Hər saatın altındakı slayderi tənzimləyə bilərsiniz</span>
+            </div>
+            <div class="hourly-inputs-scroll">
+              <div class="hourly-grid-24" id="hourly-grid-container">
+                <!-- Populated by renderHourlyGrid() -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── SUBVIEW 2: SENSOR LİMİTLƏRİ & TƏHLÜKƏSİZLİK HƏDLƏRİ ─── -->
+      <div id="admin-subview-thresholds" style="display:none">
+        <!-- Telemetry Averages & Thresholds Table -->
+        <div class="neuro-card" style="padding:0;overflow:hidden;margin-bottom:20px">
+          <div style="padding:16px 20px;background:var(--bg-surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:13px;font-weight:700">Sensorların Ortalama Göstəriciləri və Tənzimləməsi</span>
+            <span style="font-size:11px;color:var(--text-muted)">Toplam 39 Kanal</span>
+          </div>
+          <div style="max-height:480px;overflow-y:auto">
+            <table class="admin-telemetry-table">
+              <thead>
+                <tr>
+                  <th>Kanal & Ad</th>
+                  <th>Vahid</th>
+                  <th>24 Saatlıq</th>
+                  <th>7 Günlük</th>
+                  <th>30 Günlük</th>
+                  <th>Təhlükəsizlik Hədləri (Min ~ Max)</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="admin-telemetry-tbody">
+                <!-- Populated by renderAdminTelemetryTable() -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Quick Threshold Creator Form -->
+        <div class="neuro-card">
+          <div class="neuro-card-header">
+            <div>
+              <div class="neuro-card-title">Yeni Təhlükəsizlik Limiti Əlavə Et</div>
+              <div class="neuro-card-sub">Kritik hədd aşması zamanı operatora avtomatik xəbərdarlıq göndərilir</div>
+            </div>
+          </div>
+
+          <form onsubmit="handleSaveThreshold(event)" style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)) 120px;gap:12px;align-items:end">
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">Sensor Kanalı</label>
+              <select id="admin-thresh-channel" class="admin-pass-input" style="height:38px;font-size:12px;text-align:left"></select>
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">Min Limit</label>
+              <input type="number" step="any" id="admin-thresh-min" class="admin-pass-input" style="height:38px;font-size:12px" placeholder="Məs: 15.0">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">Max Limit</label>
+              <input type="number" step="any" id="admin-thresh-max" class="admin-pass-input" style="height:38px;font-size:12px" placeholder="Məs: 28.0">
+            </div>
+            <div>
+              <label style="font-size:10px;font-weight:700;color:var(--text-muted);display:block;margin-bottom:4px">Etiket / Xəbərdarlıq</label>
+              <input type="text" id="admin-thresh-lbl" class="admin-pass-input" style="height:38px;font-size:12px" placeholder="Məs: Kritik İstilik">
+            </div>
+            <button type="submit" class="btn-admin-submit" style="height:38px;font-size:12px">Saxla</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- ─── SUBVIEW 3: DATA FAYLI YÜKLƏ VƏ YOXLAMA (IMPORT / PREVIEW) ─── -->
+      <div id="admin-subview-import" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+          <div>
+            <h3 style="font-size:17px;font-weight:800;color:var(--text-primary)">Data Faylı Yükləmə və Yoxlama Mərkəzi</h3>
+            <p style="font-size:12px;color:var(--text-muted);margin-top:2px">
+              CSV, JSON və ya Excel (.xlsx) formatında telemetriya datalarını seçib öncə yoxlayın, sonra təsdiq edərək bazaya əlavə edin.
+            </p>
+          </div>
+        </div>
+
+        <div class="neuro-card" style="margin-bottom:20px">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <!-- Format Guide Banner -->
+            <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:12px;color:var(--text-secondary);line-height:1.6">
+              <strong style="color:var(--accent-cyan);display:block;margin-bottom:4px">📋 Dəstəklənən Fayl Formatı:</strong>
+              Faylda <code>channel_id</code> (Məs: 10), <code>date</code> (YYYY-MM-DD), <code>time</code> (HH:MM), <code>value</code> (rəqəm) sütunları olmalıdır. Əlavə olaraq <code>note</code> sütunu da daxil edilə bilər.
+            </div>
+
+            <!-- Upload Controls -->
+            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+              <input type="file" id="import-file-input" accept=".csv, .json, .xlsx, .xlsm" class="admin-pass-input" style="height:44px;padding:8px 12px;flex:1;min-width:240px">
+              <button type="button" class="cat-chip-btn active" onclick="handleImportPreview()" style="height:44px;padding:0 22px;font-size:13px;font-weight:700;background:linear-gradient(135deg,var(--accent-electric),var(--accent-cyan));color:#fff">
+                🔍 Faylı Yoxla (Önbaxış)
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Results Container -->
+        <div id="import-preview-results" style="display:none">
+          <!-- Status Banner (Populated dynamically) -->
+          <div id="import-status-banner" style="margin-bottom:16px"></div>
+
+          <!-- Preview Table -->
+          <div class="neuro-card" style="padding:0;overflow:hidden;margin-bottom:16px">
+            <div style="padding:14px 18px;background:var(--bg-surface);border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+              <span style="font-size:13px;font-weight:700">Faylın Düzgün Sətirləri (Önbaxış - İlk 25 sətir)</span>
+              <span id="import-valid-count" style="font-size:12px;color:var(--accent-teal);font-weight:700"></span>
+            </div>
+            <div style="max-height:360px;overflow-y:auto">
+              <table class="admin-telemetry-table">
+                <thead>
+                  <tr>
+                    <th>Kanal</th>
+                    <th>Tarix</th>
+                    <th>Saat</th>
+                    <th>Dəyər</th>
+                    <th>Qeyd</th>
+                  </tr>
+                </thead>
+                <tbody id="import-preview-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Errors List (if any) -->
+          <div id="import-errors-box" class="neuro-card" style="display:none;border-left:4px solid var(--accent-red);margin-bottom:16px">
+            <div style="font-size:13px;font-weight:700;color:var(--accent-red);margin-bottom:8px">⚠️ Fayldakı Xətalı Sətirlər (Bazaya yazılmayacaq):</div>
+            <div id="import-errors-list" style="display:flex;flex-direction:column;gap:6px;font-size:11.5px;max-height:160px;overflow-y:auto"></div>
+          </div>
+
+          <!-- Final Confirm & Save Button -->
+          <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:16px">
+            <button class="cat-chip-btn" onclick="clearImportPreview()" style="height:42px;padding:0 20px">Ləğv Et</button>
+            <button id="btn-import-commit" class="btn-admin-submit" onclick="handleImportCommit()" style="height:42px;padding:0 24px;font-size:13px;background:linear-gradient(135deg,var(--accent-teal),#059669);color:#fff;font-weight:700">
+              💾 Təsdiqlə və Bazaya Əlavə Et
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ VIEW 7: XƏBƏRDARLIQ SİSTEMİ (ALERTS HUB) ════ -->
+  <section id="view-alerts" class="view-container">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+      <div>
+        <h2 style="font-size:20px;font-weight:800;color:var(--text-primary)">⚠️ Xəbərdarlıq və Hədd Aşmaları Mərkəzi</h2>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:2px">
+          Sensorların təyin olunmuş təhlükəsizlik hədlərindən kənara çıxması və kritik bildirişlər
+        </p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="cat-chip-btn" onclick="clearAcknowledgedAlerts()">🧹 Keçmişləri Təmizlə</button>
+        <button class="cat-chip-btn active" onclick="switchView('admin')" style="background:var(--accent-electric);color:#fff">⚙️ Yeni Hədd Əlavə Et</button>
+      </div>
+    </div>
+
+    <!-- Alert List Feed -->
+    <div id="alerts-hub-content" class="alert-feed-list">
+      <!-- Populated by renderAlertsView() -->
+    </div>
+  </section>
+</main>
+
+<!-- ════ DRILLDOWN MODAL ════ -->
+<div id="modal-drilldown" class="modal-backdrop" onclick="if(event.target===this)closeDrilldown()">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <div>
+        <h2 id="m-title" style="font-size:18px;font-weight:800;color:var(--text-primary)">Sensor Detallı Analizi</h2>
+        <p id="m-sub" style="font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace;margin-top:3px"></p>
+      </div>
+      <button class="arrow-card-btn" onclick="closeDrilldown()" title="Bağla">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Purpose / Agronomic Description Box -->
+      <div id="m-desc-box" class="sensor-desc-box" style="margin-bottom:4px">
+        <strong style="color:var(--text-primary);display:block;margin-bottom:3px">Sensorun Təyinatı və Aqronomik Rolu:</strong>
+        <span id="m-desc-txt"></span>
+      </div>
+
+      <!-- Controls Row -->
+      <div class="zoom-toolbar-row">
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="cat-chip-btn" id="m-gran-yearly" onclick="setDrilldownGran('yearly', this)">İllik (Arxiv)</button>
+          <button class="cat-chip-btn" id="m-gran-monthly" onclick="setDrilldownGran('monthly', this)">Aylıq</button>
+          <button class="cat-chip-btn active" id="m-gran-daily" onclick="setDrilldownGran('daily', this)">Gündəlik</button>
+          <button class="cat-chip-btn" id="m-gran-hourly" onclick="setDrilldownGran('hourly', this)">Saatlıq (24s)</button>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="date" id="m-date-from" class="search-input-txt" style="width:130px;height:34px" onchange="renderDrilldownGraph()">
+          <span style="color:var(--text-muted)">→</span>
+          <input type="date" id="m-date-to" class="search-input-txt" style="width:130px;height:34px" onchange="renderDrilldownGraph()">
+          
+          <button class="cat-chip-btn" onclick="resetDrilldownZoom()" title="Zoomu Sıfırla">🔍 Zoom Sıfırla</button>
+          <button class="cat-chip-btn" onclick="exportChartCsv('modal-chart-canvas')" title="CSV Fayl Yüklə">📥 CSV</button>
+          <button class="cat-chip-btn" onclick="exportChartPng('modal-chart-canvas')" title="Qrafiki Saxla">📷 PNG</button>
+        </div>
+      </div>
+
+      <!-- Canvas -->
+      <div class="modal-chart-area">
+        <canvas id="modal-chart-canvas"></canvas>
+      </div>
+
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">
+        <span>💡 Siçan çarxı (Mouse wheel) ilə horizontal zoom edin, sürükləyərək hərəkət etdirin</span>
+        <span style="color:var(--accent-cyan)">Priva Telemetry Interactive Engine</span>
+      </div>
+
+      <!-- Metrics Triplet -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+        <div class="neuro-card" style="padding:12px;text-align:center"><span class="stat-col-lbl">Orta Dəyər</span><span class="neuro-stat-big" id="m-avg" style="font-size:18px;justify-content:center">—</span></div>
+        <div class="neuro-card" style="padding:12px;text-align:center"><span class="stat-col-lbl">Minimum</span><span class="neuro-stat-big" id="m-min" style="font-size:18px;justify-content:center">—</span></div>
+        <div class="neuro-card" style="padding:12px;text-align:center"><span class="stat-col-lbl">Maksimum</span><span class="neuro-stat-big" id="m-max" style="font-size:18px;justify-content:center">—</span></div>
+        <div class="neuro-card" style="padding:12px;text-align:center"><span class="stat-col-lbl">Cəmi Ölçüm</span><span class="neuro-stat-big" id="m-cnt" style="font-size:18px;justify-content:center">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SÜRƏTLİ ƏLLƏ DATA ƏLAVƏ ET MODAL ════ -->
+<div id="modal-quick-add" class="modal-backdrop" onclick="if(event.target===this)closeQuickAddModal()">
+  <div class="modal-dialog" style="max-width:500px">
+    <div class="modal-header">
+      <div>
+        <h2 style="font-size:18px;font-weight:800;color:var(--text-primary)">➕ Yeni Göstərici Əlavə Et</h2>
+        <p style="font-size:11px;color:var(--text-muted);margin-top:3px">Əlavə etdiyiniz məlumat saytda və qrafikdə dərhal əks olunacaq</p>
+      </div>
+      <button class="arrow-card-btn" onclick="closeQuickAddModal()">✕</button>
+    </div>
+
+    <form onsubmit="handleQuickDataSubmit(event)" class="modal-body" style="gap:14px">
+      <!-- Fayl yükləmə və yoxlamaya sürətli keçid -->
+      <div style="background:var(--bg-card);border:1px dashed rgba(0,242,254,0.4);border-radius:8px;padding:10px 12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <span style="font-size:11px;color:var(--text-secondary)">📂 Çoxsaylı data faylı yükləmək və yoxlamaq üçün:</span>
+        <button type="button" class="cat-chip-btn" onclick="closeQuickAddModal(); switchView('admin'); switchAdminSubTab('import')" style="font-size:11px;padding:4px 10px;color:var(--accent-cyan);border-color:var(--accent-cyan);font-weight:700">
+          Fayl Yoxlama Mərkəzi ➔
+        </button>
+      </div>
+
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:6px">Sensor Kanalı *</label>
+        <select id="qa-channel-select" class="admin-pass-input" style="height:40px;font-size:12px;text-align:left;width:100%" onchange="updateQaUnit()" required></select>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:6px">Tarix *</label>
+          <input type="date" id="qa-date" class="admin-pass-input" style="height:40px;font-size:12px" required>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:6px">Saat *</label>
+          <input type="time" id="qa-time" class="admin-pass-input" style="height:40px;font-size:12px" required>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:6px">Ölçülən Rəqəm (Value) *</label>
+        <div style="display:flex;align-items:center;gap:8px">
+          <input type="number" step="any" id="qa-value" class="admin-pass-input" style="height:42px;font-size:16px;font-weight:700;text-align:center" placeholder="Məs: 24.5" required>
+          <span id="qa-unit-badge" class="cat-chip-btn" style="height:42px;display:flex;align-items:center;padding:0 14px;font-weight:700;font-size:13px">°C</span>
+        </div>
+      </div>
+
+      <div>
+        <label style="font-size:11px;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:6px">Qeyd / Təyinat</label>
+        <input type="text" id="qa-note" class="admin-pass-input" style="height:38px;font-size:12px" placeholder="Məs: Əllə yoxlama, kalibrasiya">
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:6px">
+        <button type="button" class="cat-chip-btn" onclick="closeQuickAddModal()" style="flex:1;height:42px">İmtina</button>
+        <button type="submit" class="btn-admin-submit" style="flex:2;height:42px;font-size:13px;background:linear-gradient(135deg,var(--accent-electric),var(--accent-cyan));color:#fff;font-weight:700">💾 Yadda Saxla və Göstər</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ════ MOBIL SABİT ALT NAVİQASİYA ════ -->
+<nav class="mobile-bottom-nav">
+  <button class="mob-nav-item active" id="mob-btn-dashboard" onclick="switchView('dashboard')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+    <span>İcmal</span>
+  </button>
+  <button class="mob-nav-item" id="mob-btn-sensors" onclick="switchView('sensors')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"/></svg>
+    <span>Sensorlar</span>
+  </button>
+  <button class="mob-nav-item highlight" onclick="openQuickAddModal()" title="Yeni Data Əlavə Et">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <span>Əlavə</span>
+  </button>
+  <button class="mob-nav-item" id="mob-btn-admin" onclick="switchView('admin')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    <span>Admin</span>
+  </button>
+  <button class="mob-nav-item" id="mob-btn-alerts" onclick="switchView('alerts')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span>Xəbərdarlıq</span>
+  </button>
+</nav>
+
+<!-- Toast Container -->
+<div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none"></div>
+
+<script>
+window.__INITIAL_CHANNELS__ = {{ channels | tojson if channels is defined else '{}' }};
+</script>
+<script>
+// ─── GLOBAL APPLICATION STATE ───
+let SD = (window.__INITIAL_CHANNELS__ && Object.keys(window.__INITIAL_CHANNELS__).length > 0) ? window.__INITIAL_CHANNELS__ : {};
+let CI = {};
+let currentActiveView = 'dashboard';
+let currentDrilldownId = '10';
+let currentDrilldownGran = 'daily';
+let isAdminAuthenticated = false;
+let acknowledgedAlerts = new Set(JSON.parse(localStorage.getItem('ack_alerts') || '[]'));
+
+const GC = {
+  weather: '#00d4aa',
+  greenhouse_temp: '#3b82f6',
+  humidity: '#a855f7',
+  heating: '#f59e0b',
+  ventilation: '#00f2fe',
+  co2: '#10b981',
+  curtain: '#ec4899',
+  water: '#0ea5e9',
+  water_quality: '#14b8a6',
+  energy: '#f97316'
+};
+
+const GL = {
+  weather: 'Xarici Hava',
+  greenhouse_temp: 'İstixana Temperaturu',
+  humidity: 'Rütubət',
+  heating: 'Isıtma Sistemi',
+  ventilation: 'Ventilyasiya',
+  co2: 'CO₂ Sistemi',
+  curtain: 'Pərdə Sistemi',
+  water: 'Su Temperaturu',
+  water_quality: 'Su Keyfiyyəti',
+  energy: 'Enerji / Qaz'
+};
+
+// ─── INITIALIZATION ───
+async function init() {
+  initTheme();
+  await loadChannels();
+  renderDashboardCharts();
+  renderCategorizedSensors('');
+  loadAlertsQueue();
+  checkAdminStatus();
+  updateHeaderAndCards();
+  populateChannelSelects();
+
+  // Sidebar tarix
+  const dateEl = document.getElementById('sidebar-current-date');
+  if (dateEl) {
+    const now = new Date();
+    const months = ['YANVAR','FEVRAL','MART','APRELİ','MAY','İYUN','İYUL','AVQUST','SENTYABR','OKTYABR','NOYABR','DEKABR'];
+    dateEl.textContent = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  }
+
+  // Alert badge
+  setTimeout(async () => {
+    try {
+      const res = await fetch('/api/alerts?limit=200');
+      const data = await res.json();
+      const active = (data.alerts||[]).filter(a => !acknowledgedAlerts.has(`${a.threshold_id}_${a.date}`)).length;
+      const badge = document.getElementById('header-alert-badge');
+      if (badge) { badge.textContent = active; badge.style.display = active > 0 ? 'flex' : 'none'; }
+    } catch(e) {}
+  }, 1000);
+
+  // Search input filter (⌘K)
+  document.getElementById('global-search-input')?.addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    if (q) {
+      if (currentActiveView !== 'sensors') switchView('sensors');
+      renderCategorizedSensors(q);
+    } else {
+      renderCategorizedSensors('');
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      const input = document.getElementById('global-search-input');
+      input?.focus();
+      input?.select();
+    }
+  });
+}
+
+async function loadChannels() {
+  try {
+    const res = await fetch('/api/channels');
+    SD = await res.json();
+  } catch (err) {
+    console.error('Error fetching channels:', err);
+  }
+}
+
+function cleanUnit(unit) {
+  return (unit || '').replace(/C/g, '°C').replace(/m\/h/g, 'm³/h').replace(/\uFFFD/g, '°');
+}
+
+// ─── MOBİL OFFCANVAS SIDEBAR İDARƏETMƏSİ ───
+function toggleMobileSidebar() {
+  const rail = document.getElementById('sidebar-rail');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!rail) return;
+  const isOpen = rail.classList.contains('mobile-open');
+  if (isOpen) {
+    rail.classList.remove('mobile-open');
+    backdrop?.classList.remove('active');
+  } else {
+    rail.classList.add('mobile-open');
+    backdrop?.classList.add('active');
+  }
+}
+
+function handleMenuClick(viewId) {
+  switchView(viewId);
+  const rail = document.getElementById('sidebar-rail');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  rail?.classList.remove('mobile-open');
+  backdrop?.classList.remove('active');
+}
+
+// ─── VIEW NAVIGATION ───
+function switchView(viewId) {
+  currentActiveView = viewId;
+  document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.rail-link-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.mob-nav-item').forEach(b => b.classList.remove('active'));
+
+  // Mobildə naviqasiyadan sonra sidebar-ı bağla
+  const rail = document.getElementById('sidebar-rail');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  rail?.classList.remove('mobile-open');
+  backdrop?.classList.remove('active');
+
+  const el = document.getElementById(`view-${viewId}`);
+  if (el) { el.classList.add('active'); el.classList.add('fade-in-scale'); setTimeout(()=>el.classList.remove('fade-in-scale'), 350); }
+  document.getElementById(`btn-tab-${viewId}`)?.classList.add('active');
+  document.getElementById(`mob-btn-${viewId}`)?.classList.add('active');
+
+  if (viewId === 'dashboard') {
+    renderDashboardCharts();
+  } else if (viewId === 'analytics') {
+    renderMultiAnalyticsChart();
+  } else if (viewId === 'admin') {
+    checkAdminStatus();
+  } else if (viewId === 'schedule-drawer') {
+    currentAdminSubTab = 'schedule';
+    switchView('admin');
+  } else if (viewId === 'alerts') {
+    renderAlertsView();
+  }
+}
+
+function updateHeaderAndCards() {
+  if (!SD || Object.keys(SD).length === 0) return;
+
+  const t10 = SD['10']?.avg_val ?? 20.4;
+  const t11 = SD['11']?.avg_val ?? 20.1;
+  const t12 = SD['12']?.avg_val ?? 20.6;
+  const t13 = SD['13']?.avg_val ?? 20.3;
+  const avgTemp = ((t10 + t11 + t12 + t13) / 4).toFixed(1);
+
+  const avgEl = document.getElementById('header-avg-temp');
+  if (avgEl) avgEl.textContent = `${avgTemp}°C`;
+
+  const bigTempEl = document.getElementById('card-big-temp');
+  if (bigTempEl) bigTempEl.textContent = `${avgTemp}°C`;
+
+  if (document.getElementById('row-temp-val')) document.getElementById('row-temp-val').textContent = `${avgTemp} °C`;
+  if (document.getElementById('row-hum-val')) document.getElementById('row-hum-val').textContent = `${(SD['14']?.avg_val ?? 66.5).toFixed(1)} %`;
+  if (document.getElementById('row-co2-val')) document.getElementById('row-co2-val').textContent = `${Math.round(SD['292']?.avg_val ?? 680)} ppm`;
+  if (document.getElementById('row-pipe-val')) document.getElementById('row-pipe-val').textContent = `${(SD['22']?.avg_val ?? 44.0).toFixed(1)} °C`;
+  if (document.getElementById('row-vent-val')) document.getElementById('row-vent-val').textContent = `${(SD['26']?.avg_val ?? 28.0).toFixed(1)} %`;
+}
+
+// ─── DASHBOARD CHARTS (NEUROBANK AESTHETICS) ───
+function renderDashboardCharts() {
+  renderBalanceOverviewChart();
+  renderYoYComparisonChart();
+  renderHumidityWaveChart();
+}
+
+// 1. Balance Overview Area Wave
+function renderBalanceOverviewChart() {
+  const ctx = document.getElementById('chart-balance-overview');
+  if (!ctx) return;
+  if (CI['chart-balance-overview']) CI['chart-balance-overview'].destroy();
+
+  const ch = SD['10'] || {};
+  const daily = ch.daily || {};
+  const keys = Object.keys(daily).slice(-14);
+  const labels = keys.map(k => k.slice(5));
+  const data = keys.map(k => daily[k]);
+
+  CI['chart-balance-overview'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.length ? labels : ['10-01', '10-03', '10-05', '10-07', '10-09', '10-11', '10-13', '10-15'],
+      datasets: [{
+        data: data.length ? data : [19.8, 20.2, 20.8, 21.4, 20.5, 20.9, 21.2, 20.4],
+        borderColor: '#38bdf8',
+        backgroundColor: 'rgba(56, 189, 248, 0.15)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.45,
+        pointRadius: 0,
+        pointHoverRadius: 6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } },
+        y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } }
+      }
+    }
+  });
+}
+
+// 2. Year-over-Year Dual Line (Screenshot 1 top right)
+function renderYoYComparisonChart() {
+  const ctx = document.getElementById('chart-yoy-comparison');
+  if (!ctx) return;
+  if (CI['chart-yoy-comparison']) CI['chart-yoy-comparison'].destroy();
+
+  CI['chart-yoy-comparison'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyn', 'İyl', 'Avq', 'Sen', 'Okt'],
+      datasets: [
+        {
+          label: '2026 (Cari İl)',
+          data: [18.2, 18.9, 19.8, 21.2, 22.5, 23.8, 24.5, 24.2, 22.1, 20.4],
+          borderColor: '#3b82f6',
+          borderWidth: 2,
+          tension: 0.4,
+          pointRadius: 0
+        },
+        {
+          label: '2025 (Keçən İl)',
+          data: [17.5, 18.0, 18.8, 20.1, 21.4, 22.8, 23.5, 23.1, 21.2, 19.6],
+          borderColor: '#00f0aa',
+          borderWidth: 1.5,
+          borderDash: [4, 4],
+          tension: 0.4,
+          pointRadius: 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: true, position: 'top', labels: { color: '#94a3b8', font: { size: 9 }, boxWidth: 10 } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } },
+        y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } }
+      }
+    }
+  });
+}
+
+// 3. Humidity Overview Area Wave
+function renderHumidityWaveChart() {
+  const ctx = document.getElementById('chart-humidity-overview');
+  if (!ctx) return;
+  if (CI['chart-humidity-overview']) CI['chart-humidity-overview'].destroy();
+
+  const ch = SD['14'] || {};
+  const daily = ch.daily || {};
+  const keys = Object.keys(daily).slice(-20);
+  const labels = keys.map(k => k.slice(5));
+  const data = keys.map(k => daily[k]);
+
+  CI['chart-humidity-overview'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels.length ? labels : ['09-25', '09-28', '10-01', '10-05', '10-10', '10-15'],
+      datasets: [{
+        data: data.length ? data : [64, 65, 68, 67, 69, 66.5],
+        borderColor: '#a855f7',
+        backgroundColor: 'rgba(168, 85, 247, 0.15)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } },
+        y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } }
+      }
+    }
+  });
+}
+
+// 4. Multi Analytics View Chart
+function renderMultiAnalyticsChart() {
+  const ctx = document.getElementById('chart-multi-analytics');
+  if (!ctx) return;
+  if (CI['chart-multi-analytics']) CI['chart-multi-analytics'].destroy();
+
+  const d10 = (SD['10'] && SD['10'].monthly) ? Object.values(SD['10'].monthly) : [18, 19, 21, 23, 24, 21, 20];
+  const d14 = (SD['14'] && SD['14'].monthly) ? Object.values(SD['14'].monthly) : [68, 66, 65, 64, 63, 66, 67];
+  const labels = (SD['10'] && SD['10'].monthly) ? Object.keys(SD['10'].monthly) : ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07'];
+
+  CI['chart-multi-analytics'] = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Temperatur (°C)',
+          data: d10,
+          borderColor: '#38bdf8',
+          yAxisID: 'y',
+          borderWidth: 2,
+          tension: 0.35
+        },
+        {
+          label: 'Rütubət (%)',
+          data: d14,
+          borderColor: '#a855f7',
+          yAxisID: 'y1',
+          borderWidth: 2,
+          tension: 0.35
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b' } },
+        y: { type: 'linear', position: 'left', grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#38bdf8' } },
+        y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#a855f7' } }
+      }
+    }
+  });
+}
+
+// ─── CATEGORIZED SENSORS RENDERER ───
+let currentSelectedCategory = '';
+
+function filterCategory(cat, btn) {
+  currentSelectedCategory = cat;
+  document.querySelectorAll('.cat-chip-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderCategorizedSensors(document.getElementById('global-search-input')?.value.trim().toLowerCase());
+}
+
+function generateSvgSparkline(dailyObj, color) {
+  if (!dailyObj || typeof dailyObj !== 'object') return '';
+  const vals = Object.values(dailyObj).slice(-20);
+  if (!vals.length) return '';
+
+  const min = Math.min(...vals);
+  const max = Math.max(...vals);
+  const range = (max - min) || 1;
+  const w = 120, h = 32;
+
+  const points = vals.map((v, i) => {
+    const x = ((i / (vals.length - 1 || 1)) * w).toFixed(1);
+    const y = (h - 4 - ((v - min) / range) * (h - 8)).toFixed(1);
+    return `${x},${y}`;
+  });
+
+  const polylinePts = points.join(' ');
+  const areaPts = `0,${h} ${polylinePts} ${w},${h}`;
+
+  return `
+    <div class="sensor-spark-box">
+      <svg style="width:100%;height:100%;overflow:visible" viewBox="0 0 ${w} ${h}">
+        <polygon points="${areaPts}" fill="${color}" opacity="0.12" />
+        <polyline points="${polylinePts}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </div>
+  `;
+}
+
+function renderCategorizedSensors(query = '') {
+  const container = document.getElementById('categorized-sensors-root');
+  if (!container) return;
+
+  const CATEGORIES = [
+    { key: 'temp', label: '🌡️ Temperatur Sistemi', groups: ['greenhouse_temp', 'heating'] },
+    { key: 'humidity', label: '💧 Rütubət & Nəmlik (RH)', groups: ['humidity'] },
+    { key: 'co2', label: '🌿 CO₂ & Fotosintez Sistemi', groups: ['co2'] },
+    { key: 'weather', label: '🌤️ Xarici Hava Stansiyası', groups: ['weather'] },
+    { key: 'energy', label: '⚡ Enerji & Qaz İstehlakı', groups: ['energy', 'ventilation', 'curtain'] },
+    { key: 'water', label: '⚗️ Su & Gübrə Keyfiyyəti', groups: ['water', 'water_quality'] }
+  ];
+
+  const entries = Object.entries(SD).sort((a,b) => parseInt(a[0]) - parseInt(b[0]));
+
+  let html = '';
+  CATEGORIES.forEach(cat => {
+    if (currentSelectedCategory && currentSelectedCategory !== cat.key) return;
+
+    const matchedSensors = entries.filter(([id, s]) => {
+      if (!cat.groups.includes(s.group)) return false;
+      if (query) {
+        const match = id.includes(query) ||
+                      s.name.toLowerCase().includes(query) ||
+                      (s.az_name || '').toLowerCase().includes(query) ||
+                      (s.description || '').toLowerCase().includes(query);
+        if (!match) return false;
+      }
+      return true;
+    });
+
+    if (!matchedSensors.length) return;
+
+    html += `
+      <div class="category-section-block">
+        <div class="category-header-title">
+          <span>${cat.label}</span>
+          <span class="category-header-badge">${matchedSensors.length} Sensor</span>
+        </div>
+
+        <div class="sensor-cards-grid">
+          ${matchedSensors.map(([id, s]) => {
+            const color = GC[s.group] || '#3b82f6';
+            const unit = cleanUnit(s.unit);
+            const title = s.az_name || s.name;
+            const desc = s.description || 'İstixana iqlim və avtomatlaşdırma nəzarət parametri.';
+            const sparkline = generateSvgSparkline(s.daily, color);
+
+            return `
+              <div class="sensor-card-item" onclick="openDrilldown('${id}')">
+                <div class="sensor-card-top">
+                  <div>
+                    <span class="sensor-code-tag">CH-${id} · ${GL[s.group] || s.group}</span>
+                    <div class="sensor-az-title" title="${escapeHtml(s.name)}">${escapeHtml(title)}</div>
+                  </div>
+                  <span class="sensor-unit-badge">${unit}</span>
+                </div>
+
+                <div class="sensor-desc-box" title="${escapeHtml(desc)}">
+                  <strong>Təyinatı:</strong> ${escapeHtml(desc)}
+                </div>
+
+                ${sparkline}
+
+                <div class="sensor-stats-bar">
+                  <div class="sensor-stat-col">
+                    <span class="stat-col-lbl">Orta</span>
+                    <span class="stat-col-val" style="color:${color}">${s.avg_val.toFixed(1)}</span>
+                  </div>
+                  <div class="sensor-stat-col">
+                    <span class="stat-col-lbl">Min</span>
+                    <span class="stat-col-val">${s.min_val.toFixed(1)}</span>
+                  </div>
+                  <div class="sensor-stat-col">
+                    <span class="stat-col-lbl">Max</span>
+                    <span class="stat-col-val">${s.max_val.toFixed(1)}</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  });
+
+  if (!html) {
+    container.innerHTML = '<div style="text-align:center;padding:50px 20px;color:var(--text-muted);font-size:13px">Axtarışa uyğun heç bir sensor tapılmadı.</div>';
+    return;
+  }
+
+  container.innerHTML = html;
+}
+
+// ─── DYNAMIC ALERTS QUEUE ───
+async function loadAlertsQueue() {
+  const container = document.getElementById('alert-queue-items');
+  const badge = document.getElementById('header-alert-badge');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/alerts');
+    const data = await res.json();
+    const alerts = (data.alerts || []).filter(a => !acknowledgedAlerts.has(`${a.channel_id}-${a.date}-${a.threshold_id}`));
+
+    if (badge) {
+      if (alerts.length > 0) {
+        badge.textContent = alerts.length;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    if (!alerts.length) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:24px 12px;color:var(--text-muted);font-size:11.5px">
+          ✅ Bütün parametrlər təhlükəsiz hədlər daxilindədir.
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = alerts.slice(0, 5).map(a => {
+      const isCritical = a.status === 'high' || (a.deviation && a.deviation > 15);
+      const levelClass = isCritical ? 'color:var(--accent-red)' : 'color:var(--accent-amber)';
+      const key = `${a.channel_id}-${a.date}-${a.threshold_id}`;
+      const unit = cleanUnit(a.unit);
+
+      return `
+        <div class="neuro-table-row" onclick="openDrilldown('${a.channel_id}')" style="cursor:pointer">
+          <div style="flex:1">
+            <div style="font-weight:700;${levelClass}">${escapeHtml(a.label || a.channel_name || 'Hədd Aşması')}</div>
+            <div style="font-size:10.5px;color:var(--text-muted)">CH-${a.channel_id}: ${a.value} ${unit} (Hədd: ${a.min_value ?? '—'}~${a.max_value ?? '—'})</div>
+          </div>
+          <button class="arrow-card-btn" style="width:24px;height:24px;font-size:10px" onclick="acknowledgeAlert(event, '${key}', this)">✓</button>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {}
+}
+
+function acknowledgeAlert(e, key, btn) {
+  e.stopPropagation();
+  acknowledgedAlerts.add(key);
+  localStorage.setItem('ack_alerts', JSON.stringify([...acknowledgedAlerts]));
+  btn.closest('.neuro-table-row')?.remove();
+  loadAlertsQueue();
+}
+
+// ─── ADMIN AUTHENTICATION (PASSWORD: agrotech) ───
+let currentAdminSubTab = 'schedule';
+
+function switchAdminSubTab(subTab) {
+  currentAdminSubTab = subTab;
+  const isSched = subTab === 'schedule';
+  const isThresh = subTab === 'thresholds';
+  const isImport = subTab === 'import';
+
+  const scheduleView = document.getElementById('admin-subview-schedule');
+  const threshView = document.getElementById('admin-subview-thresholds');
+  const importView = document.getElementById('admin-subview-import');
+
+  const btnSched = document.getElementById('admin-subtab-schedule-btn');
+  const btnThresh = document.getElementById('admin-subtab-thresh-btn');
+  const btnImport = document.getElementById('admin-subtab-import-btn');
+
+  if (scheduleView) scheduleView.style.display = isSched ? 'block' : 'none';
+  if (threshView) threshView.style.display = isThresh ? 'block' : 'none';
+  if (importView) importView.style.display = isImport ? 'block' : 'none';
+
+  if (btnSched) btnSched.classList.toggle('active', isSched);
+  if (btnThresh) btnThresh.classList.toggle('active', isThresh);
+  if (btnImport) btnImport.classList.toggle('active', isImport);
+
+  if (isSched) {
+    initScheduleDrawer();
+    setTimeout(() => { renderCurveDrawCanvas(); }, 50);
+  }
+}
+
+// ─── DATA FAYLI YOXLAMA (PREVIEW) VƏ BAZAYA ƏLAVƏ ETMƏ ───
+let currentImportValidatedFile = null;
+
+async function handleImportPreview() {
+  const fileInput = document.getElementById('import-file-input');
+  const file = fileInput?.files?.[0];
+  if (!file) {
+    showToast('⚠️ Zəhmət olmasa CSV, JSON və ya XLSX faylı seçin!', 'warning');
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('file', file);
+
+  const btn = event?.target;
+  const oldText = btn ? btn.textContent : '';
+  if (btn) btn.textContent = '⏳ Yoxlanılır...';
+
+  try {
+    const res = await fetch('/api/admin/import/preview', {
+      method: 'POST',
+      body: fd
+    });
+    const d = await res.json();
+    if (btn) btn.textContent = oldText;
+
+    if (!res.ok || d.error) {
+      showToast(`❌ Xəta: ${d.error || 'Fayl oxuna bilmədi'}`, 'error');
+      return;
+    }
+
+    currentImportValidatedFile = file;
+    renderImportPreviewResults(d);
+    showToast(`🔍 Fayl yoxlandı: ${d.valid} düzgün sətir aşkarlandı!`, 'info');
+  } catch(e) {
+    if (btn) btn.textContent = oldText;
+    showToast('❌ Faylı yoxlayarkən server xətası baş verdi!', 'error');
+  }
+}
+
+function renderImportPreviewResults(data) {
+  const container = document.getElementById('import-preview-results');
+  const banner = document.getElementById('import-status-banner');
+  const tbody = document.getElementById('import-preview-tbody');
+  const errorsBox = document.getElementById('import-errors-box');
+  const errorsList = document.getElementById('import-errors-list');
+  const validCountEl = document.getElementById('import-valid-count');
+  if (!container) return;
+
+  const valid = data.valid || 0;
+  const errors = data.errors || [];
+  const preview = data.preview || [];
+  const total = data.total_rows || (valid + errors.length);
+
+  container.style.display = 'block';
+  if (validCountEl) validCountEl.textContent = `${valid} / ${total} Sətir Düzgündür`;
+
+  // Status Banner
+  if (banner) {
+    const hasErr = errors.length > 0;
+    banner.innerHTML = `
+      <div style="background:${hasErr ? 'linear-gradient(135deg,rgba(245,158,11,0.12),rgba(239,68,68,0.08))' : 'linear-gradient(135deg,rgba(16,185,129,0.12),rgba(0,212,170,0.08))'};border:1px solid ${hasErr ? 'rgba(245,158,11,0.3)' : 'rgba(16,185,129,0.3)'};border-radius:10px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <strong style="color:${hasErr ? 'var(--accent-amber)' : 'var(--accent-teal)'};font-size:14px">
+            ${hasErr ? '⚠️ Yoxlama Tamamlandı: Bəzi xətalar var' : '✅ Yoxlama Uğurludur: Bütün sətirlər qaydasındadır!'}
+          </strong>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-top:3px">
+            Cəmi: ${total} sətir · Qəbul edilə bilən: <strong>${valid}</strong> · Xətalı: <strong>${errors.length}</strong>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // Previews Tbody
+  if (tbody) {
+    if (!preview.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text-muted)">Heç bir düzgün sətir tapılmadı</td></tr>';
+    } else {
+      tbody.innerHTML = preview.map(r => {
+        const ch = SD[r.channel_id];
+        return `
+          <tr>
+            <td><strong>#${r.channel_id}</strong> ${escapeHtml(ch?.name || 'Kanal')}</td>
+            <td>${r.date}</td>
+            <td style="font-family:'JetBrains Mono',monospace">${r.time || '—'}</td>
+            <td style="color:var(--accent-cyan);font-weight:700">${r.value} ${cleanUnit(ch?.unit || '')}</td>
+            <td style="color:var(--text-muted);font-size:11px">${escapeHtml(r.note || '—')}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
+
+  // Errors Box
+  if (errorsBox && errorsList) {
+    if (errors.length > 0) {
+      errorsBox.style.display = 'block';
+      errorsList.innerHTML = errors.map(e => `
+        <div style="background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:6px;padding:6px 10px;display:flex;justify-content:space-between">
+          <span><strong>Sətir ${e.row}:</strong> ${escapeHtml(e.error)}</span>
+          <span style="color:var(--text-muted)">${JSON.stringify(e.raw || {}).slice(0, 40)}</span>
+        </div>
+      `).join('');
+    } else {
+      errorsBox.style.display = 'none';
+    }
+  }
+
+  // Commit düyməsi
+  const commitBtn = document.getElementById('btn-import-commit');
+  if (commitBtn) {
+    commitBtn.disabled = valid === 0;
+    commitBtn.style.opacity = valid === 0 ? '0.5' : '1';
+  }
+}
+
+async function handleImportCommit() {
+  if (!currentImportValidatedFile) {
+    showToast('⚠️ Əvvəlcə faylı seçib yoxlayın!', 'warning');
+    return;
+  }
+
+  const fd = new FormData();
+  fd.append('file', currentImportValidatedFile);
+
+  const btn = document.getElementById('btn-import-commit');
+  if (btn) btn.textContent = '⏳ Bazaya yazılır...';
+
+  try {
+    const res = await fetch('/api/admin/import', {
+      method: 'POST',
+      body: fd
+    });
+    const d = await res.json();
+    if (btn) btn.textContent = '💾 Təsdiqlə və Bazaya Əlavə Et';
+
+    if (res.ok && d.imported !== undefined) {
+      showToast(`🎉 Uğurlu! ${d.imported} yeni qeyd bazaya yazıldı və qrafiklər yeniləndi!`, 'success');
+      clearImportPreview();
+      if (document.getElementById('modal-drilldown')?.classList.contains('open')) {
+        renderDrilldownGraph();
+      }
+      renderDashboardCharts();
+    } else {
+      showToast(`❌ Xəta: ${d.error || 'İmport zamanı xəta'}`, 'error');
+    }
+  } catch(e) {
+    if (btn) btn.textContent = '💾 Təsdiqlə və Bazaya Əlavə Et';
+    showToast('❌ İmport zamanı server xətası!', 'error');
+  }
+}
+
+function clearImportPreview() {
+  currentImportValidatedFile = null;
+  const res = document.getElementById('import-preview-results');
+  if (res) res.style.display = 'none';
+  const inp = document.getElementById('import-file-input');
+  if (inp) inp.value = '';
+}
+
+async function checkAdminStatus() {
+  try {
+    const res = await fetch('/api/admin/status');
+    const data = await res.json();
+    isAdminAuthenticated = !!(data.admin || data.authenticated);
+    renderAdminView();
+  } catch (err) {
+    isAdminAuthenticated = false;
+    renderAdminView();
+  }
+}
+
+function renderAdminView() {
+  const gate = document.getElementById('admin-login-gate');
+  const main = document.getElementById('admin-main-controls');
+  if (!gate || !main) return;
+
+  if (isAdminAuthenticated) {
+    gate.style.display = 'none';
+    main.style.display = 'flex';
+    populateAdminDropdown();
+    renderAdminTelemetryTable();
+    switchAdminSubTab(currentAdminSubTab || 'schedule');
+  } else {
+    gate.style.display = 'flex';
+    main.style.display = 'none';
+  }
+}
+
+async function handleAdminLogin(e) {
+  e.preventDefault();
+  const pass = document.getElementById('admin-login-pass')?.value;
+  if (!pass) return;
+
+  try {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pass })
+    });
+    const d = await res.json();
+    if (res.ok && d.ok) {
+      isAdminAuthenticated = true;
+      renderAdminView();
+      showToast('✅ Admin girişi uğurludur! Bütün tənzimləmələr aktivdir.', 'success');
+    } else {
+      showToast('❌ Yanlış admin şifrəsi! ("agrotech")', 'error');
+    }
+  } catch (err) {
+    showToast('❌ Server bağlantı xətası baş verdi.', 'error');
+  }
+}
+
+async function handleAdminLogout() {
+  await fetch('/api/admin/logout', { method: 'POST' });
+  isAdminAuthenticated = false;
+  renderAdminView();
+}
+
+function populateAdminDropdown() {
+  const sel = document.getElementById('admin-thresh-channel');
+  if (!sel) return;
+  const entries = Object.entries(SD).sort((a,b) => parseInt(a[0]) - parseInt(b[0]));
+  sel.innerHTML = entries.map(([id, info]) => `<option value="${id}">${id} · ${escapeHtml(info.az_name || info.name)} (${cleanUnit(info.unit)})</option>`).join('');
+}
+
+function renderAdminTelemetryTable() {
+  const tbody = document.getElementById('admin-telemetry-tbody');
+  if (!tbody) return;
+
+  const entries = Object.entries(SD).sort((a,b) => parseInt(a[0]) - parseInt(b[0]));
+  tbody.innerHTML = entries.map(([id, s]) => {
+    const unit = cleanUnit(s.unit);
+    const dailyKeys = Object.keys(s.daily || {});
+    
+    // 24h average (last day)
+    const lastDayVal = dailyKeys.length ? s.daily[dailyKeys[dailyKeys.length - 1]] : s.avg_val;
+    // 7d average
+    const last7Vals = dailyKeys.slice(-7).map(k => s.daily[k]);
+    const avg7d = last7Vals.length ? (last7Vals.reduce((a,b)=>a+b,0)/last7Vals.length).toFixed(1) : s.avg_val.toFixed(1);
+    // 30d average
+    const last30Vals = dailyKeys.slice(-30).map(k => s.daily[k]);
+    const avg30d = last30Vals.length ? (last30Vals.reduce((a,b)=>a+b,0)/last30Vals.length).toFixed(1) : s.avg_val.toFixed(1);
+
+    return `
+      <tr>
+        <td><strong>#${id}</strong> ${escapeHtml(s.az_name || s.name)}</td>
+        <td style="color:var(--accent-cyan);font-family:'JetBrains Mono',monospace">${unit}</td>
+        <td style="font-family:'JetBrains Mono',monospace">${Number(lastDayVal).toFixed(1)}</td>
+        <td style="font-family:'JetBrains Mono',monospace">${avg7d}</td>
+        <td style="font-family:'JetBrains Mono',monospace">${avg30d}</td>
+        <td style="font-family:'JetBrains Mono',monospace;color:var(--accent-amber)">${s.min_val.toFixed(1)} ~ ${s.max_val.toFixed(1)}</td>
+        <td><span class="neuro-trend-badge up" style="font-size:10px">Optimal</span></td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function handleSaveThreshold(e) {
+  e.preventDefault();
+  const payload = {
+    channel_id: document.getElementById('admin-thresh-channel').value,
+    min_value: document.getElementById('admin-thresh-min').value,
+    max_value: document.getElementById('admin-thresh-max').value,
+    label: document.getElementById('admin-thresh-lbl').value,
+    enabled: true
+  };
+  const res = await fetch('/api/admin/thresholds', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  if (res.ok) {
+    alert('Təhlükəsizlik limiti uğurla yadda saxlanıldı!');
+    loadAlertsQueue();
+  }
+}
+
+// ─── DRILLDOWN MODAL & ZOOM ENGINE ───
+function openDrilldown(id) {
+  if (!SD || !SD[id]) return;
+  currentDrilldownId = id;
+  currentDrilldownGran = 'daily';
+  const ch = SD[id];
+
+  document.getElementById('m-title').textContent = `${ch.az_name || ch.name} (${cleanUnit(ch.unit)})`;
+  document.getElementById('m-sub').textContent = `Kanal #${id} · Sistem: ${ch.name} · Qrup: ${GL[ch.group] || ch.group} · Arxiv: ${ch.date_from} → ${ch.date_to}`;
+
+  const descEl = document.getElementById('m-desc-txt');
+  if (descEl) descEl.textContent = ch.description || 'İstixana mikroiqlim balansı və telemetriya nəzarət parametri.';
+
+  document.getElementById('m-avg').textContent = `${ch.avg_val.toFixed(1)} ${cleanUnit(ch.unit)}`;
+  document.getElementById('m-min').textContent = `${ch.min_val.toFixed(1)} ${cleanUnit(ch.unit)}`;
+  document.getElementById('m-max').textContent = `${ch.max_val.toFixed(1)} ${cleanUnit(ch.unit)}`;
+  document.getElementById('m-cnt').textContent = (ch.total_records || 160000).toLocaleString();
+
+  // Default to recent 14 days so daily view is rich and immediate
+  document.getElementById('m-date-from').value = '2026-10-01';
+  document.getElementById('m-date-to').value = '2026-10-15';
+
+  renderDrilldownGraph();
+  document.getElementById('modal-drilldown').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrilldown() {
+  document.getElementById('modal-drilldown').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function resetDrilldownZoom() {
+  if (CI['modal-chart-canvas'] && typeof CI['modal-chart-canvas'].resetZoom === 'function') {
+    CI['modal-chart-canvas'].resetZoom();
+  }
+}
+
+function setDrilldownGran(g, btn) {
+  currentDrilldownGran = g;
+  document.querySelectorAll('#modal-drilldown .cat-chip-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  // Adjust dates for granularity convenience
+  if (g === 'hourly') {
+    document.getElementById('m-date-from').value = '2026-10-15';
+    document.getElementById('m-date-to').value = '2026-10-15';
+  } else if (g === 'daily') {
+    document.getElementById('m-date-from').value = '2026-09-15';
+    document.getElementById('m-date-to').value = '2026-10-15';
+  } else if (g === 'yearly' || g === 'monthly') {
+    document.getElementById('m-date-from').value = '2020-01-25';
+    document.getElementById('m-date-to').value = '2026-10-15';
+  }
+
+  renderDrilldownGraph();
+}
+
+async function renderDrilldownGraph() {
+  if (!currentDrilldownId || !SD[currentDrilldownId]) return;
+  const ch = SD[currentDrilldownId];
+  const unit = cleanUnit(ch.unit);
+  const fromV = document.getElementById('m-date-from').value;
+  const toV = document.getElementById('m-date-to').value;
+  const effective = (fromV && toV && fromV === toV) ? 'hourly' : currentDrilldownGran;
+
+  try {
+    const params = new URLSearchParams({ granularity: effective === 'yearly' ? 'monthly' : effective });
+    if (fromV) params.set('from', fromV);
+    if (toV) params.set('to', toV);
+
+    const res = await fetch(`/api/channel/${currentDrilldownId}/series?${params.toString()}`);
+    const series = await res.json();
+
+    const ctx = document.getElementById('modal-chart-canvas');
+    if (!ctx) return;
+    if (CI['modal-chart-canvas']) CI['modal-chart-canvas'].destroy();
+
+    const labels = series.labels || [];
+    const values = series.values || [];
+    const manual = (series.manual && series.manual.values) || [];
+    const hasManual = manual.some(v => v !== null && v !== undefined);
+    const targetCurve = series.target_curve || null;
+    const hasTarget = targetCurve && targetCurve.some(v => v !== null);
+
+    const datasets = [{
+      label: `${ch.az_name || ch.name} (${unit})`,
+      data: values,
+      borderColor: '#38bdf8',
+      backgroundColor: 'rgba(56, 189, 248, 0.15)',
+      borderWidth: 2.5,
+      pointRadius: labels.length > 60 ? 0 : 3.5,
+      pointHoverRadius: 6,
+      tension: 0.35,
+      fill: true
+    }];
+
+    if (hasManual) {
+      datasets.push({
+        label: `Planlanan Hədəf (${unit})`,
+        data: manual,
+        borderColor: '#f59e0b',
+        borderWidth: 2,
+        borderDash: [5, 4],
+        pointRadius: labels.length > 60 ? 0 : 3.5,
+        fill: false
+      });
+    }
+
+    if (hasTarget) {
+      datasets.push({
+        label: `🎯 Saatlıq Hədəf Əyrisi (${unit})`,
+        data: targetCurve,
+        borderColor: '#a855f7',
+        backgroundColor: 'rgba(168, 85, 247, 0.08)',
+        borderWidth: 2,
+        borderDash: [3, 3],
+        pointRadius: 4,
+        pointBackgroundColor: '#a855f7',
+        fill: true,
+        tension: 0.4
+      });
+    }
+
+    CI['modal-chart-canvas'] = new Chart(ctx, {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: hasManual || hasTarget, labels: { color: '#94a3b8', usePointStyle: true, pointStyleWidth: 14 } },
+          tooltip: {
+            backgroundColor: '#0f1527',
+            borderColor: '#283756',
+            borderWidth: 1,
+            titleColor: '#94a3b8',
+            bodyColor: '#f8fafc',
+            callbacks: {
+              label: (c) => ` ${c.dataset.label}: ${c.parsed.y} ${unit}`
+            }
+          },
+          zoom: {
+            pan: { enabled: true, mode: 'x' },
+            zoom: {
+              wheel: { enabled: true, speed: 0.1 },
+              pinch: { enabled: true },
+              mode: 'x'
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.04)' },
+            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 }, maxTicksLimit: 14 }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.04)' },
+            ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 10 } }
+          }
+        }
+      }
+    });
+
+  } catch (err) {
+    console.error('Error rendering modal graph:', err);
+  }
+}
+
+// ─── EXPORT HELPERS ───
+function exportChartPng(cid) {
+  const c = CI[cid];
+  if (!c) return;
+  const a = document.createElement('a');
+  a.href = c.toBase64Image('image/png', 1);
+  a.download = `agrotech-telemetry-${new Date().toISOString().slice(0,10)}.png`;
+  a.click();
+}
+
+function exportChartCsv(cid) {
+  const c = CI[cid];
+  if (!c) return;
+  const rows = [['Tarix / Saat', ...c.data.datasets.map(d => d.label)]];
+  c.data.labels.forEach((lbl, idx) => {
+    rows.push([lbl, ...c.data.datasets.map(d => d.data[idx] ?? '')]);
+  });
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `agrotech-telemetry-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+// ─── THEME & UTILITIES ───
+function initTheme() {
+  const t = localStorage.getItem('greenhouse-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+}
+
+function toggleTheme() {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const nxt = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', nxt);
+  localStorage.setItem('greenhouse-theme', nxt);
+  renderDashboardCharts();
+  if (currentActiveView === 'schedule-drawer') setTimeout(renderCurveDrawCanvas, 50);
+}
+
+function escapeHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+}
+
+// ─── TOAST BİLDİRİŞ ───
+function showToast(msg, type='success') {
+  const c = document.getElementById('toast-container'); if(!c) return;
+  const t = document.createElement('div');
+  const bg = type==='success'?'linear-gradient(135deg,#10b981,#00d4aa)':type==='error'?'linear-gradient(135deg,#ef4444,#dc2626)':type==='warning'?'linear-gradient(135deg,#f59e0b,#d97706)':'linear-gradient(135deg,#3b82f6,#2563eb)';
+  t.style.cssText=`background:${bg};color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.5);pointer-events:all;cursor:pointer;max-width:320px;`;
+  t.textContent=msg; t.onclick=()=>t.remove();
+  c.appendChild(t); setTimeout(()=>t.remove(),4500);
+}
+
+// ─── DATAS SINXRONIZASIYASI ───
+async function handleDatasSync() {
+  try {
+    const res = await fetch('/api/datas-sync',{method:'POST'});
+    const d = await res.json();
+    if(d.ok) {
+      const el = document.getElementById('sidebar-datas-text');
+      if(el) el.textContent=`${d.datas_status?.files_count||0} fayl · ${d.datas_status?.total_mb||0} MB · Sinxronlaşdırıldı ✓`;
+      showToast(`✅ Datas sinxronlaşdırıldı! ${d.datas_status?.total_mb||0} MB aktiv.`,'success');
+    }
+  } catch(e){showToast('❌ Datas əlaqəsini yoxlayın!','error');}
+}
+
+// ─── KANAL SEÇİCİLƏRİNİ DOLDUR ───
+function populateChannelSelects() {
+  const sorted = Object.entries(SD).sort((a,b)=>(a[1].name||'').localeCompare(b[1].name||''));
+  ['qa-channel-select','schedule-sensor-select'].forEach(id => {
+    const sel=document.getElementById(id); if(!sel) return;
+    sel.innerHTML='';
+    sorted.forEach(([id2,ch])=>{ const o=document.createElement('option'); o.value=id2; o.textContent=`CH${id2} · ${ch.name} (${cleanUnit(ch.unit)})`; sel.appendChild(o); });
+  });
+  const ts=document.getElementById('admin-thresh-channel');
+  if(ts){ts.innerHTML='';sorted.forEach(([id2,ch])=>{const o=document.createElement('option');o.value=id2;o.textContent=`CH${id2} · ${ch.name}`;ts.appendChild(o);});}
+}
+
+// ─── SÜRƏTLİ DATA ƏLAVƏ ET ───
+function openQuickAddModal() {
+  const m=document.getElementById('modal-quick-add'); if(!m) return;
+  populateChannelSelects();
+  document.getElementById('qa-date').value=new Date().toISOString().slice(0,10);
+  document.getElementById('qa-time').value=new Date().toTimeString().slice(0,5);
+  document.getElementById('qa-value').value='';
+  updateQaUnit(); m.classList.add('open');
+  setTimeout(()=>document.getElementById('qa-value')?.focus(),200);
+}
+function closeQuickAddModal(){document.getElementById('modal-quick-add')?.classList.remove('open');}
+function updateQaUnit(){
+  const sel=document.getElementById('qa-channel-select');
+  const b=document.getElementById('qa-unit-badge');
+  if(sel&&b) b.textContent=cleanUnit(SD[sel.value]?.unit||'')||'—';
+}
+async function handleQuickDataSubmit(e) {
+  e.preventDefault();
+  const ch=document.getElementById('qa-channel-select').value;
+  const date=document.getElementById('qa-date').value;
+  const time=document.getElementById('qa-time').value;
+  const value=parseFloat(document.getElementById('qa-value').value);
+  if(!ch||!date||!time||isNaN(value)){showToast('⚠️ Bütün sahələri doldurun!','warning');return;}
+  try {
+    const res=await fetch('/api/manual-data',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({channel_id:ch,date,time,value,enabled:true})});
+    const d=await res.json();
+    if(res.ok&&d.ok){closeQuickAddModal();showToast(`✅ ${SD[ch]?.name||'Sensor'}: ${value} ${cleanUnit(SD[ch]?.unit||'')} əlavə edildi!`,'success');if(document.getElementById('modal-drilldown')?.classList.contains('open'))renderDrilldownGraph();}
+    else showToast(`❌ ${d.error||'Xəta'}`, 'error');
+  }catch(err){showToast('❌ Şəbəkə xətası!','error');}
+}
+
+// ─── XƏBƏRDARLIQ MƏRKƏZİ ───
+async function renderAlertsView() {
+  const container=document.getElementById('alerts-hub-content'); if(!container) return;
+  container.innerHTML='<div style="text-align:center;padding:40px;color:var(--text-muted)">⏳ Yüklənir...</div>';
+  try {
+    const res=await fetch('/api/alerts?limit=200');
+    const data=await res.json();
+    const alerts=data.alerts||[];
+    const active=alerts.filter(a=>!acknowledgedAlerts.has(`${a.threshold_id}_${a.date}`)).length;
+    const badge=document.getElementById('header-alert-badge');
+    if(badge){badge.textContent=active;badge.style.display=active>0?'flex':'none';}
+    if(!alerts.length){container.innerHTML='<div style="text-align:center;padding:60px"><div style="font-size:56px">✅</div><div style="font-size:18px;font-weight:700;margin-top:12px">Heç bir Xəbərdarlıq Yoxdur!</div><div style="color:var(--text-muted);margin-top:6px">Bütün sensorlar həddlər daxilindədir.</div></div>';return;}
+    const cols={low:'var(--accent-blue)',high:'var(--accent-red)'};
+    container.innerHTML=`<div class="alert-banner-top"><div><strong style="color:var(--accent-red)">🚨 ${alerts.length} Aktiv Xəbərdarlıq</strong><div style="font-size:11px;color:var(--text-muted);margin-top:2px">${data.threshold_count} sensor izlənilir</div></div><button class="cat-chip-btn" onclick="switchView('admin')" style="background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4);color:var(--accent-red)">⚙️ Həddləri Tənzimlə</button></div><div class="alert-feed-list">${alerts.map(a=>{const key=`${a.threshold_id}_${a.date}`;const acked=acknowledgedAlerts.has(key);const col=cols[a.status]||'var(--accent-amber)';const icon=a.status==='low'?'📉':'📈';return `<div class="alert-item-card" style="${acked?'opacity:0.45;':''}border-left-color:${col}"><div style="display:flex;align-items:center;gap:14px;flex:1"><span style="font-size:22px">${icon}</span><div style="flex:1"><div style="font-size:13px;font-weight:700">${escapeHtml(a.label||a.channel_name)}</div><div style="font-size:11px;color:var(--text-muted)">${a.date} · Kanal #${a.channel_id}</div><div style="font-size:12px;margin-top:4px">Dəyər: <strong style="color:${col}">${a.value} ${escapeHtml(a.unit)}</strong> · Hədd: ${a.min_value??'—'}~${a.max_value??'—'} · Fərq: <strong>±${a.deviation}</strong></div></div></div><div style="display:flex;gap:8px"><button class="cat-chip-btn" style="font-size:11px" onclick="openDrilldown('${a.channel_id}')">📊</button><button class="cat-chip-btn" style="font-size:11px" onclick="ackAlert('${key}',this)">${acked?'✓':'Qeyd'}</button></div></div>`;}).join('')}</div>`;
+  }catch(e){container.innerHTML='<div style="text-align:center;padding:40px;color:var(--accent-red)">❌ Xəbərdarlıqlar yüklənə bilmədi</div>';}
+}
+function ackAlert(key,btn){
+  acknowledgedAlerts.add(key);localStorage.setItem('ack_alerts',JSON.stringify([...acknowledgedAlerts]));
+  if(btn){const card=btn.closest('.alert-item-card');if(card)card.style.opacity='0.45';btn.textContent='✓';}
+  const b=document.getElementById('header-alert-badge');if(b){const n=Math.max(0,(parseInt(b.textContent)||0)-1);b.textContent=n;b.style.display=n>0?'flex':'none';}
+}
+function clearAcknowledgedAlerts(){acknowledgedAlerts=new Set();localStorage.removeItem('ack_alerts');renderAlertsView();showToast('🧹 Keçmiş qeydlər təmizləndi','info');}
+
+// ─── 24 SAATLIQ QRAFİK ÇƏKMƏ ───
+let scheduleCurveValues=new Array(24).fill(20);
+let scheduleChannelId=null;
+let scheduleChInfo={};
+let isDrawingCurve=false;
+let curveListenersAttached=false;
+
+function initScheduleDrawer() {
+  if(!Object.keys(SD).length) return;
+  populateChannelSelects();
+  const sel=document.getElementById('schedule-sensor-select'); if(!sel) return;
+  for(const id of['10','14','290','0']){if(SD[id]){sel.value=id;break;}}
+  onScheduleSensorChange();
+  if(!curveListenersAttached){attachCurveDrawListeners();curveListenersAttached=true;}
+}
+async function onScheduleSensorChange(){
+  const sel=document.getElementById('schedule-sensor-select'); if(!sel) return;
+  scheduleChannelId=sel.value; scheduleChInfo=SD[scheduleChannelId]||{};
+  try{
+    const r=await fetch(`/api/schedule-curves/${scheduleChannelId}`);
+    const d=await r.json();
+    scheduleCurveValues=Array.isArray(d.hourly_values)&&d.hourly_values.length===24?[...d.hourly_values]:new Array(24).fill(scheduleChInfo.avg_val||20);
+    const tag=document.getElementById('schedule-current-mode-tag');
+    if(tag) tag.textContent=d.mode_name||'Standart Rejim';
+  }catch(e){scheduleCurveValues=new Array(24).fill(scheduleChInfo.avg_val||20);}
+  renderHourlyGrid(); setTimeout(renderCurveDrawCanvas,50);
+}
+function renderHourlyGrid(){
+  const grid=document.getElementById('hourly-grid-container'); if(!grid) return;
+  const unit=cleanUnit(scheduleChInfo.unit||'');
+  const mn=scheduleChInfo.min_val??0, mx=scheduleChInfo.max_val??100;
+  grid.innerHTML=Array.from({length:24},(_,h)=>{
+    const v=scheduleCurveValues[h]??0;
+    return `<div class="hour-col-card" id="hcol-${h}"><span class="hour-col-lbl">${String(h).padStart(2,'0')}:00</span><input type="range" min="${mn}" max="${mx}" step="0.1" value="${v}" oninput="onSliderChange(${h},this.value)" style="writing-mode:vertical-lr;direction:rtl;width:20px;height:90px;cursor:pointer;accent-color:var(--accent-cyan)"><input type="number" class="hour-val-input" value="${(+v).toFixed(1)}" min="${mn}" max="${mx}" step="0.1" oninput="onHourInputChange(${h},this.value)"><span style="font-size:9px;color:var(--text-muted)">${unit}</span></div>`;
+  }).join('');
+}
+function onSliderChange(h,v){scheduleCurveValues[h]=parseFloat(v);const i=document.querySelector(`#hcol-${h} .hour-val-input`);if(i)i.value=parseFloat(v).toFixed(1);renderCurveDrawCanvas();}
+function onHourInputChange(h,v){const n=parseFloat(v);if(isNaN(n))return;scheduleCurveValues[h]=n;const s=document.querySelector(`#hcol-${h} input[type=range]`);if(s)s.value=n;renderCurveDrawCanvas();}
+function renderCurveDrawCanvas(){
+  const wrap=document.getElementById('curve-canvas-wrap');
+  const canvas=document.getElementById('curve-draw-canvas');
+  if(!wrap||!canvas) return;
+  canvas.width=wrap.clientWidth||900; canvas.height=wrap.clientHeight||320;
+  const W=canvas.width,H=canvas.height;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const pL=52,pR=20,pT=24,pB=38,cw=W-pL-pR,ch=H-pT-pB;
+  const mn=scheduleChInfo.min_val??(Math.min(...scheduleCurveValues)-2);
+  const mx=scheduleChInfo.max_val??(Math.max(...scheduleCurveValues)+2);
+  const rng=(mx-mn)||1;
+  const xP=h=>pL+(h/23)*cw, yP=v=>pT+ch-((v-mn)/rng)*ch;
+  for(let i=0;i<=4;i++){const y=pT+(i/4)*ch;ctx.strokeStyle='rgba(255,255,255,0.05)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pL,y);ctx.lineTo(W-pR,y);ctx.stroke();ctx.fillStyle='#64748b';ctx.font='10px JetBrains Mono';ctx.textAlign='right';ctx.fillText((mx-(i/4)*rng).toFixed(1),pL-6,y+4);}
+  for(let h=0;h<24;h++){ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(xP(h),pT);ctx.lineTo(xP(h),H-pB);ctx.stroke();if(h%3===0){ctx.fillStyle='#475569';ctx.font='9px JetBrains Mono';ctx.textAlign='center';ctx.fillText(`${String(h).padStart(2,'0')}h`,xP(h),H-pB+14);}}
+  const grd=ctx.createLinearGradient(0,pT,0,H-pB);grd.addColorStop(0,'rgba(0,242,254,0.18)');grd.addColorStop(1,'rgba(0,242,254,0.01)');
+  ctx.beginPath();ctx.moveTo(xP(0),H-pB);
+  for(let h=0;h<24;h++)ctx.lineTo(xP(h),yP(scheduleCurveValues[h]));
+  ctx.lineTo(xP(23),H-pB);ctx.closePath();ctx.fillStyle=grd;ctx.fill();
+  ctx.beginPath();ctx.strokeStyle='#00f2fe';ctx.lineWidth=2.5;ctx.lineJoin='round';
+  for(let h=0;h<24;h++){const x=xP(h),y=yP(scheduleCurveValues[h]);h===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+  ctx.stroke();
+  for(let h=0;h<24;h++){ctx.beginPath();ctx.arc(xP(h),yP(scheduleCurveValues[h]),4,0,Math.PI*2);ctx.fillStyle='#00f2fe';ctx.fill();ctx.strokeStyle='#0a0e1c';ctx.lineWidth=2;ctx.stroke();}
+  ctx.fillStyle='#94a3b8';ctx.font='11px JetBrains Mono';ctx.textAlign='left';
+  ctx.fillText(`${scheduleChInfo.name||'Sensor'} · 24 Saatlıq Hədəf Əyrisi (${cleanUnit(scheduleChInfo.unit||'')})`,pL,pT-6);
+}
+function attachCurveDrawListeners(){
+  const canvas=document.getElementById('curve-draw-canvas'); if(!canvas) return;
+  function getVal(e){
+    const rect=canvas.getBoundingClientRect();
+    const cx=e.touches?e.touches[0].clientX:e.clientX;
+    const cy=e.touches?e.touches[0].clientY:e.clientY;
+    const W=canvas.width,H=canvas.height,pL=52,pR=20,pT=24,pB=38;
+    const cw=W-pL-pR,ch=H-pT-pB;
+    const mn=scheduleChInfo.min_val??(Math.min(...scheduleCurveValues)-2);
+    const mx=scheduleChInfo.max_val??(Math.max(...scheduleCurveValues)+2);
+    const rng=(mx-mn)||1;
+    const h=Math.round((cx-rect.left-pL)/cw*23);
+    const v=mx-((cy-rect.top-pT)/ch)*rng;
+    if(h<0||h>23) return null;
+    return{h,v:Math.max(mn,Math.min(mx,+v.toFixed(1)))};
+  }
+  function draw(e){if(!isDrawingCurve)return;e.preventDefault();const r=getVal(e);if(!r)return;scheduleCurveValues[r.h]=r.v;const i=document.querySelector(`#hcol-${r.h} .hour-val-input`);if(i)i.value=r.v.toFixed(1);const s=document.querySelector(`#hcol-${r.h} input[type=range]`);if(s)s.value=r.v;renderCurveDrawCanvas();}
+  canvas.addEventListener('mousedown',e=>{isDrawingCurve=true;draw(e);});
+  canvas.addEventListener('mousemove',draw);
+  canvas.addEventListener('mouseup',()=>isDrawingCurve=false);
+  canvas.addEventListener('mouseleave',()=>isDrawingCurve=false);
+  canvas.addEventListener('touchstart',e=>{isDrawingCurve=true;draw(e);},{passive:false});
+  canvas.addEventListener('touchmove',draw,{passive:false});
+  canvas.addEventListener('touchend',()=>isDrawingCurve=false);
+}
+function applySchedulePreset(preset){
+  const avg=scheduleChInfo.avg_val||20;
+  const mn=scheduleChInfo.min_val??(avg-5),mx=scheduleChInfo.max_val??(avg+5);
+  const grp=scheduleChInfo.group||'';
+  const cl=v=>+Math.max(mn,Math.min(mx,v)).toFixed(1);
+  if(preset==='optimal'){
+    if(grp==='co2')scheduleCurveValues=[450,450,450,450,450,500,700,900,1000,1000,950,900,850,800,750,650,550,450,450,450,450,450,450,450];
+    else if(grp==='humidity')scheduleCurveValues=[78,78,78,78,79,78,76,72,68,65,63,62,62,63,65,68,72,74,76,77,78,78,78,78];
+    else scheduleCurveValues=Array.from({length:24},(_,h)=>cl(avg-2.5*Math.cos((h-5)/24*2*Math.PI)));
+  }else if(preset==='energy'){scheduleCurveValues=Array.from({length:24},(_,h)=>cl((h>=7&&h<=20)?avg:(avg-2.5)));}
+  else if(preset==='growth'){
+    if(grp==='co2')scheduleCurveValues=[450,450,450,450,450,600,900,1200,1200,1100,1000,950,900,850,800,700,550,450,450,450,450,450,450,450];
+    else scheduleCurveValues=Array.from({length:24},(_,h)=>cl((h>=9&&h<=17)?mx:(h>=6&&h<=21?avg:mn)));
+  }
+  renderHourlyGrid(); setTimeout(renderCurveDrawCanvas,50);
+  showToast('🎨 Rejim tətbiq edildi. Saxlamaq üçün düyməyə basın!','info');
+}
+async function saveActiveScheduleCurve(){
+  if(!scheduleChannelId){showToast('⚠️ Əvvəlcə sensor seçin!','warning');return;}
+  try{
+    const res=await fetch('/api/schedule-curves',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({channel_id:scheduleChannelId,hourly_values:scheduleCurveValues,mode_name:`${scheduleChInfo.name||'Sensor'} Saatlıq Rejimi`})});
+    const d=await res.json();
+    if(d.ok){const tag=document.getElementById('schedule-current-mode-tag');if(tag)tag.textContent=d.curve.mode_name;showToast('✅ Saatlıq rejim yadda saxlandı!','success');}
+    else showToast(`❌ ${d.error}`,'error');
+  }catch(e){showToast('❌ Saxlama xətası!','error');}
+}
+
+window.addEventListener('load', init);
+window.addEventListener('resize',()=>{if(currentActiveView==='schedule-drawer')renderCurveDrawCanvas();});
+</script>
+</body>
+</html>

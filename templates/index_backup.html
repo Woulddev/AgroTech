@@ -1,0 +1,1894 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Priva VP9508 — İstixana Sensor Analitikası</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500&display=swap');
+
+  :root {
+    --bg-primary: #0a0e1a;
+    --bg-secondary: #0f1629;
+    --bg-card: #131d35;
+    --bg-card-hover: #162040;
+    --border: #1e2d50;
+    --border-bright: #2a3f6f;
+    --text-primary: #e8eeff;
+    --text-secondary: #7a8ab8;
+    --text-muted: #4a5a88;
+    --accent-green: #00d4aa;
+    --accent-blue: #4d8ef0;
+    --accent-red: #ff6b6b;
+    --accent-purple: #a29bfe;
+    --glow-green: rgba(0,212,170,0.15);
+    --shadow-panel: 0 18px 44px rgba(0,0,0,.28);
+    --chart-grid: #1e2d5066;
+    --tooltip-bg: #131d35;
+  }
+  :root[data-theme="light"] {
+    --bg-primary: #f4f7fb;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-card-hover: #f0f6fb;
+    --border: #d9e3ef;
+    --border-bright: #adc0d6;
+    --text-primary: #142033;
+    --text-secondary: #52637a;
+    --text-muted: #7c8da3;
+    --accent-green: #009f83;
+    --accent-blue: #2563eb;
+    --accent-red: #dc4c4c;
+    --accent-purple: #6d5dfc;
+    --glow-green: rgba(0,159,131,.12);
+    --shadow-panel: 0 14px 35px rgba(30,54,84,.12);
+    --chart-grid: #d8e3f0;
+    --tooltip-bg: #ffffff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Space Grotesk', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; overflow-x: hidden; }
+  body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px); background-size: 60px 60px; opacity: .22; pointer-events: none; z-index: 0; }
+
+  /* HEADER */
+  header { position: relative; z-index: 10; padding: 26px 40px 20px; border-bottom: 1px solid var(--border); background: linear-gradient(180deg,rgba(0,212,170,.05) 0%,transparent 100%); }
+  .header-inner { max-width: 1600px; margin: 0 auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+  .system-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(0,212,170,.1); border: 1px solid rgba(0,212,170,.3); border-radius: 4px; padding: 4px 12px; font-family: 'JetBrains Mono',monospace; font-size: 11px; color: var(--accent-green); letter-spacing: 1px; text-transform: uppercase; }
+  .pulse-dot { width: 7px; height: 7px; background: var(--accent-green); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+  h1 { font-size: 29px; font-weight: 700; letter-spacing: -.5px; line-height: 1.1; margin-top: 7px; }
+  h1 span { color: var(--accent-green); }
+  .subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .header-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+  .header-actions { display:flex; align-items:flex-start; gap:18px; flex-wrap:wrap; justify-content:flex-end; }
+  .admin-btn { padding:8px 14px; border-radius:8px; border:1px solid rgba(0,212,170,.35); background:rgba(0,212,170,.12); color:var(--accent-green); font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:all .15s; white-space:nowrap; }
+  .admin-btn:hover { background:rgba(0,212,170,.2); border-color:rgba(0,212,170,.55); }
+  .theme-btn,.icon-btn { width:36px; height:36px; display:inline-flex; align-items:center; justify-content:center; border-radius:8px; border:1px solid var(--border); background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer; transition:all .15s; font-size:15px; }
+  .theme-btn:hover,.icon-btn:hover { color:var(--accent-green); border-color:rgba(0,212,170,.35); background:var(--bg-card-hover); }
+  .hstat { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+  .hstat-val { font-family: 'JetBrains Mono',monospace; font-size: 22px; font-weight: 500; color: var(--accent-green); }
+  .hstat-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+
+  /* LAYOUT */
+  .container { position: relative; z-index: 5; max-width: 1600px; margin: 0 auto; padding: 26px 40px; }
+
+  /* TABS */
+  .nav-tabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 24px; padding: 5px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border); }
+  .nav-tab { padding: 8px 15px; border-radius: 8px; border: none; background: transparent; color: var(--text-secondary); font-family: 'Space Grotesk',sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all .2s; white-space: nowrap; }
+  .nav-tab:hover { background: var(--bg-card); color: var(--text-primary); }
+  .nav-tab.active { background: var(--bg-card-hover); color: var(--accent-green); border: 1px solid rgba(0,212,170,.25); }
+
+  /* SECTIONS */
+  .section { display: none; animation: fadeIn .3s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  /* TIMELINE */
+  .timeline-info { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 20px; font-size: 12px; color: var(--text-secondary); }
+  .timeline-date { font-family: 'JetBrains Mono',monospace; color: var(--accent-green); font-weight: 500; }
+  .tl-sep { color: var(--text-muted); }
+
+  /* STAT CARDS */
+  .stat-cards { display: grid; grid-template-columns: repeat(auto-fill,minmax(170px,1fr)); gap: 12px; margin-bottom: 22px; }
+  .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .stat-val { font-family: 'JetBrains Mono',monospace; font-size: 24px; font-weight: 600; color: var(--accent-green); line-height: 1; margin-bottom: 5px; }
+  .stat-label { font-size: 11px; color: var(--text-secondary); }
+
+  /* MAIN CHART */
+  .chart-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-bottom: 20px; }
+  .chart-panel-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
+  .chart-title { font-size: 17px; font-weight: 600; }
+  .chart-subtitle { font-size: 12px; color: var(--text-secondary); margin-top: 3px; }
+  .chart-controls { display: flex; gap: 7px; }
+  .ctrl-btn { padding: 6px 13px; border-radius: 7px; border: 1px solid var(--border); background: var(--bg-secondary); color: var(--text-secondary); font-family: 'Space Grotesk',sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all .15s; }
+  .ctrl-btn:hover,.ctrl-btn.active { background: rgba(0,212,170,.1); color: var(--accent-green); border-color: rgba(0,212,170,.3); }
+  .chart-wrapper { position: relative; height: 280px; }
+
+  /* GLOBAL FILTERS / ALERTS */
+  .filter-panel { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:14px; margin-bottom:20px; box-shadow:var(--shadow-panel); }
+  .filter-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; align-items:end; }
+  .filter-field { display:flex; flex-direction:column; gap:5px; min-width:0; }
+  .filter-field label { font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:.3px; }
+  .filter-input,.filter-select { width:100%; background:var(--bg-secondary); border:1px solid var(--border); border-radius:8px; padding:8px 10px; color:var(--text-primary); font-family:'Space Grotesk',sans-serif; font-size:12px; outline:none; }
+  .filter-input:focus,.filter-select:focus { border-color:var(--accent-green); }
+  .filter-actions { display:flex; gap:7px; flex-wrap:wrap; align-items:center; margin-top:12px; }
+  .filter-check { display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-secondary); min-height:36px; }
+  .empty-state { padding:18px; text-align:center; color:var(--text-muted); border:1px dashed var(--border); border-radius:10px; background:var(--bg-secondary); font-size:12px; }
+  .alerts-panel,.quality-panel,.comparison-summary { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:20px; }
+  .alert-card,.quality-card,.comparison-card { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px; min-width:0; }
+  .alert-card.warning { border-color:rgba(255,107,107,.35); background:rgba(255,107,107,.08); }
+  .alert-title,.quality-title,.comparison-title { font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-bottom:5px; }
+  .alert-value,.quality-value,.comparison-value { font-family:'JetBrains Mono',monospace; font-size:19px; color:var(--accent-green); font-weight:600; }
+  .alert-desc,.quality-desc,.comparison-desc { font-size:11px; color:var(--text-secondary); margin-top:4px; line-height:1.35; overflow-wrap:anywhere; }
+
+  /* OVERVIEW GRID */
+  .overview-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 13px; }
+  .group-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; cursor: pointer; transition: all .25s; position: relative; overflow: hidden; }
+  .group-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background:var(--card-color,var(--accent-green)); transform:scaleX(0); transform-origin:left; transition:transform .3s; }
+  .group-card:hover { background:var(--bg-card-hover); border-color:var(--border-bright); transform:translateY(-2px); }
+  .group-card:hover::before { transform:scaleX(1); }
+  .card-header { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+  .card-icon { font-size:20px; width:38px; height:38px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,.05); border-radius:8px; }
+  .card-title { font-size:14px; font-weight:600; }
+  .card-count { font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+  .channel-list { display:flex; flex-direction:column; gap:5px; }
+  .channel-item { display:flex; justify-content:space-between; align-items:center; padding:6px 9px; background:var(--bg-secondary); border-radius:7px; cursor:pointer; transition:all .15s; border:1px solid transparent; }
+  .channel-item:hover { border-color:var(--border-bright); background:var(--bg-card-hover); }
+  .channel-name { font-size:11px; color:var(--text-primary); font-weight:500; }
+  .channel-stats { display:flex; align-items:center; gap:5px; }
+  .channel-unit { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-muted); background:var(--bg-primary); padding:2px 5px; border-radius:3px; }
+  .channel-avg { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--accent-green); font-weight:500; min-width:50px; text-align:right; }
+
+  /* MINI CHART CARDS */
+  .channels-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(310px,1fr)); gap:16px; }
+  .mini-chart-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:16px; transition:all .2s; cursor:pointer; position:relative; }
+  .mini-chart-card:hover { border-color:var(--card-color,var(--accent-green)); background:var(--bg-card-hover); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,0,0,.3); }
+  .click-hint { position:absolute; top:10px; right:10px; background:rgba(0,212,170,.1); border:1px solid rgba(0,212,170,.25); color:var(--accent-green); font-size:10px; padding:3px 8px; border-radius:5px; opacity:0; transition:opacity .2s; font-weight:500; }
+  .mini-chart-card:hover .click-hint { opacity:1; }
+  .mini-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .mini-name { font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.3; padding-right:8px; }
+  .mini-unit { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--accent-green); background:var(--glow-green); padding:3px 8px; border-radius:4px; white-space:nowrap; flex-shrink:0; }
+  .mini-stats-row { display:flex; gap:12px; margin-bottom:9px; flex-wrap:wrap; }
+  .mini-stat { display:flex; flex-direction:column; gap:2px; }
+  .mini-stat-val { font-family:'JetBrains Mono',monospace; font-size:14px; font-weight:500; }
+  .mini-stat-label { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.3px; }
+  .mini-chart-wrapper { height:75px; position:relative; }
+  .mini-date-range { margin-top:7px; font-size:10px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+
+  /* ══════════════════════════════════════════
+     MODAL — DETAYLI PANEL
+  ══════════════════════════════════════════ */
+  .modal-overlay { position:fixed; inset:0; z-index:1000; background:rgba(5,8,20,.88); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; padding:16px; opacity:0; pointer-events:none; transition:opacity .25s; }
+  .modal-overlay.open { opacity:1; pointer-events:all; }
+  .modal { background:var(--bg-card); border:1px solid var(--border-bright); border-radius:20px; width:100%; max-width:1080px; max-height:92vh; overflow-y:auto; padding:30px; position:relative; transform:scale(.94) translateY(20px); transition:transform .32s cubic-bezier(.34,1.56,.64,1); box-shadow:0 40px 80px rgba(0,0,0,.65),0 0 0 1px rgba(0,212,170,.07); }
+  .modal-overlay.open .modal { transform:scale(1) translateY(0); }
+  .modal-close { position:absolute; top:18px; right:18px; width:34px; height:34px; border-radius:50%; background:var(--bg-secondary); border:1px solid var(--border); color:var(--text-secondary); font-size:17px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+  .modal-close:hover { background:var(--bg-card-hover); color:var(--text-primary); border-color:var(--border-bright); }
+
+  /* Modal header */
+  .modal-header { margin-bottom:20px; padding-right:46px; }
+  .modal-sys-label { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+  .modal-title { font-size:24px; font-weight:700; color:var(--text-primary); }
+  .modal-sub { font-size:13px; color:var(--text-secondary); margin-top:5px; }
+
+  /* Modal meta */
+  .modal-meta { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .meta-chip { display:flex; align-items:center; gap:6px; background:var(--bg-secondary); border:1px solid var(--border); padding:7px 12px; border-radius:8px; font-size:12px; color:var(--text-secondary); }
+  .meta-chip strong { color:var(--text-primary); font-family:'JetBrains Mono',monospace; }
+
+  /* Modal stats */
+  .modal-stats { display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:9px; margin-bottom:20px; }
+  .modal-stat { background:var(--bg-secondary); border:1px solid var(--border); border-radius:10px; padding:13px 14px; }
+  .modal-stat-val { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:600; line-height:1; margin-bottom:5px; }
+  .modal-stat-label { font-size:11px; color:var(--text-muted); }
+
+  /* Date range picker */
+  .date-range-bar { display:flex; align-items:center; gap:9px; flex-wrap:wrap; padding:12px 16px; background:var(--bg-secondary); border:1px solid var(--border); border-radius:12px; margin-bottom:18px; }
+  .date-range-bar label { font-size:12px; color:var(--text-secondary); white-space:nowrap; font-weight:500; }
+  .date-input { background:var(--bg-card); border:1px solid var(--border); color:var(--text-primary); padding:7px 11px; border-radius:8px; font-family:'JetBrains Mono',monospace; font-size:12px; cursor:pointer; outline:none; }
+  .date-input:focus { border-color:var(--accent-green); }
+  .date-sep { color:var(--text-muted); font-size:14px; }
+  .quick-btns { display:flex; gap:5px; flex-wrap:wrap; }
+  .quick-btn { padding:6px 11px; border-radius:7px; border:1px solid var(--border); background:var(--bg-card); color:var(--text-secondary); font-size:11px; font-weight:500; cursor:pointer; transition:all .15s; font-family:'Space Grotesk',sans-serif; }
+  .quick-btn:hover,.quick-btn.active { background:rgba(0,212,170,.1); color:var(--accent-green); border-color:rgba(0,212,170,.3); }
+  .apply-btn { padding:7px 15px; border-radius:8px; border:1px solid rgba(0,212,170,.4); background:rgba(0,212,170,.12); color:var(--accent-green); font-size:12px; font-weight:600; cursor:pointer; transition:all .15s; font-family:'Space Grotesk',sans-serif; margin-left:auto; }
+  .apply-btn:hover { background:rgba(0,212,170,.22); }
+
+  /* Modal chart */
+  .modal-chart-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+  .modal-chart-label { font-size:13px; font-weight:600; color:var(--text-secondary); }
+  .gran-btns { display:flex; gap:5px; }
+  .modal-chart-wrapper { position:relative; height:300px; margin-bottom:18px; }
+
+  /* Modal table */
+  .table-label { font-size:13px; font-weight:600; color:var(--text-secondary); margin-bottom:9px; }
+  .modal-table-wrapper { max-height:200px; overflow-y:auto; border-radius:10px; border:1px solid var(--border); }
+  .modal-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .modal-table thead tr { background:var(--bg-secondary); position:sticky; top:0; z-index:2; }
+  .modal-table th { padding:9px 13px; text-align:left; color:var(--text-muted); font-weight:500; border-bottom:1px solid var(--border); }
+  .modal-table td { padding:7px 13px; border-bottom:1px solid rgba(30,45,80,.4); font-family:'JetBrains Mono',monospace; }
+  .modal-table tr:hover td { background:var(--bg-card-hover); }
+
+  /* Admin panel */
+  .admin-overlay { position:fixed; inset:0; z-index:1200; background:rgba(5,8,20,.9); backdrop-filter:blur(8px); display:flex; align-items:center; justify-content:center; padding:16px; opacity:0; pointer-events:none; transition:opacity .2s; }
+  .admin-overlay.open { opacity:1; pointer-events:all; }
+  .admin-dialog { background:var(--bg-card); border:1px solid var(--border-bright); border-radius:16px; width:100%; max-width:1120px; max-height:92vh; overflow-y:auto; padding:24px; position:relative; box-shadow:0 30px 70px rgba(0,0,0,.55); }
+  .admin-dialog.small { max-width:420px; }
+  .admin-close { position:absolute; top:14px; right:14px; width:32px; height:32px; border-radius:8px; border:1px solid var(--border); background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer; font-size:16px; }
+  .admin-close:hover { color:var(--text-primary); border-color:var(--border-bright); }
+  .admin-title { font-size:20px; font-weight:700; margin-bottom:5px; padding-right:42px; }
+  .admin-subtitle { font-size:12px; color:var(--text-secondary); margin-bottom:18px; }
+  .admin-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:10px; margin-bottom:12px; }
+  .admin-field { display:flex; flex-direction:column; gap:5px; }
+  .admin-field label { font-size:11px; color:var(--text-muted); text-transform:uppercase; font-weight:600; }
+  .admin-input,.admin-select { width:100%; background:var(--bg-secondary); border:1px solid var(--border); color:var(--text-primary); border-radius:8px; padding:9px 10px; font-family:'Space Grotesk',sans-serif; font-size:13px; outline:none; }
+  .admin-input:focus,.admin-select:focus { border-color:var(--accent-green); }
+  .admin-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin:12px 0 18px; }
+  .admin-primary,.admin-secondary,.admin-danger { border-radius:8px; padding:8px 13px; font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:700; cursor:pointer; border:1px solid var(--border); }
+  .admin-primary { background:rgba(0,212,170,.14); color:var(--accent-green); border-color:rgba(0,212,170,.4); }
+  .admin-secondary { background:var(--bg-secondary); color:var(--text-secondary); }
+  .admin-danger { background:rgba(255,107,107,.12); color:#ff6b6b; border-color:rgba(255,107,107,.35); }
+  .admin-check { display:flex; align-items:center; gap:8px; color:var(--text-secondary); font-size:12px; padding-top:20px; }
+  .admin-status { min-height:18px; font-size:12px; color:var(--text-secondary); margin-bottom:10px; }
+  .admin-status.error { color:#ff6b6b; }
+  .admin-status.ok { color:var(--accent-green); }
+  .admin-import { display:flex; gap:8px; flex-wrap:wrap; align-items:center; padding:12px; background:var(--bg-secondary); border:1px solid var(--border); border-radius:10px; margin-bottom:14px; }
+  .admin-section { border-top:1px solid var(--border); padding-top:16px; margin-top:16px; }
+  .admin-section-title { font-size:15px; font-weight:700; margin-bottom:4px; }
+  .admin-section-sub { font-size:12px; color:var(--text-secondary); margin-bottom:12px; }
+  .admin-table-wrap { max-height:260px; overflow:auto; border:1px solid var(--border); border-radius:10px; }
+  .admin-table { width:100%; border-collapse:collapse; font-size:12px; }
+  .admin-table th { position:sticky; top:0; background:var(--bg-secondary); color:var(--text-muted); text-align:left; padding:9px; border-bottom:1px solid var(--border); }
+  .admin-table td { padding:8px 9px; border-bottom:1px solid rgba(30,45,80,.45); vertical-align:middle; font-family:'JetBrains Mono',monospace; }
+  .admin-row-actions { display:flex; gap:6px; flex-wrap:wrap; }
+  .admin-row-actions button { padding:5px 8px; border-radius:6px; border:1px solid var(--border); background:var(--bg-secondary); color:var(--text-secondary); cursor:pointer; font-size:11px; }
+  .admin-row-actions button:hover { color:var(--text-primary); border-color:var(--border-bright); }
+
+  /* INFO */
+  .info-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:10px; margin-bottom:22px; }
+  .info-card { background:var(--bg-secondary); border:1px solid var(--border); border-radius:10px; padding:13px; }
+  .info-card-title { font-size:13px; font-weight:600; margin-bottom:5px; }
+  .info-card-desc { font-size:11px; color:var(--text-secondary); line-height:1.5; }
+  .info-card-count { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-muted); margin-top:4px; }
+
+  ::-webkit-scrollbar { width:5px; height:5px; }
+  ::-webkit-scrollbar-track { background:var(--bg-primary); }
+  ::-webkit-scrollbar-thumb { background:var(--border-bright); border-radius:3px; }
+
+  footer { position:relative; z-index:5; border-top:1px solid var(--border); padding:16px 40px; text-align:center; font-size:11px; color:var(--text-muted); font-family:'JetBrains Mono',monospace; }
+
+  @media(max-width:768px) {
+    header,.container { padding:16px; width:100%; overflow:hidden; }
+    .header-inner { display:block; min-width:0; }
+    .header-actions { width:100%; margin-top:18px; justify-content:flex-start; gap:10px; }
+    .header-stats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:100%; gap:10px; order:3; }
+    .hstat { align-items:flex-start; background:var(--bg-secondary); border:1px solid var(--border); border-radius:10px; padding:10px; min-width:0; }
+    .hstat-val { font-size:18px; max-width:100%; overflow:hidden; text-overflow:ellipsis; }
+    h1 { font-size:19px; }
+    .subtitle { line-height:1.35; }
+    .timeline-info { align-items:flex-start; overflow-wrap:anywhere; }
+    .nav-tabs { flex-wrap:nowrap; overflow-x:auto; padding-bottom:7px; }
+    .chart-panel { padding:16px; overflow:hidden; }
+    .chart-controls,.gran-btns { flex-wrap:wrap; }
+    .chart-wrapper { height:260px; min-width:0; }
+    .filter-grid { grid-template-columns:1fr; }
+    .filter-panel { overflow:hidden; }
+    .filter-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:stretch; }
+    .filter-actions .ctrl-btn,.filter-actions .admin-secondary { width:100%; min-width:0; padding:8px 6px; font-size:11px; }
+    .modal { padding:18px; }
+    .channels-grid,.overview-grid { grid-template-columns:1fr; }
+    .modal-table-wrapper,.admin-table-wrap { overflow:auto; }
+    .modal-table,.admin-table { min-width:620px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════
+     MODAL
+═══════════════════════════════════ -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeBg(event)">
+ <div class="modal">
+  <button class="modal-close" onclick="closeModal()">✕</button>
+
+  <div class="modal-header">
+   <div class="modal-sys-label" id="m-syslabel">PRIVA VP9508 · SENSOR</div>
+   <div class="modal-title" id="m-title">—</div>
+   <div class="modal-sub" id="m-sub">—</div>
+  </div>
+
+  <div class="modal-meta">
+   <div class="meta-chip">📏 Vahid: <strong id="m-unit">—</strong></div>
+   <div class="meta-chip">🗂️ Qrup: <strong id="m-group">—</strong></div>
+   <div class="meta-chip">📅 Başlanğıc: <strong id="m-from">—</strong></div>
+   <div class="meta-chip">📅 Son: <strong id="m-to">—</strong></div>
+   <div class="meta-chip">📊 Cəmi ölçüm: <strong id="m-cnt">—</strong></div>
+  </div>
+
+  <div class="modal-stats">
+   <div class="modal-stat">
+    <div class="modal-stat-val" id="m-avg" style="color:var(--accent-green)">—</div>
+    <div class="modal-stat-label">Ortalama</div>
+   </div>
+   <div class="modal-stat">
+    <div class="modal-stat-val" id="m-min" style="color:var(--accent-blue)">—</div>
+    <div class="modal-stat-label">Minimum</div>
+   </div>
+   <div class="modal-stat">
+    <div class="modal-stat-val" id="m-max" style="color:var(--accent-red)">—</div>
+    <div class="modal-stat-label">Maksimum</div>
+   </div>
+   <div class="modal-stat">
+    <div class="modal-stat-val" id="m-rng" style="color:var(--accent-purple)">—</div>
+    <div class="modal-stat-label">Aralıq</div>
+   </div>
+   <div class="modal-stat">
+    <div class="modal-stat-val" id="m-fcnt" style="color:var(--text-secondary);font-size:16px">—</div>
+    <div class="modal-stat-label">Seçilmiş dövr</div>
+   </div>
+  </div>
+
+  <!-- DATE RANGE -->
+  <div class="date-range-bar">
+   <label>📅 Tarix aralığı:</label>
+   <input type="date" class="date-input" id="d-from" onchange="onDateChange()">
+   <span class="date-sep">→</span>
+   <input type="date" class="date-input" id="d-to" onchange="onDateChange()">
+   <div class="quick-btns">
+    <button class="quick-btn" onclick="qRange(30,this)">30 gün</button>
+    <button class="quick-btn" onclick="qRange(90,this)">90 gün</button>
+    <button class="quick-btn" onclick="qRange(180,this)">6 ay</button>
+    <button class="quick-btn" onclick="qRange(365,this)">1 il</button>
+    <button class="quick-btn active" onclick="qRange(0,this)">Hamısı</button>
+   </div>
+  </div>
+
+  <!-- CHART -->
+  <div class="modal-chart-top">
+   <div class="modal-chart-label">Zaman seriyası — <span id="gran-label">aylıq ortalama</span></div>
+   <div class="gran-btns">
+   <button class="ctrl-btn active" id="g-monthly" onclick="setGran('monthly',this)">Aylıq</button>
+    <button class="ctrl-btn" id="g-daily" onclick="setGran('daily',this)">Gündəlik</button>
+    <button class="ctrl-btn" id="g-hourly" onclick="setGran('hourly',this)">Saatlıq</button>
+    <button class="ctrl-btn" onclick="resetChartZoom('modal-chart')">Zoom reset</button>
+    <button class="ctrl-btn" onclick="exportChartCsv('modal-chart')">CSV</button>
+    <button class="ctrl-btn" onclick="exportChartPng('modal-chart')">PNG</button>
+   </div>
+  </div>
+  <div class="modal-chart-wrapper">
+   <canvas id="modal-chart"></canvas>
+  </div>
+
+  <div class="comparison-summary" id="comparison-summary"></div>
+
+  <!-- TABLE -->
+  <div class="table-label">📋 Cədvəl (<span id="tbl-gran">aylıq</span>)</div>
+  <div class="modal-table-wrapper">
+   <table class="modal-table">
+    <thead>
+     <tr>
+      <th>Tarix/Saat</th>
+      <th>Real dəyər</th>
+      <th>Manual/planlanan</th>
+      <th>Fərq</th>
+     </tr>
+    </thead>
+    <tbody id="modal-tbody"></tbody>
+   </table>
+  </div>
+ </div>
+</div>
+
+<!-- ═══════════════════════════════════
+     HEADER
+═══════════════════════════════════ -->
+<!-- ADMIN LOGIN -->
+<div class="admin-overlay" id="admin-login-overlay" onclick="closeAdminBg(event)">
+ <div class="admin-dialog small">
+  <button class="admin-close" onclick="closeAdminLogin()">×</button>
+  <div class="admin-title">Admin Panel</div>
+  <div class="admin-subtitle">Giriş şifrəsi backend tərəfindən yoxlanılır.</div>
+  <form onsubmit="adminLogin(event)">
+   <div class="admin-field">
+    <label>Şifrə</label>
+    <input type="password" class="admin-input" id="admin-password" autocomplete="current-password" required>
+   </div>
+   <div class="admin-actions">
+    <button type="submit" class="admin-primary">Daxil ol</button>
+    <button type="button" class="admin-secondary" onclick="closeAdminLogin()">Bağla</button>
+   </div>
+   <div class="admin-status" id="admin-login-status"></div>
+  </form>
+ </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-overlay" id="admin-panel-overlay" onclick="closeAdminBg(event)">
+ <div class="admin-dialog">
+  <button class="admin-close" onclick="closeAdminPanel()">×</button>
+  <div class="admin-title">Manual müqayisə datası</div>
+  <div class="admin-subtitle">Real sensor datası dəyişmir; manual dəyərlər ayrıca overlay xətti kimi saxlanılır.</div>
+
+  <form id="manual-form" onsubmit="saveManualRecord(event)">
+   <input type="hidden" id="manual-id">
+   <div class="admin-grid">
+    <div class="admin-field">
+     <label>Qrafik tipi / kanal</label>
+     <select class="admin-select" id="manual-channel" required></select>
+    </div>
+    <div class="admin-field">
+     <label>Tarix</label>
+     <input type="date" class="admin-input" id="manual-date" required>
+    </div>
+    <div class="admin-field">
+     <label>Saat</label>
+     <input type="time" class="admin-input" id="manual-time" step="3600" required>
+    </div>
+    <div class="admin-field">
+     <label>Dəyər</label>
+     <input type="number" class="admin-input" id="manual-value" step="0.01" required>
+    </div>
+    <label class="admin-check">
+     <input type="checkbox" id="manual-enabled" checked>
+     Manual xətt aktivdir
+    </label>
+   </div>
+   <div class="admin-actions">
+    <button type="submit" class="admin-primary" id="manual-save-btn">Yadda saxla</button>
+    <button type="button" class="admin-secondary" onclick="resetManualForm()">Təmizlə</button>
+    <button type="button" class="admin-secondary" onclick="adminLogout()">Çıxış</button>
+   </div>
+   <div class="admin-status" id="admin-panel-status"></div>
+  </form>
+
+  <div class="admin-import">
+   <input type="file" class="admin-input" id="manual-import-file" accept=".csv,.json,.xlsx,.xlsm">
+   <button type="button" class="admin-secondary" onclick="previewManualImport()">Preview</button>
+   <button type="button" class="admin-secondary" onclick="importManualData()">Import</button>
+   <button type="button" class="admin-secondary" onclick="downloadImportTemplate()">Template CSV</button>
+  </div>
+
+  <div class="admin-table-wrap" id="import-preview-wrap" style="display:none;margin-bottom:14px">
+   <table class="admin-table">
+    <thead>
+     <tr>
+      <th>Kanal</th>
+      <th>Tarix/Saat</th>
+      <th>Dəyər</th>
+      <th>Status</th>
+     </tr>
+    </thead>
+    <tbody id="import-preview-body"></tbody>
+   </table>
+  </div>
+
+  <div class="admin-table-wrap">
+   <table class="admin-table">
+    <thead>
+     <tr>
+      <th>Kanal</th>
+      <th>Tarix/Saat</th>
+      <th>Dəyər</th>
+      <th>Status</th>
+      <th>Əməliyyat</th>
+     </tr>
+    </thead>
+   <tbody id="manual-records-body"></tbody>
+   </table>
+  </div>
+
+  <div class="admin-section">
+   <div class="admin-section-title">Alert və threshold idarəetməsi</div>
+   <div class="admin-section-sub">Kanal üçün minimum/maksimum aralıq təyin edin; dashboard seçilmiş dövrdə kənaraçıxmaları göstərir.</div>
+   <form id="threshold-form" onsubmit="saveThresholdRecord(event)">
+    <input type="hidden" id="threshold-id">
+    <div class="admin-grid">
+     <div class="admin-field">
+      <label>Kanal</label>
+      <select class="admin-select" id="threshold-channel" required></select>
+     </div>
+     <div class="admin-field">
+      <label>Minimum</label>
+      <input type="number" class="admin-input" id="threshold-min" step="0.01" placeholder="boş qala bilər">
+     </div>
+     <div class="admin-field">
+      <label>Maksimum</label>
+      <input type="number" class="admin-input" id="threshold-max" step="0.01" placeholder="boş qala bilər">
+     </div>
+     <div class="admin-field">
+      <label>Qısa ad</label>
+      <input type="text" class="admin-input" id="threshold-label" placeholder="Məs: Gündüz temp.">
+     </div>
+     <label class="admin-check">
+      <input type="checkbox" id="threshold-enabled" checked>
+      Alert aktivdir
+     </label>
+    </div>
+    <div class="admin-actions">
+     <button type="submit" class="admin-primary" id="threshold-save-btn">Threshold saxla</button>
+     <button type="button" class="admin-secondary" onclick="resetThresholdForm()">Təmizlə</button>
+    </div>
+   </form>
+   <div class="admin-table-wrap">
+    <table class="admin-table">
+     <thead>
+      <tr>
+       <th>Kanal</th>
+       <th>Min</th>
+       <th>Max</th>
+       <th>Status</th>
+       <th>Əməliyyat</th>
+      </tr>
+     </thead>
+     <tbody id="threshold-records-body"></tbody>
+    </table>
+   </div>
+  </div>
+ </div>
+</div>
+
+<header>
+ <div class="header-inner">
+  <div>
+   <div class="system-badge"><span class="pulse-dot"></span>PRIVA VP9508 · İSTİXANA İQLİM SİSTEMİ</div>
+   <h1>İstixana Sensor <span>Analitikası</span></h1>
+   <div class="subtitle">Priva Integro / Connext Datalog — 6+ İllik Real Sensor Datası (2020–2026)</div>
+  </div>
+  <div class="header-actions">
+   <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()" title="Tema dəyiş">☾</button>
+   <button class="admin-btn" onclick="openAdminPanelEntry()">Admin Panel</button>
+   <div class="header-stats">
+    <div class="hstat"><div class="hstat-val">{{ total_channels }}</div><div class="hstat-label">Kanal</div></div>
+    <div class="hstat"><div class="hstat-val">{{ "{:,}".format(total_records) }}</div><div class="hstat-label">Ölçüm</div></div>
+    <div class="hstat"><div class="hstat-val">6.3 il</div><div class="hstat-label">Dövr</div></div>
+    <div class="hstat"><div class="hstat-val">5 dəq</div><div class="hstat-label">Interval</div></div>
+   </div>
+  </div>
+ </div>
+</header>
+
+<!-- ═══════════════════════════════════
+     MAIN
+═══════════════════════════════════ -->
+<div class="container">
+
+ <div class="timeline-info">
+  <span>📅</span>
+  <span class="timeline-date">25 Yanvar 2020</span>
+  <span class="tl-sep">→</span>
+  <span class="timeline-date">25 Aprel 2026</span>
+  <span class="tl-sep">·</span>
+  <span>{{ total_channels }} kanal · ~288 ölçüm/gün · 5 dəq interval · .dlt/.dof (zlib binary)</span>
+ </div>
+
+ <div class="filter-panel">
+  <div class="filter-grid">
+   <div class="filter-field">
+    <label>Başlanğıc tarix</label>
+    <input type="date" class="filter-input" id="global-from" min="{{ date_from }}" max="{{ date_to }}" value="{{ date_from }}">
+   </div>
+   <div class="filter-field">
+    <label>Son tarix</label>
+    <input type="date" class="filter-input" id="global-to" min="{{ date_from }}" max="{{ date_to }}" value="{{ date_to }}">
+   </div>
+   <div class="filter-field">
+    <label>Qrup</label>
+    <select class="filter-select" id="global-group">
+     <option value="">Bütün qruplar</option>
+     {% for key, group in groups.items() %}
+     <option value="{{ key }}">{{ group.label }}</option>
+     {% endfor %}
+    </select>
+   </div>
+   <div class="filter-field">
+    <label>Sensor axtarışı</label>
+    <input type="search" class="filter-input" id="global-search" placeholder="ID, ad, vahid...">
+   </div>
+   <label class="filter-check">
+    <input type="checkbox" id="global-overlay" checked>
+    Manual overlay aktiv
+   </label>
+  </div>
+  <div class="filter-actions">
+   <button class="ctrl-btn" onclick="applyGlobalFilters()">Filter tətbiq et</button>
+   <button class="ctrl-btn" onclick="resetGlobalFilters()">Sıfırla</button>
+   <button class="ctrl-btn" onclick="exportChartCsv('main-chart')">CSV</button>
+   <button class="ctrl-btn" onclick="exportChartPng('main-chart')">PNG</button>
+   <button class="ctrl-btn" onclick="resetChartZoom('main-chart')">Zoom reset</button>
+  </div>
+ </div>
+
+ <div class="alerts-panel" id="alerts-panel"></div>
+
+ <div class="nav-tabs">
+  <button class="nav-tab active" onclick="showSec('overview',this)">🏠 Ümumi</button>
+  <button class="nav-tab" onclick="showSec('weather',this)">🌤️ Xarici Hava</button>
+  <button class="nav-tab" onclick="showSec('greenhouse',this)">🌡️ İstixana</button>
+  <button class="nav-tab" onclick="showSec('co2',this)">🌿 CO₂</button>
+  <button class="nav-tab" onclick="showSec('heating',this)">🔥 Isıtma</button>
+  <button class="nav-tab" onclick="showSec('water',this)">💧 Su / EC / pH</button>
+  <button class="nav-tab" onclick="showSec('energy',this)">⚡ Enerji</button>
+  <button class="nav-tab" onclick="showSec('info',this)">📋 Sistem</button>
+ </div>
+
+ <!-- OVERVIEW -->
+ <div id="section-overview" class="section active">
+  <div class="stat-cards">
+    <div class="stat-card"><div class="stat-val">{{ total_channels }}</div><div class="stat-label">Sensor kanali (temperatur, rütubət, CO₂, qaz, su...)</div></div>
+   <div class="stat-card"><div class="stat-val">~167K</div><div class="stat-label">Hər kanal üçün ölçüm sayı (588 günlük bloklar)</div></div>
+   <div class="stat-card"><div class="stat-val">-18°C</div><div class="stat-label">Xarici minimum temperatur (qış aylarında)</div></div>
+   <div class="stat-card"><div class="stat-val">50°C</div><div class="stat-label">İstixana maksimum temperaturu (yay aylarında)</div></div>
+   <div class="stat-card"><div class="stat-val">1484</div><div class="stat-label">Ən yüksək CO₂ konsentrasiyası (ppm)</div></div>
+   <div class="stat-card"><div class="stat-val">6.3 il</div><div class="stat-label">Ümumi verilənlər dövrü (Jan 2020 → Apr 2026)</div></div>
+  </div>
+  <div class="chart-panel">
+   <div class="chart-panel-header">
+    <div>
+     <div class="chart-title">Xarici Temperatur — 6 İllik Trend</div>
+     <div class="chart-subtitle">Kanal 0: OUTSIDE TEMP · °C · 160,401 ölçüm · Priva VP9508:WEATHER</div>
+    </div>
+    <div class="chart-controls">
+     <button class="ctrl-btn active" onclick="mainView('monthly',this)">Aylıq</button>
+     <button class="ctrl-btn" onclick="mainView('daily',this)">Gündəlik</button>
+    </div>
+   </div>
+   <div class="chart-wrapper"><canvas id="main-chart"></canvas></div>
+  </div>
+  <div class="quality-panel" id="quality-panel"></div>
+  <div class="overview-grid" id="overview-cards"></div>
+ </div>
+
+ <!-- GROUP SECTIONS -->
+ <div id="section-weather" class="section"><div class="channels-grid" id="weather-charts"></div></div>
+ <div id="section-greenhouse" class="section"><div class="channels-grid" id="greenhouse-charts"></div></div>
+ <div id="section-co2" class="section"><div class="channels-grid" id="co2-charts"></div></div>
+ <div id="section-heating" class="section"><div class="channels-grid" id="heating-charts"></div></div>
+ <div id="section-water" class="section"><div class="channels-grid" id="water-charts"></div></div>
+ <div id="section-energy" class="section"><div class="channels-grid" id="energy-charts"></div></div>
+
+ <!-- INFO -->
+ <div id="section-info" class="section">
+  <div class="chart-panel">
+   <div class="chart-panel-header">
+    <div>
+     <div class="chart-title">📋 Sistem Məlumatları — Priva VP9508</div>
+     <div class="chart-subtitle">Texniki analiz: fayl strukturu, sensor növləri, bütün kanallar</div>
+    </div>
+   </div>
+   <div style="display:grid;gap:24px">
+    <div>
+     <h3 style="font-size:13px;color:var(--accent-green);margin-bottom:9px;font-family:'JetBrains Mono',monospace">🗂️ Fayl Strukturu</h3>
+     <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:2.1">
+      <div><span style="color:var(--accent-green)">reg_loginfodetails.dlt/.dof</span><span style="color:var(--text-muted);margin-left:10px"># Kanal metadata indeksi</span></div>
+      <div><span style="color:var(--accent-green)">reg_loginfo.dlt/.dof</span><span style="color:var(--text-muted);margin-left:10px">       # 371 kanal — adlar, vahidlər</span></div>
+      <div><span style="color:var(--accent-green)">reg_datalog.dlt/.dof</span><span style="color:var(--text-muted);margin-left:10px">       # 218,284 blok · 231MB sensor data</span></div>
+      <div><span style="color:var(--accent-green)">Reg.ODB</span><span style="color:var(--text-muted);margin-left:10px">                    # Priva object database</span></div>
+      <div style="color:var(--text-muted);margin-top:5px"># Format: Magic 0xBC0DBB0D · Rekord: int32(ts)+double(val)=12bayt · zlib sıxılmış</div>
+     </div>
+    </div>
+    <div>
+     <h3 style="font-size:13px;color:#f7a741;margin-bottom:9px">🔬 Sensor Kateqoriyaları</h3>
+     <div class="info-grid" id="sensor-type-list"></div>
+    </div>
+    <div>
+     <h3 style="font-size:13px;color:var(--accent-blue);margin-bottom:9px">📊 Bütün Kanalların Siyahısı (klikləyib qrafiki açın)</h3>
+     <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+       <thead>
+        <tr style="background:var(--bg-secondary);color:var(--text-secondary);text-align:left">
+         <th style="padding:9px 11px;border-bottom:1px solid var(--border)">ID</th>
+         <th style="padding:9px 11px;border-bottom:1px solid var(--border)">Sensor Adı</th>
+         <th style="padding:9px 11px;border-bottom:1px solid var(--border)">Vahid</th>
+         <th style="padding:9px 11px;border-bottom:1px solid var(--border)">Qrup</th>
+         <th style="padding:9px 11px;border-bottom:1px solid var(--border)">Ölçüm</th>
+         <th style="padding:9px 11px;border-bottom:1px solid var(--border)">Min</th>
+         <th style="padding:9px 11px;border-bottom:1px solid var(--border)">Max</th>
+         <th style="padding:9px 11px;border-bottom:1px solid var(--border)">Ort.</th>
+        </tr>
+       </thead>
+       <tbody id="channel-table-body"></tbody>
+      </table>
+     </div>
+    </div>
+   </div>
+  </div>
+ </div>
+
+</div>
+
+<footer>PRIVA VP9508 GREENHOUSE CLIMATE CONTROL · 2020-01-25 → 2026-04-25 · {{ total_channels }} CHANNELS · ~6.5M RECORDS</footer>
+
+<script>
+// ─── GLOBALS ───
+let SD = null; // sensor data
+const CI = {};  // chart instances
+let curId = null, curGran = 'monthly';
+const built = new Set();
+const seriesCache = new Map();
+let modalRequestId = 0;
+let ADMIN_RECORDS = [];
+let THRESHOLD_RECORDS = [];
+let mainGran = 'monthly';
+let lastChartPayload = {};
+let GLOBAL_FILTER = { from:'', to:'', group:'', search:'', overlay:true };
+
+const GC = { weather:'#00d4aa', greenhouse_temp:'#ff6b6b', humidity:'#4ecdc4', heating:'#f7b731', ventilation:'#a29bfe', co2:'#6c5ce7', curtain:'#fd79a8', water:'#0984e3', water_quality:'#00b894', energy:'#e17055' };
+const GL = { weather:'Xarici Hava', greenhouse_temp:'İstixana Temp.', humidity:'Rütubət', heating:'Isıtma', ventilation:'Ventilyasiya', co2:'CO₂ Sistemi', curtain:'Pərdə', water:'Su Temp.', water_quality:'Su Keyfiyyəti', energy:'Enerji/Qaz' };
+const GD = {
+ weather:      { label:'Xarici Hava',     icon:'🌤️', ids:['0','1','2','4','5','7'] },
+ greenhouse_temp:{ label:'İstixana Temp.', icon:'🌡️', ids:['10','11','12','13'] },
+ humidity:     { label:'Rütubət',          icon:'💧', ids:['14','15','16','17'] },
+ heating:      { label:'Isıtma',           icon:'🔥', ids:['22','23','333','334','357','358','359'] },
+ ventilation:  { label:'Ventilyasiya',     icon:'💨', ids:['26','27'] },
+ co2:          { label:'CO₂',              icon:'🌿', ids:['290','292','293'] },
+ curtain:      { label:'Pərdə',            icon:'🎭', ids:['282','283'] },
+ water:        { label:'Su Temp.',         icon:'🌊', ids:['150','151'] },
+ water_quality:{ label:'Su Keyfiyyəti',   icon:'⚗️', ids:['365','366','367','368','369','370'] },
+ energy:       { label:'Enerji',           icon:'⚡', ids:['324','325','328'] },
+};
+const SG = { weather:['weather'], greenhouse:['greenhouse_temp','humidity','ventilation','curtain'], co2:['co2'], heating:['heating'], water:['water','water_quality'], energy:['energy'] };
+
+// ─── LOAD ───
+async function init() {
+ initTheme();
+ const r = await fetch('/static/data.json');
+ SD = await r.json();
+ syncGlobalFilterFromInputs();
+ bindGlobalFilterInputs();
+ await buildMainChart();
+ buildOverview();
+ populateAdminChannels();
+ loadAlerts();
+}
+
+// ─── THEME / GLOBAL FILTERS ───
+function initTheme() {
+ const saved = localStorage.getItem('greenhouse-theme');
+ const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+ setTheme(saved || (prefersLight ? 'light' : 'dark'));
+}
+
+function setTheme(theme) {
+ document.documentElement.setAttribute('data-theme', theme);
+ localStorage.setItem('greenhouse-theme', theme);
+ const btn = document.getElementById('theme-toggle');
+ if (btn) btn.textContent = theme === 'light' ? '☀' : '☾';
+ Object.values(CI).forEach(chart => {
+  if (!chart) return;
+  updateChartTheme(chart);
+  chart.update('none');
+ });
+}
+
+function toggleTheme() {
+ setTheme(document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+}
+
+function cssVar(name) {
+ return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function syncGlobalFilterFromInputs() {
+ GLOBAL_FILTER = {
+  from: document.getElementById('global-from')?.value || '',
+  to: document.getElementById('global-to')?.value || '',
+  group: document.getElementById('global-group')?.value || '',
+  search: (document.getElementById('global-search')?.value || '').trim().toLowerCase(),
+  overlay: !!document.getElementById('global-overlay')?.checked
+ };
+}
+
+function bindGlobalFilterInputs() {
+ ['global-from','global-to','global-group','global-search','global-overlay'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener(id === 'global-search' ? 'input' : 'change', () => applyGlobalFilters());
+ });
+}
+
+async function applyGlobalFilters() {
+ syncGlobalFilterFromInputs();
+ seriesCache.clear();
+ await buildMainChart();
+ buildOverview();
+ refreshBuiltSections();
+ buildInfo(true);
+ loadAlerts();
+ if (curId) renderModal();
+}
+
+async function resetGlobalFilters() {
+ const from = document.getElementById('global-from');
+ const to = document.getElementById('global-to');
+ const group = document.getElementById('global-group');
+ const search = document.getElementById('global-search');
+ const overlay = document.getElementById('global-overlay');
+ if (from) from.value = from.min || '';
+ if (to) to.value = to.max || '';
+ if (group) group.value = '';
+ if (search) search.value = '';
+ if (overlay) overlay.checked = true;
+ await applyGlobalFilters();
+}
+
+function channelMatchesFilter(id) {
+ if (!SD || !SD[id]) return false;
+ const ch = SD[id];
+ if (GLOBAL_FILTER.group && ch.group !== GLOBAL_FILTER.group) return false;
+ if (!GLOBAL_FILTER.search) return true;
+ const haystack = `${id} ${ch.name} ${ch.unit} ${ch.group} ${GL[ch.group] || ''}`.toLowerCase();
+ return haystack.includes(GLOBAL_FILTER.search);
+}
+
+function filteredIds(ids) {
+ return ids.filter(id => channelMatchesFilter(id));
+}
+
+function refreshBuiltSections() {
+ built.clear();
+ for (const [key, chart] of Object.entries(CI)) {
+  if (key.startsWith('mini-') && chart) {
+   chart.destroy();
+   delete CI[key];
+  }
+ }
+ document.querySelectorAll('.channels-grid').forEach(c => c.innerHTML = '');
+ const active = document.querySelector('.section.active');
+ if (!active) return;
+ const name = active.id.replace('section-', '');
+ const groups = SG[name];
+ if (groups) {
+  built.add(name);
+  buildGroupCharts(groups, name + '-charts');
+ }
+}
+
+// ─── NAVIGATION ───
+function showSec(name, btn) {
+ document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+ document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+ document.getElementById('section-' + name).classList.add('active');
+ if (btn) btn.classList.add('active');
+ const groups = SG[name];
+ if (groups && !built.has(name)) { built.add(name); buildGroupCharts(groups, name + '-charts'); }
+ if (name === 'info') buildInfo();
+}
+
+// ─── MAIN CHART ───
+async function buildMainChart() {
+ if (!SD || !SD['0']) return;
+ const ch = SD['0'];
+ const color = GC[ch.group] || '#00d4aa';
+ try {
+  const series = await fetchSeries('0', GLOBAL_FILTER.from, GLOBAL_FILTER.to, mainGran);
+  lastChartPayload['main-chart'] = series;
+  renderLine('main-chart', series, 'Xarici Temperatur (°C)', color, { manual: GLOBAL_FILTER.overlay ? series.manual : null, zoom:true });
+  updateDataQuality(series, ch.unit);
+ } catch (err) {
+  const panel = document.getElementById('quality-panel');
+  if (panel) panel.innerHTML = `<div class="quality-card"><div class="quality-title">Qrafik xətası</div><div class="quality-value">!</div><div class="quality-desc">${escapeHtml(err.message)}</div></div>`;
+ }
+}
+async function mainView(type, btn) {
+ mainGran = type === 'daily' ? 'daily' : 'monthly';
+ document.querySelectorAll('.chart-controls .ctrl-btn').forEach(b => b.classList.remove('active'));
+ if (btn) btn.classList.add('active');
+ await buildMainChart();
+}
+
+// ─── OVERVIEW ───
+function buildOverview() {
+ const c = document.getElementById('overview-cards');
+ c.innerHTML = '';
+ let rendered = 0;
+ for (const [gk, gi] of Object.entries(GD)) {
+  const ids = filteredIds(gi.ids.filter(id => SD[id]));
+  if (!ids.length) continue;
+  rendered += 1;
+  const color = GC[gk] || '#00d4aa';
+  const el = document.createElement('div');
+  el.className = 'group-card';
+  el.style.setProperty('--card-color', color);
+  el.innerHTML = `
+   <div class="card-header">
+    <div class="card-icon">${gi.icon}</div>
+    <div><div class="card-title">${gi.label}</div><div class="card-count">${ids.length} kanal</div></div>
+   </div>
+   <div class="channel-list">
+    ${ids.map(id => { const ch = SD[id]; return `
+     <div class="channel-item" onclick="openModal('${id}')">
+      <span class="channel-name">${ch.name}</span>
+      <div class="channel-stats">
+       <span class="channel-unit">${ch.unit}</span>
+       <span class="channel-avg">${ch.avg_val.toFixed(1)}</span>
+      </div>
+     </div>`; }).join('')}
+   </div>`;
+  c.appendChild(el);
+ }
+ if (!rendered) c.innerHTML = '<div class="empty-state">Filterə uyğun sensor tapılmadı.</div>';
+}
+
+// ─── GROUP MINI CHARTS ───
+function buildGroupCharts(groups, cid) {
+ const c = document.getElementById(cid);
+ c.innerHTML = '';
+ const ids = filteredIds(groups.flatMap(g => GD[g] ? GD[g].ids : []));
+ if (!ids.length) {
+  c.innerHTML = '<div class="empty-state">Filterə uyğun sensor tapılmadı.</div>';
+  return;
+ }
+ ids.forEach(id => {
+  if (!SD[id]) return;
+  const ch = SD[id];
+  const color = GC[ch.group] || '#00d4aa';
+  const canvasId = 'mini-' + id;
+  const card = document.createElement('div');
+  card.className = 'mini-chart-card';
+  card.style.setProperty('--card-color', color);
+  card.onclick = () => openModal(id);
+  card.innerHTML = `
+   <span class="click-hint">🔍 Detallı bax</span>
+   <div class="mini-header">
+    <div class="mini-name">${ch.name}</div>
+    <div class="mini-unit">${ch.unit}</div>
+   </div>
+   <div class="mini-stats-row">
+    <div class="mini-stat"><div class="mini-stat-val" style="color:${color}">${ch.avg_val.toFixed(1)}</div><div class="mini-stat-label">Ort.</div></div>
+    <div class="mini-stat"><div class="mini-stat-val" style="color:#ff6b6b">${ch.max_val.toFixed(1)}</div><div class="mini-stat-label">Max</div></div>
+    <div class="mini-stat"><div class="mini-stat-val" style="color:#4d8ef0">${ch.min_val.toFixed(1)}</div><div class="mini-stat-label">Min</div></div>
+    <div class="mini-stat"><div class="mini-stat-val" style="color:var(--text-muted);font-size:12px">${(ch.total_records/1000).toFixed(0)}K</div><div class="mini-stat-label">Ölçüm</div></div>
+   </div>
+   <div class="mini-chart-wrapper"><canvas id="${canvasId}"></canvas></div>
+   <div class="mini-date-range">📅 ${ch.date_from} → ${ch.date_to}</div>
+  `;
+  c.appendChild(card);
+  setTimeout(() => renderMini(canvasId, ch.monthly, color), 80);
+ });
+}
+
+// ─────────────────────────────────────────
+// MODAL
+// ─────────────────────────────────────────
+function openModal(id) {
+ if (!SD || !SD[id]) return;
+ curId = id; curGran = 'monthly';
+ const ch = SD[id];
+ const color = GC[ch.group] || '#00d4aa';
+
+ // Header
+ document.getElementById('m-syslabel').textContent = `PRIVA VP9508 · KANAL ${id} · ${(ch.group||'').replace('_',' ').toUpperCase()}`;
+ document.getElementById('m-title').innerHTML = `<span style="color:${color}">${ch.name}</span>`;
+ document.getElementById('m-sub').textContent = `Sensor ID: ${id} · Sistem: VP9508 · Ölçü vahidi: ${ch.unit} · Qrup: ${GL[ch.group]||ch.group}`;
+
+ // Meta
+ document.getElementById('m-unit').textContent = ch.unit;
+ document.getElementById('m-group').textContent = GL[ch.group] || ch.group;
+ document.getElementById('m-from').textContent = ch.date_from;
+ document.getElementById('m-to').textContent = ch.date_to;
+ document.getElementById('m-cnt').textContent = ch.total_records.toLocaleString();
+
+ // Stats
+ document.getElementById('m-avg').textContent = ch.avg_val.toFixed(2) + ' ' + ch.unit;
+ document.getElementById('m-min').textContent = ch.min_val.toFixed(2) + ' ' + ch.unit;
+ document.getElementById('m-max').textContent = ch.max_val.toFixed(2) + ' ' + ch.unit;
+ document.getElementById('m-rng').textContent = (ch.max_val - ch.min_val).toFixed(2) + ' ' + ch.unit;
+
+ // Dates
+ document.getElementById('d-from').value = GLOBAL_FILTER.from || ch.date_from;
+ document.getElementById('d-from').min   = ch.date_from;
+ document.getElementById('d-from').max   = ch.date_to;
+ document.getElementById('d-to').value   = GLOBAL_FILTER.to || ch.date_to;
+ document.getElementById('d-to').min     = ch.date_from;
+ document.getElementById('d-to').max     = ch.date_to;
+
+ // Reset UI
+ document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+ document.querySelectorAll('.quick-btn').forEach(b => { if (b.textContent==='Hamısı') b.classList.add('active'); });
+ document.querySelectorAll('.gran-btns .ctrl-btn').forEach(b => b.classList.remove('active'));
+ document.getElementById('g-monthly').classList.add('active');
+ document.getElementById('gran-label').textContent = 'aylıq ortalama';
+ document.getElementById('tbl-gran').textContent = 'aylıq';
+
+ renderModal();
+ document.getElementById('modal-overlay').classList.add('open');
+ document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+ document.getElementById('modal-overlay').classList.remove('open');
+ document.body.style.overflow = '';
+}
+function closeBg(e) { if (e.target.id === 'modal-overlay') closeModal(); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+function renderModal() {
+ if (!curId || !SD[curId]) return;
+ const ch = SD[curId];
+ const color = GC[ch.group] || '#00d4aa';
+ const fromV = document.getElementById('d-from').value;
+ const toV   = document.getElementById('d-to').value;
+ const raw   = curGran === 'monthly' ? ch.monthly : ch.daily;
+ const filt  = filterDate(raw, fromV, toV);
+
+ document.getElementById('m-fcnt').textContent = Object.keys(filt).length + (curGran==='monthly' ? ' ay' : ' gün');
+ renderLine('modal-chart', filt, `${ch.name} (${ch.unit})`, color);
+ buildTable(filt, ch.unit);
+}
+
+function filterDate(data, f, t) {
+ const res = {};
+ for (const [k,v] of Object.entries(data)) {
+  if (f && k.substring(0, f.length) < f) continue;
+  if (t && k.substring(0, t.length) > t) continue;
+  res[k] = v;
+ }
+ return res;
+}
+
+function buildTable(data, unit) {
+ const tb = document.getElementById('modal-tbody');
+ tb.innerHTML = '';
+ const ents = Object.entries(data);
+ if (!ents.length) { tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:18px">Bu dövr üçün verilən yoxdur</td></tr>'; return; }
+ const vals = ents.map(([,v]) => v);
+ const mn = Math.min(...vals), mx = Math.max(...vals);
+ ents.forEach(([d,v]) => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+   <td style="color:var(--text-secondary)">${d}</td>
+   <td style="color:var(--accent-green);font-weight:500">${v.toFixed(2)} ${unit}</td>
+   <td style="color:#4d8ef0">${v===mn ? '▼ '+v.toFixed(2) : '—'}</td>
+   <td style="color:#ff6b6b">${v===mx ? '▲ '+v.toFixed(2) : '—'}</td>
+  `;
+  tb.appendChild(tr);
+ });
+}
+
+function setGran(g, btn) {
+ curGran = g;
+ document.querySelectorAll('.gran-btns .ctrl-btn').forEach(b => b.classList.remove('active'));
+ if (btn) btn.classList.add('active');
+ document.getElementById('gran-label').textContent = g === 'monthly' ? 'aylıq ortalama' : 'gündəlik ortalama';
+ document.getElementById('tbl-gran').textContent = g === 'monthly' ? 'aylıq' : 'gündəlik';
+ renderModal();
+}
+
+function onDateChange() {
+ document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+ renderModal();
+}
+
+function qRange(days, btn) {
+ document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+ if (btn) btn.classList.add('active');
+ if (!curId || !SD[curId]) return;
+ const ch = SD[curId];
+ if (days === 0) {
+  document.getElementById('d-from').value = ch.date_from;
+  document.getElementById('d-to').value   = ch.date_to;
+ } else {
+  const t = new Date(ch.date_to);
+  const f = new Date(t); f.setDate(f.getDate() - days);
+  const clamped = new Date(Math.max(f, new Date(ch.date_from)));
+  document.getElementById('d-from').value = clamped.toISOString().split('T')[0];
+  document.getElementById('d-to').value   = ch.date_to;
+ }
+ renderModal();
+}
+
+// ─── CHART HELPERS ───
+function renderLine(cid, data, label, color) {
+ const ctx = document.getElementById(cid);
+ if (!ctx) return;
+ if (CI[cid]) CI[cid].destroy();
+ const labels = Object.keys(data), vals = Object.values(data);
+ CI[cid] = new Chart(ctx, {
+  type: 'line',
+  data: { labels, datasets: [{ label, data: vals, borderColor: color, backgroundColor: color+'18', borderWidth: 2, pointRadius: labels.length > 150 ? 0 : labels.length > 60 ? 2 : 4, pointHoverRadius: 6, tension: 0.35, fill: true }] },
+  options: {
+   responsive: true, maintainAspectRatio: false,
+   plugins: {
+    legend: { display: false },
+    tooltip: { mode:'index', intersect:false, backgroundColor:'#131d35', borderColor:'#2a3f6f', borderWidth:1, titleColor:'#7a8ab8', bodyColor:'#e8eeff', callbacks: { label: c => ` ${c.dataset.label}: ${c.parsed.y.toFixed(2)}` } }
+   },
+   scales: {
+    x: { grid:{ color:'#1e2d5066', lineWidth:.5 }, ticks:{ color:'#4a5a88', font:{family:'JetBrains Mono',size:10}, maxTicksLimit:20, maxRotation:40 } },
+    y: { grid:{ color:'#1e2d5066', lineWidth:.5 }, ticks:{ color:'#4a5a88', font:{family:'JetBrains Mono',size:10} } }
+   },
+   animation: { duration: 450 },
+   interaction: { mode:'nearest', axis:'x', intersect:false }
+  }
+ });
+}
+
+function renderMini(cid, data, color) {
+ const ctx = document.getElementById(cid);
+ if (!ctx || CI[cid]) return;
+ CI[cid] = new Chart(ctx, {
+  type: 'line',
+  data: { labels: Object.keys(data), datasets: [{ data: Object.values(data), borderColor: color, backgroundColor: color+'18', borderWidth: 1.5, pointRadius: 0, tension: 0.4, fill: true }] },
+  options: { responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false}, tooltip:{enabled:false} }, scales:{ x:{display:false}, y:{display:false} }, animation:{duration:300} }
+ });
+}
+
+// ─── INFO ───
+function buildInfo(force = false) {
+ const el = document.getElementById('sensor-type-list');
+ if (el && !el.children.length) {
+  const types = [
+   {name:'Temperatur Sensorları', desc:'Xarici, istixana (4 bölmə), istilik borusu, qazan, su temperaturu', icon:'🌡️', count:'15+', color:'#ff6b6b'},
+   {name:'Rütubət (RH) Sensorları', desc:'Nisbi rütubət 4 bölmə — həm ölçüm həm hesablama', icon:'💧', count:'8', color:'#4ecdc4'},
+   {name:'Radiasiya Sensorları', desc:'Solar radiasiya W/m², radiasiya cəmi J/cm², PAR µmol/s/m²', icon:'☀️', count:'6', color:'#f7b731'},
+   {name:'CO₂ Sistemi', desc:'CO₂ konsentrasiyası ppm, dozaj nəzarəti, ümumi dozaj kg/ha', icon:'🌿', count:'4', color:'#6c5ce7'},
+   {name:'Ventilyasiya', desc:'Küləyin tərəfi (lee/wind), açılma faizi, min/max hesablamalar', icon:'💨', count:'12', color:'#a29bfe'},
+   {name:'Pərdə Sistemi', desc:'4 bölmə üçün pərdə mövqeyi (%) və funksiya statusu', icon:'🎭', count:'8', color:'#fd79a8'},
+   {name:'Su Keyfiyyəti', desc:'EC mS/cm, pH, axın sürəti m³/h, hesablama + ölçüm', icon:'⚗️', count:'6', color:'#00b894'},
+   {name:'İsıtma Şəbəkəsi', desc:'Isıtma borusu temperaturu, lazım olan güc, aktual güc, bufer', icon:'🔥', count:'20+', color:'#e17055'},
+   {name:'Qaz / Enerji', desc:'Qaz sərfi m³/h, qaz cəmi, maksimal qaz limiti', icon:'⚡', count:'5', color:'#f7b731'},
+   {name:'Hava Stansiyası', desc:'Külək sürəti, istiqaməti, yağış, dolu, don sensorları', icon:'🌧️', count:'5', color:'#74b9ff'},
+   {name:'Avtomatik Isıtma', desc:'12 avtomatik zona üçün set/ölçüm/hesablama', icon:'⚙️', count:'60+', color:'#636e72'},
+   {name:'Manifold / Boiler', desc:'Qazan temp., dolum, boşaltma, CO₂ paylanma kapasitəsi', icon:'🏗️', count:'8', color:'#0984e3'},
+  ];
+  el.innerHTML = types.map(s => `<div class="info-card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-size:17px">${s.icon}</span><div class="info-card-title" style="color:${s.color}">${s.name}</div></div><div class="info-card-desc">${s.desc}</div><div class="info-card-count">${s.count} kanal</div></div>`).join('');
+ }
+
+ const tb = document.getElementById('channel-table-body');
+ if (tb && SD && (force || !tb.children.length)) {
+  tb.innerHTML = '';
+  const entries = Object.entries(SD).filter(([id]) => channelMatchesFilter(id));
+  if (!entries.length) {
+   tb.innerHTML = '<tr><td colspan="8" style="padding:18px;text-align:center;color:var(--text-muted)">Filterə uyğun sensor tapılmadı</td></tr>';
+   return;
+  }
+  for (const [id, ch] of entries) {
+   const c = GC[ch.group] || '#7a8ab8';
+   const tr = document.createElement('tr');
+   tr.style.cssText = 'border-bottom:1px solid rgba(30,45,80,.4);cursor:pointer';
+   tr.onclick = () => openModal(id);
+   tr.onmouseover = () => tr.style.background = 'var(--bg-card-hover)';
+   tr.onmouseout  = () => tr.style.background = '';
+   tr.innerHTML = `
+    <td style="padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-muted)">${id}</td>
+    <td style="padding:7px 11px;font-size:12px;font-weight:500;color:var(--text-primary)">${ch.name}</td>
+    <td style="padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent-green)">${ch.unit}</td>
+    <td style="padding:7px 11px"><span style="background:${c}22;color:${c};border:1px solid ${c}44;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600">${GL[ch.group]||ch.group}</span></td>
+    <td style="padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-secondary)">${ch.total_records.toLocaleString()}</td>
+    <td style="padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#4d8ef0">${ch.min_val.toFixed(1)}</td>
+    <td style="padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#ff6b6b">${ch.max_val.toFixed(1)}</td>
+    <td style="padding:7px 11px;font-family:'JetBrains Mono',monospace;font-size:11px;color:${c}">${ch.avg_val.toFixed(2)}</td>
+   `;
+   tb.appendChild(tr);
+  }
+ }
+}
+
+// Precise modal data, hourly auto mode, and manual overlay
+function getEffectiveGranularity() {
+ const fromV = document.getElementById('d-from').value;
+ const toV = document.getElementById('d-to').value;
+ if (fromV && toV && fromV === toV) return 'hourly';
+ return curGran;
+}
+
+function granularityLabel(g) {
+ if (g === 'monthly') return 'aylıq ortalama';
+ if (g === 'daily') return 'gündəlik ortalama';
+ return 'saatlıq ortalama';
+}
+
+function granularityCountLabel(g) {
+ if (g === 'monthly') return ' ay';
+ if (g === 'daily') return ' gün';
+ return ' saat';
+}
+
+function syncGranButtons(effective) {
+ document.querySelectorAll('.gran-btns .ctrl-btn').forEach(b => b.classList.remove('active'));
+ const active = document.getElementById('g-' + effective);
+ if (active) active.classList.add('active');
+ document.getElementById('gran-label').textContent = granularityLabel(effective);
+ document.getElementById('tbl-gran').textContent = effective === 'hourly' ? 'saatlıq' : effective === 'daily' ? 'gündəlik' : 'aylıq';
+}
+
+async function fetchSeries(id, fromV, toV, granularity) {
+ const params = new URLSearchParams({ granularity });
+ if (fromV) params.set('from', fromV);
+ if (toV) params.set('to', toV);
+ const key = `${id}|${params.toString()}`;
+ if (seriesCache.has(key)) return seriesCache.get(key);
+ const r = await fetch(`/api/channel/${id}/series?${params.toString()}`);
+ if (!r.ok) throw new Error((await r.json()).error || 'Series request failed');
+ const payload = await r.json();
+ seriesCache.set(key, payload);
+ return payload;
+}
+
+async function renderModal() {
+ if (!curId || !SD[curId]) return;
+ const requestId = ++modalRequestId;
+ const ch = SD[curId];
+ const color = GC[ch.group] || '#00d4aa';
+ const fromV = document.getElementById('d-from').value;
+ const toV = document.getElementById('d-to').value;
+ const effective = getEffectiveGranularity();
+ syncGranButtons(effective);
+
+ const tb = document.getElementById('modal-tbody');
+ tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:18px">Yüklənir...</td></tr>';
+
+ try {
+  const series = await fetchSeries(curId, fromV, toV, effective);
+  if (requestId !== modalRequestId) return;
+  document.getElementById('m-fcnt').textContent = series.labels.length + granularityCountLabel(series.granularity);
+  lastChartPayload['modal-chart'] = series;
+  renderLine('modal-chart', series, `${ch.name} (${ch.unit})`, color, { manual: GLOBAL_FILTER.overlay ? series.manual : null, tooltipDate: fromV === toV ? fromV : null, zoom:true });
+  buildSeriesTable(series, ch.unit);
+  renderComparisonSummary(series, ch.unit);
+ } catch (err) {
+  tb.innerHTML = `<tr><td colspan="4" style="text-align:center;color:#ff6b6b;padding:18px">${escapeHtml(err.message)}</td></tr>`;
+ }
+}
+
+function buildSeriesTable(series, unit) {
+ const tb = document.getElementById('modal-tbody');
+ tb.innerHTML = '';
+ const labels = series.labels || [];
+ const values = series.values || [];
+ const manual = (series.manual && series.manual.values) || [];
+ if (!labels.length) {
+  tb.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:18px">Bu dövr üçün verilən yoxdur</td></tr>';
+  return;
+ }
+ labels.forEach((label, idx) => {
+  const realValue = values[idx];
+  const manualValue = manual[idx];
+  const diff = realValue == null || manualValue == null ? null : manualValue - realValue;
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+   <td style="color:var(--text-secondary)">${escapeHtml(label)}</td>
+   <td style="color:var(--accent-green);font-weight:500">${formatValue(realValue, unit)}</td>
+   <td style="color:#f7b731;font-weight:500">${formatValue(manualValue, unit)}</td>
+   <td style="color:${diff == null ? 'var(--text-muted)' : diff >= 0 ? '#f7b731' : '#4d8ef0'}">${diff == null ? '—' : `${diff >= 0 ? '+' : ''}${diff.toFixed(2)} ${unit}`}</td>
+  `;
+  tb.appendChild(tr);
+ });
+}
+
+function formatValue(value, unit) {
+ return value == null || Number.isNaN(value) ? '—' : `${Number(value).toFixed(2)} ${unit}`;
+}
+
+function renderComparisonSummary(series, unit) {
+ const el = document.getElementById('comparison-summary');
+ if (!el) return;
+ const manual = (series.manual && series.manual.values) || [];
+ const values = series.values || [];
+ const diffs = [];
+ manual.forEach((manualValue, idx) => {
+  const realValue = values[idx];
+  if (manualValue == null || realValue == null) return;
+  diffs.push(manualValue - realValue);
+ });
+ if (!GLOBAL_FILTER.overlay || !diffs.length) {
+  el.innerHTML = '<div class="comparison-card"><div class="comparison-title">Manual müqayisə</div><div class="comparison-value">—</div><div class="comparison-desc">Bu dövr üçün aktiv manual overlay yoxdur.</div></div>';
+  return;
+ }
+ const avg = diffs.reduce((sum, v) => sum + v, 0) / diffs.length;
+ const maxAbs = diffs.reduce((max, v) => Math.abs(v) > Math.abs(max) ? v : max, diffs[0]);
+ const aligned = diffs.filter(v => Math.abs(v) <= 1).length;
+ const accuracy = Math.round((aligned / diffs.length) * 100);
+ el.innerHTML = `
+  <div class="comparison-card"><div class="comparison-title">Orta fərq</div><div class="comparison-value">${avg >= 0 ? '+' : ''}${avg.toFixed(2)}</div><div class="comparison-desc">${unit} ilə real və manual orta fərq</div></div>
+  <div class="comparison-card"><div class="comparison-title">Maks. fərq</div><div class="comparison-value">${maxAbs >= 0 ? '+' : ''}${maxAbs.toFixed(2)}</div><div class="comparison-desc">${unit} üzrə ən böyük kənarlaşma</div></div>
+  <div class="comparison-card"><div class="comparison-title">Uyğunluq</div><div class="comparison-value">${accuracy}%</div><div class="comparison-desc">±1 ${unit} intervalında olan manual nöqtələr</div></div>
+  <div class="comparison-card"><div class="comparison-title">Manual nöqtə</div><div class="comparison-value">${diffs.length}</div><div class="comparison-desc">Seçilmiş dövrdə müqayisəyə daxil oldu</div></div>
+ `;
+}
+
+function updateDataQuality(series, unit) {
+ const el = document.getElementById('quality-panel');
+ if (!el) return;
+ const values = series.values || [];
+ const missing = values.filter(v => v == null || Number.isNaN(v)).length;
+ const valid = values.length - missing;
+ const manualValues = (series.manual && series.manual.values) || [];
+ const manualCount = manualValues.filter(v => v != null && !Number.isNaN(v)).length;
+ const coverage = values.length ? Math.round((valid / values.length) * 100) : 0;
+ el.innerHTML = `
+  <div class="quality-card"><div class="quality-title">Data keyfiyyəti</div><div class="quality-value">${coverage}%</div><div class="quality-desc">${valid}/${values.length} nöqtə real data ilə doludur</div></div>
+  <div class="quality-card"><div class="quality-title">Boş data</div><div class="quality-value">${missing}</div><div class="quality-desc">Seçilmiş dövrdə boş və ya ölçülməmiş nöqtə</div></div>
+  <div class="quality-card"><div class="quality-title">Manual overlay</div><div class="quality-value">${manualCount}</div><div class="quality-desc">Aktiv planlanan/manual nöqtə</div></div>
+  <div class="quality-card"><div class="quality-title">Granularity</div><div class="quality-value">${series.granularity}</div><div class="quality-desc">Cari qrafik dəqiqliyi</div></div>
+ `;
+}
+
+function setGran(g, btn) {
+ curGran = g;
+ document.querySelectorAll('.gran-btns .ctrl-btn').forEach(b => b.classList.remove('active'));
+ if (btn) btn.classList.add('active');
+ renderModal();
+}
+
+function renderLine(cid, data, label, color, opts = {}) {
+ const ctx = document.getElementById(cid);
+ if (!ctx) return;
+ if (CI[cid]) CI[cid].destroy();
+
+ const labels = Array.isArray(data.labels) ? data.labels : Object.keys(data);
+ const vals = Array.isArray(data.values) ? data.values : Object.values(data);
+ const manualValues = opts.manual && Array.isArray(opts.manual.values) ? opts.manual.values : [];
+ const hasManual = GLOBAL_FILTER.overlay && manualValues.some(v => v !== null && v !== undefined);
+ const pointRadius = labels.length > 150 ? 0 : labels.length > 60 ? 2 : 4;
+ const datasets = [{
+  label,
+  data: vals,
+  borderColor: color,
+  backgroundColor: color + '18',
+  borderWidth: 2,
+  pointRadius,
+  pointHoverRadius: 6,
+  tension: labels.length > 48 ? 0.22 : 0.35,
+  fill: true,
+  spanGaps: true
+ }];
+
+ if (hasManual) {
+  datasets.push({
+   label: label.replace(/\s*\([^)]*\)$/, '') + ' - Manual/planlanan',
+   data: manualValues,
+   borderColor: '#f7b731',
+   backgroundColor: 'transparent',
+   borderWidth: 2,
+   borderDash: [6, 4],
+   pointRadius,
+   pointHoverRadius: 6,
+   tension: labels.length > 48 ? 0.22 : 0.35,
+   fill: false,
+   spanGaps: true
+  });
+ }
+
+ CI[cid] = new Chart(ctx, {
+  type: 'line',
+  data: { labels, datasets },
+  options: {
+   responsive: true, maintainAspectRatio: false,
+   plugins: {
+    legend: { display: hasManual, labels: { color:cssVar('--text-secondary'), boxWidth:18, font:{ family:'Space Grotesk', size:11 } } },
+    tooltip: {
+     mode:'index', intersect:false, backgroundColor:cssVar('--tooltip-bg'), borderColor:cssVar('--border-bright'), borderWidth:1, titleColor:cssVar('--text-secondary'), bodyColor:cssVar('--text-primary'),
+     callbacks: {
+      title: items => {
+       const raw = items && items[0] ? items[0].label : '';
+       return opts.tooltipDate && /^\d{2}:00$/.test(raw) ? `${opts.tooltipDate} ${raw}` : raw;
+      },
+      label: c => {
+       const y = c.parsed.y;
+       return y == null || Number.isNaN(y) ? ` ${c.dataset.label}: —` : ` ${c.dataset.label}: ${y.toFixed(2)}`;
+      }
+     }
+    }
+   },
+   scales: {
+    x: { grid:{ color:cssVar('--chart-grid'), lineWidth:.5 }, ticks:{ color:cssVar('--text-muted'), font:{family:'JetBrains Mono',size:10}, maxTicksLimit:24, maxRotation:40 } },
+    y: { grid:{ color:cssVar('--chart-grid'), lineWidth:.5 }, ticks:{ color:cssVar('--text-muted'), font:{family:'JetBrains Mono',size:10} } }
+   },
+   plugins: {
+    legend: { display: hasManual, labels: { color:cssVar('--text-secondary'), boxWidth:18, font:{ family:'Space Grotesk', size:11 } } },
+    tooltip: {
+     mode:'index', intersect:false, backgroundColor:cssVar('--tooltip-bg'), borderColor:cssVar('--border-bright'), borderWidth:1, titleColor:cssVar('--text-secondary'), bodyColor:cssVar('--text-primary'),
+     callbacks: {
+      title: items => {
+       const raw = items && items[0] ? items[0].label : '';
+       return opts.tooltipDate && /^\d{2}:00$/.test(raw) ? `${opts.tooltipDate} ${raw}` : raw;
+      },
+      label: c => {
+       const y = c.parsed.y;
+       return y == null || Number.isNaN(y) ? ` ${c.dataset.label}: —` : ` ${c.dataset.label}: ${y.toFixed(2)}`;
+      }
+     }
+    }
+   },
+   animation: { duration: labels.length > 120 ? 0 : 300 },
+   interaction: { mode:'nearest', axis:'x', intersect:false }
+  }
+ });
+ if (opts.zoom) setupCustomZoom(cid);
+}
+
+function updateChartTheme(chart) {
+ if (!chart || !chart.options) return;
+ const text = cssVar('--text-muted');
+ const grid = cssVar('--chart-grid');
+ if (chart.options.plugins?.legend?.labels) chart.options.plugins.legend.labels.color = cssVar('--text-secondary');
+ if (chart.options.plugins?.tooltip) {
+  chart.options.plugins.tooltip.backgroundColor = cssVar('--tooltip-bg');
+  chart.options.plugins.tooltip.borderColor = cssVar('--border-bright');
+  chart.options.plugins.tooltip.titleColor = cssVar('--text-secondary');
+  chart.options.plugins.tooltip.bodyColor = cssVar('--text-primary');
+ }
+ if (chart.options.scales?.x) {
+  chart.options.scales.x.grid.color = grid;
+  chart.options.scales.x.ticks.color = text;
+ }
+ if (chart.options.scales?.y) {
+  chart.options.scales.y.grid.color = grid;
+  chart.options.scales.y.ticks.color = text;
+ }
+}
+
+function setupCustomZoom(cid) {
+ const chart = CI[cid];
+ if (!chart || chart.$wheelZoomBound) return;
+ chart.$wheelZoomBound = true;
+ chart.canvas.addEventListener('wheel', event => {
+  const labels = chart.data.labels || [];
+  if (labels.length < 8) return;
+  event.preventDefault();
+  const xScale = chart.options.scales.x;
+  const currentMin = xScale.min ? labels.indexOf(xScale.min) : 0;
+  const currentMax = xScale.max ? labels.indexOf(xScale.max) : labels.length - 1;
+  const min = currentMin >= 0 ? currentMin : 0;
+  const max = currentMax >= 0 ? currentMax : labels.length - 1;
+  const span = Math.max(4, max - min + 1);
+  const centerRatio = event.offsetX / Math.max(chart.canvas.clientWidth, 1);
+  const center = Math.round(min + span * centerRatio);
+  const nextSpan = event.deltaY < 0 ? Math.max(4, Math.round(span * 0.75)) : Math.min(labels.length, Math.round(span * 1.35));
+  let nextMin = Math.max(0, center - Math.floor(nextSpan / 2));
+  let nextMax = Math.min(labels.length - 1, nextMin + nextSpan - 1);
+  nextMin = Math.max(0, nextMax - nextSpan + 1);
+  xScale.min = labels[nextMin];
+  xScale.max = labels[nextMax];
+  chart.update('none');
+ }, { passive:false });
+}
+
+function resetChartZoom(cid) {
+ const chart = CI[cid];
+ if (!chart) return;
+ if (typeof chart.resetZoom === 'function') {
+  chart.resetZoom();
+  return;
+ }
+ if (chart.options.scales?.x) {
+  delete chart.options.scales.x.min;
+  delete chart.options.scales.x.max;
+  chart.update('none');
+ }
+}
+
+function exportChartPng(cid) {
+ const chart = CI[cid];
+ if (!chart) return;
+ const a = document.createElement('a');
+ a.href = chart.toBase64Image('image/png', 1);
+ a.download = `${cid}-${new Date().toISOString().slice(0,10)}.png`;
+ a.click();
+}
+
+function exportChartCsv(cid) {
+ const chart = CI[cid];
+ if (!chart) return;
+ const rows = [['label', ...chart.data.datasets.map(ds => ds.label)]];
+ chart.data.labels.forEach((label, idx) => {
+  rows.push([label, ...chart.data.datasets.map(ds => ds.data[idx] ?? '')]);
+ });
+ const csv = rows.map(row => row.map(cell => `"${String(cell).replaceAll('"','""')}"`).join(',')).join('\n');
+ const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement('a');
+ a.href = url;
+ a.download = `${cid}-${new Date().toISOString().slice(0,10)}.csv`;
+ a.click();
+ URL.revokeObjectURL(url);
+}
+
+async function loadAlerts() {
+ const el = document.getElementById('alerts-panel');
+ if (!el) return;
+ const params = new URLSearchParams();
+ if (GLOBAL_FILTER.from) params.set('from', GLOBAL_FILTER.from);
+ if (GLOBAL_FILTER.to) params.set('to', GLOBAL_FILTER.to);
+ params.set('limit', '6');
+ try {
+  const r = await fetch(`/api/alerts?${params.toString()}`);
+  const payload = await r.json();
+  if (!payload.threshold_count) {
+   el.innerHTML = '<div class="alert-card"><div class="alert-title">Alert sistemi</div><div class="alert-value">0</div><div class="alert-desc">Admin paneldə threshold təyin edilməyib.</div></div>';
+   return;
+  }
+  const cards = [`<div class="alert-card ${payload.alert_count ? 'warning' : ''}"><div class="alert-title">Aktiv alert</div><div class="alert-value">${payload.alert_count}</div><div class="alert-desc">${payload.threshold_count} threshold qaydası üzrə seçilmiş dövr yoxlandı.</div></div>`];
+  payload.alerts.slice(0, 3).forEach(item => {
+   cards.push(`<div class="alert-card warning"><div class="alert-title">${escapeHtml(item.status === 'high' ? 'Yuxarı limit' : 'Aşağı limit')}</div><div class="alert-value">${Number(item.value).toFixed(2)}</div><div class="alert-desc">${escapeHtml(item.date)} · ${escapeHtml(item.channel_name)} · fərq ${Number(item.deviation).toFixed(2)} ${escapeHtml(item.unit)}</div></div>`);
+  });
+  el.innerHTML = cards.join('');
+ } catch (err) {
+  el.innerHTML = `<div class="alert-card warning"><div class="alert-title">Alert xətası</div><div class="alert-value">!</div><div class="alert-desc">${escapeHtml(err.message)}</div></div>`;
+ }
+}
+
+// Admin panel
+function escapeHtml(value) {
+ return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
+}
+
+function setAdminStatus(message, type = '') {
+ const el = document.getElementById('admin-panel-status');
+ if (!el) return;
+ el.textContent = message || '';
+ el.className = 'admin-status' + (type ? ' ' + type : '');
+}
+
+function setLoginStatus(message, type = '') {
+ const el = document.getElementById('admin-login-status');
+ if (!el) return;
+ el.textContent = message || '';
+ el.className = 'admin-status' + (type ? ' ' + type : '');
+}
+
+function closeAdminBg(e) {
+ if (e.target.id === 'admin-login-overlay') closeAdminLogin();
+ if (e.target.id === 'admin-panel-overlay') closeAdminPanel();
+}
+
+async function openAdminPanelEntry() {
+ const status = await fetch('/api/admin/status').then(r => r.json()).catch(() => ({ authenticated:false }));
+ if (status.authenticated) {
+  openAdminPanel();
+  return;
+ }
+ document.getElementById('admin-login-overlay').classList.add('open');
+ document.getElementById('admin-password').focus();
+}
+
+function closeAdminLogin() {
+ document.getElementById('admin-login-overlay').classList.remove('open');
+ setLoginStatus('');
+}
+
+async function adminLogin(event) {
+ event.preventDefault();
+ setLoginStatus('Yoxlanılır...');
+ const password = document.getElementById('admin-password').value;
+ const r = await fetch('/api/admin/login', {
+  method:'POST',
+  headers:{ 'Content-Type':'application/json' },
+  body:JSON.stringify({ password })
+ });
+ if (!r.ok) {
+  setLoginStatus('Şifrə yanlışdır.', 'error');
+  return;
+ }
+ document.getElementById('admin-password').value = '';
+ closeAdminLogin();
+ openAdminPanel();
+}
+
+async function adminLogout() {
+ await fetch('/api/admin/logout', { method:'POST' });
+ closeAdminPanel();
+}
+
+async function openAdminPanel() {
+ populateAdminChannels();
+ resetManualForm();
+ resetThresholdForm();
+ document.getElementById('admin-panel-overlay').classList.add('open');
+ await loadManualRecords();
+ await loadThresholdRecords();
+}
+
+function closeAdminPanel() {
+ document.getElementById('admin-panel-overlay').classList.remove('open');
+ setAdminStatus('');
+}
+
+function populateAdminChannels() {
+ const manualSelect = document.getElementById('manual-channel');
+ const thresholdSelect = document.getElementById('threshold-channel');
+ if (!SD) return;
+ const ids = Object.keys(SD).sort((a,b) => Number(a) - Number(b));
+ const html = ids.map(id => {
+  const ch = SD[id];
+  return `<option value="${id}">${id} · ${escapeHtml(ch.name)} (${escapeHtml(ch.unit)})</option>`;
+ }).join('');
+ [manualSelect, thresholdSelect].forEach(select => {
+  if (!select) return;
+  const selected = select.value;
+  select.innerHTML = html;
+  if (selected && SD[selected]) select.value = selected;
+ });
+}
+
+function resetManualForm() {
+ const idInput = document.getElementById('manual-id');
+ if (!idInput) return;
+ idInput.value = '';
+ const firstId = SD ? Object.keys(SD).sort((a,b) => Number(a) - Number(b))[0] : '';
+ const selectedId = curId && SD[curId] ? curId : firstId;
+ if (selectedId) document.getElementById('manual-channel').value = selectedId;
+ const activeDate = document.getElementById('d-from') ? document.getElementById('d-from').value : '';
+ const fallbackDate = selectedId && SD[selectedId] ? SD[selectedId].date_to : '';
+ document.getElementById('manual-date').value = activeDate || fallbackDate;
+ document.getElementById('manual-time').value = '12:00';
+ document.getElementById('manual-value').value = '';
+ document.getElementById('manual-enabled').checked = true;
+ document.getElementById('manual-save-btn').textContent = 'Yadda saxla';
+}
+
+async function loadManualRecords() {
+ const r = await fetch('/api/admin/manual-data');
+ if (!r.ok) {
+  setAdminStatus('Manual data yüklənmədi. Yenidən daxil olun.', 'error');
+  return;
+ }
+ const payload = await r.json();
+ ADMIN_RECORDS = payload.records || [];
+ renderManualRecords();
+}
+
+function renderManualRecords() {
+ const body = document.getElementById('manual-records-body');
+ if (!body) return;
+ if (!ADMIN_RECORDS.length) {
+  body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:18px">Manual data yoxdur</td></tr>';
+  return;
+ }
+ body.innerHTML = ADMIN_RECORDS.map(record => `
+  <tr>
+   <td>${escapeHtml(record.channel_id)} · ${escapeHtml(record.channel_name || '')}</td>
+   <td>${escapeHtml(record.date)} ${escapeHtml(record.time)}</td>
+   <td style="color:#f7b731">${Number(record.value).toFixed(2)} ${escapeHtml(record.unit || '')}</td>
+   <td>${record.enabled ? 'Aktiv' : 'Deaktiv'}</td>
+   <td>
+    <div class="admin-row-actions">
+     <button type="button" onclick="editManualRecord('${record.id}')">Redaktə</button>
+     <button type="button" onclick="toggleManualRecord('${record.id}', ${record.enabled ? 'false' : 'true'})">${record.enabled ? 'Deaktiv et' : 'Aktiv et'}</button>
+     <button type="button" onclick="deleteManualRecord('${record.id}')">Sil</button>
+    </div>
+   </td>
+  </tr>
+ `).join('');
+}
+
+async function saveManualRecord(event) {
+ event.preventDefault();
+ const recordId = document.getElementById('manual-id').value;
+ const payload = {
+  channel_id: document.getElementById('manual-channel').value,
+  date: document.getElementById('manual-date').value,
+  time: document.getElementById('manual-time').value,
+  value: document.getElementById('manual-value').value,
+  enabled: document.getElementById('manual-enabled').checked
+ };
+ const url = recordId ? `/api/admin/manual-data/${recordId}` : '/api/admin/manual-data';
+ const method = recordId ? 'PUT' : 'POST';
+ const r = await fetch(url, { method, headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(payload) });
+ if (!r.ok) {
+  const err = await r.json().catch(() => ({}));
+  setAdminStatus(err.error || 'Manual data saxlanmadı.', 'error');
+  return;
+ }
+ seriesCache.clear();
+ setAdminStatus('Manual data saxlanıldı.', 'ok');
+ resetManualForm();
+ await loadManualRecords();
+ if (curId === payload.channel_id) renderModal();
+}
+
+function editManualRecord(id) {
+ const record = ADMIN_RECORDS.find(item => item.id === id);
+ if (!record) return;
+ document.getElementById('manual-id').value = record.id;
+ document.getElementById('manual-channel').value = record.channel_id;
+ document.getElementById('manual-date').value = record.date;
+ document.getElementById('manual-time').value = record.time;
+ document.getElementById('manual-value').value = record.value;
+ document.getElementById('manual-enabled').checked = !!record.enabled;
+ document.getElementById('manual-save-btn').textContent = 'Yenilə';
+}
+
+async function toggleManualRecord(id, enabled) {
+ const r = await fetch(`/api/admin/manual-data/${id}`, {
+  method:'PATCH',
+  headers:{ 'Content-Type':'application/json' },
+  body:JSON.stringify({ enabled })
+ });
+ if (!r.ok) {
+  setAdminStatus('Status dəyişdirilmədi.', 'error');
+  return;
+ }
+ seriesCache.clear();
+ await loadManualRecords();
+ renderModal();
+}
+
+async function deleteManualRecord(id) {
+ if (!confirm('Manual data silinsin?')) return;
+ const r = await fetch(`/api/admin/manual-data/${id}`, { method:'DELETE' });
+ if (!r.ok) {
+  setAdminStatus('Manual data silinmədi.', 'error');
+  return;
+ }
+ seriesCache.clear();
+ setAdminStatus('Manual data silindi.', 'ok');
+ await loadManualRecords();
+ renderModal();
+}
+
+async function importManualData() {
+ const input = document.getElementById('manual-import-file');
+ if (!input.files.length) {
+  setAdminStatus('Import üçün fayl seçin.', 'error');
+  return;
+ }
+ const form = new FormData();
+ form.append('file', input.files[0]);
+ const r = await fetch('/api/admin/import', { method:'POST', body:form });
+ const payload = await r.json().catch(() => ({}));
+ if (!r.ok) {
+  setAdminStatus(payload.error || 'Import alınmadı.', 'error');
+  return;
+ }
+ seriesCache.clear();
+ input.value = '';
+ setAdminStatus(`${payload.imported} sətr import edildi${payload.errors && payload.errors.length ? `, ${payload.errors.length} sətr ötürüldü` : ''}.`, 'ok');
+ await loadManualRecords();
+ renderModal();
+}
+
+async function previewManualImport() {
+ const input = document.getElementById('manual-import-file');
+ const wrap = document.getElementById('import-preview-wrap');
+ const body = document.getElementById('import-preview-body');
+ if (!input.files.length) {
+  setAdminStatus('Preview üçün fayl seçin.', 'error');
+  return;
+ }
+ const form = new FormData();
+ form.append('file', input.files[0]);
+ const r = await fetch('/api/admin/import/preview', { method:'POST', body:form });
+ const payload = await r.json().catch(() => ({}));
+ if (!r.ok) {
+  setAdminStatus(payload.error || 'Preview alınmadı.', 'error');
+  return;
+ }
+ wrap.style.display = 'block';
+ const rows = [];
+ payload.preview.forEach(record => {
+  rows.push(`<tr><td>${escapeHtml(record.channel_id)} · ${escapeHtml(record.channel_name || '')}</td><td>${escapeHtml(record.date)} ${escapeHtml(record.time)}</td><td>${Number(record.value).toFixed(2)} ${escapeHtml(record.unit || '')}</td><td style="color:var(--accent-green)">OK</td></tr>`);
+ });
+ payload.errors.slice(0, 10).forEach(err => {
+  rows.push(`<tr><td colspan="3">Sətir ${err.row}: ${escapeHtml(err.error)}</td><td style="color:#ff6b6b">Xəta</td></tr>`);
+ });
+ body.innerHTML = rows.join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:18px">Preview boşdur</td></tr>';
+ setAdminStatus(`${payload.valid} düzgün sətr, ${payload.errors.length} xəta.`, payload.errors.length ? 'error' : 'ok');
+}
+
+function downloadImportTemplate() {
+ const csv = 'channel_id,date,time,value,enabled\n0,2026-04-24,01:00,25,true\n';
+ const blob = new Blob([csv], { type:'text/csv;charset=utf-8' });
+ const url = URL.createObjectURL(blob);
+ const a = document.createElement('a');
+ a.href = url;
+ a.download = 'manual_import_template.csv';
+ a.click();
+ URL.revokeObjectURL(url);
+}
+
+function resetThresholdForm() {
+ const idInput = document.getElementById('threshold-id');
+ if (!idInput) return;
+ idInput.value = '';
+ const firstId = SD ? Object.keys(SD).sort((a,b) => Number(a) - Number(b))[0] : '';
+ const selectedId = curId && SD[curId] ? curId : firstId;
+ if (selectedId) document.getElementById('threshold-channel').value = selectedId;
+ document.getElementById('threshold-min').value = '';
+ document.getElementById('threshold-max').value = '';
+ document.getElementById('threshold-label').value = '';
+ document.getElementById('threshold-enabled').checked = true;
+ document.getElementById('threshold-save-btn').textContent = 'Threshold saxla';
+}
+
+async function loadThresholdRecords() {
+ const r = await fetch('/api/admin/thresholds');
+ if (!r.ok) {
+  setAdminStatus('Threshold datası yüklənmədi.', 'error');
+  return;
+ }
+ const payload = await r.json();
+ THRESHOLD_RECORDS = payload.records || [];
+ renderThresholdRecords();
+}
+
+function renderThresholdRecords() {
+ const body = document.getElementById('threshold-records-body');
+ if (!body) return;
+ if (!THRESHOLD_RECORDS.length) {
+  body.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:18px">Threshold qaydası yoxdur</td></tr>';
+  return;
+ }
+ body.innerHTML = THRESHOLD_RECORDS.map(record => `
+  <tr>
+   <td>${escapeHtml(record.channel_id)} · ${escapeHtml(record.channel_name || record.label || '')}</td>
+   <td>${record.min_value == null ? '—' : Number(record.min_value).toFixed(2)}</td>
+   <td>${record.max_value == null ? '—' : Number(record.max_value).toFixed(2)}</td>
+   <td>${record.enabled ? 'Aktiv' : 'Deaktiv'}</td>
+   <td>
+    <div class="admin-row-actions">
+     <button type="button" onclick="editThresholdRecord('${record.id}')">Redaktə</button>
+     <button type="button" onclick="toggleThresholdRecord('${record.id}', ${record.enabled ? 'false' : 'true'})">${record.enabled ? 'Deaktiv et' : 'Aktiv et'}</button>
+     <button type="button" onclick="deleteThresholdRecord('${record.id}')">Sil</button>
+    </div>
+   </td>
+  </tr>
+ `).join('');
+}
+
+async function saveThresholdRecord(event) {
+ event.preventDefault();
+ const recordId = document.getElementById('threshold-id').value;
+ const payload = {
+  channel_id: document.getElementById('threshold-channel').value,
+  min_value: document.getElementById('threshold-min').value,
+  max_value: document.getElementById('threshold-max').value,
+  label: document.getElementById('threshold-label').value,
+  enabled: document.getElementById('threshold-enabled').checked
+ };
+ const url = recordId ? `/api/admin/thresholds/${recordId}` : '/api/admin/thresholds';
+ const method = recordId ? 'PUT' : 'POST';
+ const r = await fetch(url, { method, headers:{ 'Content-Type':'application/json' }, body:JSON.stringify(payload) });
+ if (!r.ok) {
+  const err = await r.json().catch(() => ({}));
+  setAdminStatus(err.error || 'Threshold saxlanmadı.', 'error');
+  return;
+ }
+ setAdminStatus('Threshold saxlanıldı.', 'ok');
+ resetThresholdForm();
+ await loadThresholdRecords();
+ loadAlerts();
+}
+
+function editThresholdRecord(id) {
+ const record = THRESHOLD_RECORDS.find(item => item.id === id);
+ if (!record) return;
+ document.getElementById('threshold-id').value = record.id;
+ document.getElementById('threshold-channel').value = record.channel_id;
+ document.getElementById('threshold-min').value = record.min_value ?? '';
+ document.getElementById('threshold-max').value = record.max_value ?? '';
+ document.getElementById('threshold-label').value = record.label || '';
+ document.getElementById('threshold-enabled').checked = !!record.enabled;
+ document.getElementById('threshold-save-btn').textContent = 'Threshold yenilə';
+}
+
+async function toggleThresholdRecord(id, enabled) {
+ const r = await fetch(`/api/admin/thresholds/${id}`, {
+  method:'PATCH',
+  headers:{ 'Content-Type':'application/json' },
+  body:JSON.stringify({ enabled })
+ });
+ if (!r.ok) {
+  setAdminStatus('Threshold statusu dəyişdirilmədi.', 'error');
+  return;
+ }
+ await loadThresholdRecords();
+ loadAlerts();
+}
+
+async function deleteThresholdRecord(id) {
+ if (!confirm('Threshold qaydası silinsin?')) return;
+ const r = await fetch(`/api/admin/thresholds/${id}`, { method:'DELETE' });
+ if (!r.ok) {
+  setAdminStatus('Threshold silinmədi.', 'error');
+  return;
+ }
+ setAdminStatus('Threshold silindi.', 'ok');
+ await loadThresholdRecords();
+ loadAlerts();
+}
+
+window.addEventListener('load', init);
+</script>
+</body>
+</html>
