@@ -1519,6 +1519,231 @@
       height: 220px !important;
     }
   }
+
+  /* ════ REAL-TIME SIMULATION SUITE ════ */
+  .simulation-panel {
+    background: linear-gradient(135deg, rgba(15, 21, 39, 0.95), rgba(17, 24, 44, 0.98));
+    border: 1px solid rgba(0, 242, 254, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 16px 20px;
+    box-shadow: 0 10px 30px -10px rgba(0, 242, 254, 0.15), 0 0 25px rgba(59, 130, 246, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-bottom: 22px;
+    position: relative;
+    backdrop-filter: blur(14px);
+    transition: all 0.3s ease;
+  }
+  .simulation-panel.collapsed {
+    padding: 12px 18px;
+    gap: 8px;
+  }
+  .sim-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .sim-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .sim-pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #00f2fe;
+    box-shadow: 0 0 12px #00f2fe;
+    display: inline-block;
+  }
+  .sim-pulse-dot.running {
+    background: #ef4444;
+    box-shadow: 0 0 14px #ef4444;
+    animation: simPulseLive 1.1s infinite alternate ease-in-out;
+  }
+  @keyframes simPulseLive {
+    from { transform: scale(0.9); opacity: 0.7; }
+    to { transform: scale(1.35); opacity: 1; }
+  }
+  .sim-title-txt {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--text-primary);
+  }
+  .sim-month-hero {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--accent-cyan);
+    background: rgba(0, 242, 254, 0.08);
+    border: 1px solid rgba(0, 242, 254, 0.28);
+    padding: 3px 10px;
+    border-radius: var(--radius-sm);
+  }
+  .sim-status-badge {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: rgba(100, 116, 139, 0.2);
+    color: var(--text-muted);
+  }
+  .sim-status-badge.running {
+    background: rgba(239, 68, 68, 0.16);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+  }
+  .sim-status-badge.paused {
+    background: rgba(245, 158, 11, 0.16);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.35);
+  }
+  .sim-controls-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  .sim-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .sim-btn-primary {
+    background: linear-gradient(135deg, var(--accent-electric), var(--accent-cyan));
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 7px 16px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+  }
+  .sim-btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+  }
+  .sim-btn-primary.running {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+  }
+  .sim-btn-sec {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+  }
+  .sim-btn-sec:hover {
+    color: var(--text-primary);
+    border-color: var(--border-bright);
+    background: var(--bg-card-hover);
+  }
+  .sim-timeline-strip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+  .sim-month-pill {
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 600;
+    background: var(--bg-input);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .sim-month-pill:hover {
+    color: var(--text-primary);
+    border-color: var(--accent-cyan);
+  }
+  .sim-month-pill.active {
+    background: rgba(0, 242, 254, 0.16);
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan);
+    font-weight: 800;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.25);
+  }
+  .sim-card-chip {
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    color: var(--accent-cyan);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+  }
+  .sim-card-chip:hover {
+    background: rgba(59, 130, 246, 0.22);
+    border-color: var(--accent-cyan);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
+  }
+  .sim-card-chip.active {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(245, 158, 11, 0.25));
+    border-color: #ef4444;
+    color: #fca5a5;
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+  }
+  .sim-data-flash {
+    animation: simDataGlow 0.75s ease-out;
+  }
+  @keyframes simDataGlow {
+    0% { color: #00f2fe; text-shadow: 0 0 14px rgba(0, 242, 254, 0.9); transform: scale(1.06); }
+    100% { transform: scale(1); }
+  }
+  .sim-toggle-pill {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: var(--radius-md);
+    background: rgba(0, 242, 254, 0.08);
+    border: 1px solid rgba(0, 242, 254, 0.35);
+    color: var(--accent-cyan);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .sim-toggle-pill:hover, .sim-toggle-pill.active {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(0, 242, 254, 0.25));
+    border-color: var(--accent-cyan);
+    color: #ffffff;
+    box-shadow: 0 0 16px rgba(0, 242, 254, 0.35);
+  }
 </style>
 </head>
 <body>
@@ -1628,6 +1853,12 @@
     </div>
 
     <div class="header-right-actions">
+      <!-- Simulyasiya Rejimi Düyməsi -->
+      <button class="sim-toggle-pill" id="header-sim-toggle" onclick="toggleSimulationBar()" title="Canlı ay-ay telemetriya simulyasiyası">
+        <span class="sim-pulse-dot" id="header-sim-dot"></span>
+        <span>⚡ Simulyasiya</span>
+      </button>
+
       <!-- Sürətli Data Əlavə Et Düyməsi -->
       <button class="cat-chip-btn active" onclick="openQuickAddModal()" style="display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--accent-electric),var(--accent-cyan));color:#fff;border:none;font-weight:700;padding:8px 14px">
         <span>➕ Data Əlavə Et</span>
@@ -1652,6 +1883,77 @@
 
   <!-- ════ VIEW 1: OPERATIONS DASHBOARD (NEUROBANK STYLE) ════ -->
   <section id="view-dashboard" class="view-container active">
+    <!-- ════ MASTER SİMULYASİYA İDARƏETMƏ PANELSİ ════ -->
+    <div id="master-simulation-panel" class="simulation-panel">
+      <!-- Header row -->
+      <div class="sim-header-row">
+        <div class="sim-title-group">
+          <span class="sim-pulse-dot" id="sim-main-dot"></span>
+          <span class="sim-title-txt">Canlı Telemetriya Simulyasiyası</span>
+          <span id="sim-current-month-display" class="sim-month-hero">2026-10 — Oktyabr 2026</span>
+          <span id="sim-status-badge" class="sim-status-badge">Hazırdır</span>
+          <span id="sim-feedback-ticker" style="font-size:11.5px;color:var(--text-muted);font-family:'JetBrains Mono',monospace">Priva VP9508 arxiv telemetriyası hazırdır</span>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <!-- Scope selector -->
+          <div style="display:flex;align-items:center;gap:5px">
+            <span style="font-size:11px;color:var(--text-muted)">Dövr:</span>
+            <select id="sim-scope-select" class="admin-pass-input" style="height:30px;padding:2px 8px;font-size:11.5px" onchange="changeSimScope(this.value)">
+              <option value="season" selected>Cari Mövsüm (2025-09 — 2026-10)</option>
+              <option value="year2026">2026 İllik (Yanvar — Oktyabr)</option>
+              <option value="all">Bütün Arxiv (2020 — 2026)</option>
+            </select>
+          </div>
+
+          <!-- Speed pills -->
+          <div style="display:flex;align-items:center;gap:4px">
+            <span style="font-size:11px;color:var(--text-muted)">Sürət:</span>
+            <button class="cat-chip-btn" id="sim-spd-05" onclick="setSimSpeed(0.5, this)" style="padding:3px 7px;font-size:11px">0.5x</button>
+            <button class="cat-chip-btn active" id="sim-spd-1" onclick="setSimSpeed(1, this)" style="padding:3px 7px;font-size:11px">1x</button>
+            <button class="cat-chip-btn" id="sim-spd-2" onclick="setSimSpeed(2, this)" style="padding:3px 7px;font-size:11px">2x</button>
+            <button class="cat-chip-btn" id="sim-spd-4" onclick="setSimSpeed(4, this)" style="padding:3px 7px;font-size:11px">4x</button>
+          </div>
+
+          <!-- Auto Loop checkbox -->
+          <label style="display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-secondary);cursor:pointer">
+            <input type="checkbox" id="sim-loop-check" checked onchange="toggleSimLoop(this.checked)">
+            <span>Təkrarla</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Controls & Progress row -->
+      <div class="sim-controls-row">
+        <div class="sim-btn-group">
+          <button class="sim-btn-sec" onclick="stepSimMonth(-1)" title="Əvvəlki Ay">
+            <span>⏮ Əvvəlki</span>
+          </button>
+          <button class="sim-btn-primary" id="sim-play-btn" onclick="toggleSimPlay()" title="Simulyasiyanı Başlat / Dayandır">
+            <span id="sim-play-icon">▶</span>
+            <span id="sim-play-txt">Canlı Başlat</span>
+          </button>
+          <button class="sim-btn-sec" onclick="stepSimMonth(1)" title="Sonrakı Ay">
+            <span>Sonrakı ⏭</span>
+          </button>
+          <button class="sim-btn-sec" onclick="resetSimToStart()" title="Sıfırla">
+            <span>↺ Sıfırla</span>
+          </button>
+        </div>
+
+        <!-- Slider Progress Scrubber -->
+        <div style="flex:1;min-width:220px;display:flex;align-items:center;gap:10px">
+          <input type="range" id="sim-range-slider" min="0" max="13" value="13" class="search-input-txt" style="flex:1;height:6px;padding:0;cursor:pointer" oninput="onSimSliderInput(this.value)">
+          <span id="sim-progress-txt" style="font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--text-muted);white-space:nowrap">14 / 14</span>
+        </div>
+      </div>
+
+      <!-- Timeline Pills Strip (Quick Jump to Any Month) -->
+      <div class="sim-timeline-strip" id="sim-months-pills-wrap">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
     <!-- Row 1: 3 Bento Cards -->
     <div class="bento-grid-3col">
       <!-- Card 1: Breakdown Table Style -->
@@ -1703,14 +2005,19 @@
         <div class="neuro-card-header">
           <div>
             <div class="neuro-card-title">İqlim Balansı & Orta İstilik</div>
-            <div class="neuro-card-sub">Son 7 günlük dinamika</div>
+            <div class="neuro-card-sub" id="card-balance-sub">Son 7 günlük dinamika</div>
           </div>
-          <button class="arrow-card-btn" onclick="openDrilldown('10')">↗</button>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="sim-card-chip" id="btn-sim-balance" onclick="toggleSingleChartSim('balance')" title="Tək bu qrafiki ay-ay simulyasiya et">
+              <span class="sim-btn-icon">▶</span> <span>Simulyasiya</span>
+            </button>
+            <button class="arrow-card-btn" onclick="openDrilldown('10')">↗</button>
+          </div>
         </div>
 
         <div class="neuro-stat-big">
           <span id="card-big-temp">20.4°C</span>
-          <span class="neuro-trend-badge up">↑ 0.8°C Hədəfə uyğun</span>
+          <span class="neuro-trend-badge up" id="card-balance-badge">↑ 0.8°C Hədəfə uyğun</span>
         </div>
 
         <div style="height: 140px; width: 100%; position: relative;">
@@ -1723,14 +2030,19 @@
         <div class="neuro-card-header">
           <div>
             <div class="neuro-card-title">Mövsümi Müqayisə & İllik Trend</div>
-            <div class="neuro-card-sub">Cari İl (2026) vs Keçən İl (2025)</div>
+            <div class="neuro-card-sub" id="card-yoy-sub">Cari İl (2026) vs Keçən İl (2025)</div>
           </div>
-          <button class="arrow-card-btn" onclick="switchView('analytics')">↗</button>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="sim-card-chip" id="btn-sim-yoy" onclick="toggleSingleChartSim('yoy')" title="Mövsümi trendi ay-ay böyüt və simulyasiya et">
+              <span class="sim-btn-icon">▶</span> <span>Simulyasiya</span>
+            </button>
+            <button class="arrow-card-btn" onclick="switchView('analytics')">↗</button>
+          </div>
         </div>
 
         <div class="neuro-stat-big">
-          <span style="color:var(--accent-cyan)">+12.4%</span>
-          <span class="neuro-trend-badge up">İnkişaf indeksi</span>
+          <span style="color:var(--accent-cyan)" id="card-yoy-val">+12.4%</span>
+          <span class="neuro-trend-badge up" id="card-yoy-badge">İnkişaf indeksi</span>
         </div>
 
         <div style="height: 140px; width: 100%; position: relative;">
@@ -1746,30 +2058,35 @@
         <div class="neuro-card-header">
           <div>
             <div class="neuro-card-title">Zonalar Üzrə İstilik Paylanması</div>
-            <div class="neuro-card-sub">CMP-01 ... CMP-04 İstehsal Blokları</div>
+            <div class="neuro-card-sub" id="card-zones-sub">CMP-01 ... CMP-04 İstehsal Blokları</div>
           </div>
-          <button class="arrow-card-btn" onclick="switchView('compartments')">↗</button>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="sim-card-chip" id="btn-sim-zones" onclick="toggleSingleChartSim('zones')" title="Zonaların istilik fərqini ay-ay simulyasiya et">
+              <span class="sim-btn-icon">▶</span> <span>Simulyasiya</span>
+            </button>
+            <button class="arrow-card-btn" onclick="switchView('compartments')">↗</button>
+          </div>
         </div>
 
         <div class="bars-spending-row">
           <div class="spending-col-bar">
-            <span class="bar-pct-top">20.4°C</span>
-            <div class="bar-pillar-fill" style="height: 85%" onclick="openDrilldown('10')"></div>
+            <span class="bar-pct-top" id="bar-cmp1-val">20.4°C</span>
+            <div class="bar-pillar-fill" id="bar-cmp1-fill" style="height: 85%" onclick="openDrilldown('10')"></div>
             <span class="bar-lbl-bot">CMP-01</span>
           </div>
           <div class="spending-col-bar">
-            <span class="bar-pct-top">20.1°C</span>
-            <div class="bar-pillar-fill" style="height: 80%" onclick="openDrilldown('11')"></div>
+            <span class="bar-pct-top" id="bar-cmp2-val">20.1°C</span>
+            <div class="bar-pillar-fill" id="bar-cmp2-fill" style="height: 80%" onclick="openDrilldown('11')"></div>
             <span class="bar-lbl-bot">CMP-02</span>
           </div>
           <div class="spending-col-bar">
-            <span class="bar-pct-top">20.6°C</span>
-            <div class="bar-pillar-fill" style="height: 92%" onclick="openDrilldown('12')"></div>
+            <span class="bar-pct-top" id="bar-cmp3-val">20.6°C</span>
+            <div class="bar-pillar-fill" id="bar-cmp3-fill" style="height: 92%" onclick="openDrilldown('12')"></div>
             <span class="bar-lbl-bot">CMP-03</span>
           </div>
           <div class="spending-col-bar">
-            <span class="bar-pct-top">20.3°C</span>
-            <div class="bar-pillar-fill" style="height: 78%" onclick="openDrilldown('13')"></div>
+            <span class="bar-pct-top" id="bar-cmp4-val">20.3°C</span>
+            <div class="bar-pillar-fill" id="bar-cmp4-fill" style="height: 78%" onclick="openDrilldown('13')"></div>
             <span class="bar-lbl-bot">CMP-04</span>
           </div>
         </div>
@@ -1780,14 +2097,19 @@
         <div class="neuro-card-header">
           <div>
             <div class="neuro-card-title">24 Saatlıq / Günlük Rütubət</div>
-            <div class="neuro-card-sub">Nisbi Rütubət (RH Balansı)</div>
+            <div class="neuro-card-sub" id="card-hum-sub">Nisbi Rütubət (RH Balansı)</div>
           </div>
-          <button class="arrow-card-btn" onclick="openDrilldown('14')">↗</button>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="sim-card-chip" id="btn-sim-humidity" onclick="toggleSingleChartSim('humidity')" title="Rütubət dalğasını ay-ay simulyasiya et">
+              <span class="sim-btn-icon">▶</span> <span>Simulyasiya</span>
+            </button>
+            <button class="arrow-card-btn" onclick="openDrilldown('14')">↗</button>
+          </div>
         </div>
 
         <div class="neuro-stat-big">
-          <span style="color:var(--accent-purple)">66.5%</span>
-          <span class="neuro-trend-badge up">Normal RH</span>
+          <span style="color:var(--accent-purple)" id="card-hum-val">66.5%</span>
+          <span class="neuro-trend-badge up" id="card-hum-badge">Normal RH</span>
         </div>
 
         <div style="height: 140px; width: 100%; position: relative;">
@@ -1800,9 +2122,14 @@
         <div class="neuro-card-header">
           <div>
             <div class="neuro-card-title">Hədəf Uyğunluğu & Doyum</div>
-            <div class="neuro-card-sub">Aqronomik hədəfə uyğunluq nisbəti</div>
+            <div class="neuro-card-sub" id="card-gauge-sub">Aqronomik hədəfə uyğunluq nisbəti</div>
           </div>
-          <button class="arrow-card-btn" onclick="openDrilldown('290')">↗</button>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="sim-card-chip" id="btn-sim-gauge" onclick="toggleSingleChartSim('gauge')" title="Doyum indeksini ay-ay simulyasiya et">
+              <span class="sim-btn-icon">▶</span> <span>Simulyasiya</span>
+            </button>
+            <button class="arrow-card-btn" onclick="openDrilldown('290')">↗</button>
+          </div>
         </div>
 
         <div class="arc-gauge-wrap">
@@ -1810,7 +2137,7 @@
             <!-- Background track -->
             <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="16" stroke-linecap="round" />
             <!-- Active gradient track -->
-            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#arcGlowGrad)" stroke-width="16" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="15" />
+            <path id="arc-gauge-path" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#arcGlowGrad)" stroke-width="16" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="15" />
             <defs>
               <linearGradient id="arcGlowGrad" x1="0%" y1="0%" x2="100%" y2="0%">
                 <stop offset="0%" stop-color="#3b82f6" />
@@ -1819,8 +2146,8 @@
             </defs>
           </svg>
           <div class="arc-gauge-val-center">
-            <span class="arc-gauge-pct">96.8%</span>
-            <span class="arc-gauge-subtxt">Optimal Vegetasiya</span>
+            <span class="arc-gauge-pct" id="arc-gauge-pct-val">96.8%</span>
+            <span class="arc-gauge-subtxt" id="arc-gauge-sub-val">Optimal Vegetasiya</span>
           </div>
         </div>
       </div>
@@ -1971,9 +2298,14 @@
       <div class="neuro-card-header">
         <div>
           <div class="neuro-card-title">Temperatur və Rütubət Korrelyasiyası</div>
-          <div class="neuro-card-sub">2020 — 2026 Arxiv Trendi</div>
+          <div class="neuro-card-sub" id="card-multi-sub">2020 — 2026 Arxiv Trendi</div>
         </div>
-        <button class="arrow-card-btn" onclick="openDrilldown('10')">↗</button>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="sim-card-chip" id="btn-sim-multi" onclick="toggleSingleChartSim('multi')" title="Analitika qrafikini ay-ay axın ilə simulyasiya et">
+            <span class="sim-btn-icon">▶</span> <span>Simulyasiya</span>
+          </button>
+          <button class="arrow-card-btn" onclick="openDrilldown('10')">↗</button>
+        </div>
       </div>
       <div style="height:320px;width:100%;position:relative">
         <canvas id="chart-multi-analytics"></canvas>
@@ -2267,6 +2599,9 @@
           <input type="date" id="m-date-to" class="search-input-txt" style="width:130px;height:34px" onchange="renderDrilldownGraph()">
           
           <button class="cat-chip-btn" onclick="resetDrilldownZoom()" title="Zoomu Sıfırla">🔍 Zoom Sıfırla</button>
+          <button class="cat-chip-btn" id="btn-sim-drilldown" onclick="toggleSingleChartSim('drilldown')" style="background:rgba(0,242,254,0.12);color:var(--accent-cyan);border-color:rgba(0,242,254,0.3);font-weight:700" title="Bu sensorun arxivini canlı axın ilə simulyasiya et">
+            <span class="sim-btn-icon">▶</span> <span>Simulyasiya</span>
+          </button>
           <button class="cat-chip-btn" onclick="exportChartCsv('modal-chart-canvas')" title="CSV Fayl Yüklə">📥 CSV</button>
           <button class="cat-chip-btn" onclick="exportChartPng('modal-chart-canvas')" title="Qrafiki Saxla">📷 PNG</button>
         </div>
@@ -2426,6 +2761,7 @@ async function init() {
   checkAdminStatus();
   updateHeaderAndCards();
   populateChannelSelects();
+  initSimulation();
 
   // Sidebar tarix
   const dateEl = document.getElementById('sidebar-current-date');
@@ -2557,7 +2893,549 @@ function updateHeaderAndCards() {
   if (document.getElementById('row-vent-val')) document.getElementById('row-vent-val').textContent = `${(SD['26']?.avg_val ?? 28.0).toFixed(1)} %`;
 }
 
-// ─── DASHBOARD CHARTS (NEUROBANK AESTHETICS) ───
+// ─── DASHBOARD CHARTS & REAL-TIME SIMULATION SUITE ───
+let SIM_STATE = {
+  active: false,
+  timer: null,
+  speedMs: 1200,
+  scope: 'season', // 'season' (2025-09 .. 2026-10), 'year2026' (2026-01 .. 2026-10), 'all'
+  currentIndex: 0,
+  activeTimeline: [],
+  targetCard: 'all', // 'all', 'balance', 'yoy', 'zones', 'humidity', 'gauge', 'multi', 'drilldown'
+  loop: true,
+  data: null
+};
+
+function roundDec(val, d = 1) {
+  const num = Number(val);
+  return isNaN(num) ? 0 : parseFloat(num.toFixed(d));
+}
+
+async function initSimulation() {
+  try {
+    const res = await fetch('/api/simulation-data');
+    if (!res.ok) return;
+    SIM_STATE.data = await res.json();
+    setupSimTimeline('season');
+  } catch (e) {
+    console.warn('Simulation data load failed:', e);
+  }
+}
+
+function setupSimTimeline(scopeKey) {
+  if (!SIM_STATE.data || !SIM_STATE.data.timeline) return;
+  SIM_STATE.scope = scopeKey;
+  const all = SIM_STATE.data.timeline;
+  
+  if (scopeKey === 'season') {
+    SIM_STATE.activeTimeline = all.filter(k => k >= '2025-09');
+  } else if (scopeKey === 'year2026') {
+    SIM_STATE.activeTimeline = all.filter(k => k.startsWith('2026'));
+  } else {
+    SIM_STATE.activeTimeline = [...all];
+  }
+
+  // Set default to latest month in timeline
+  SIM_STATE.currentIndex = Math.max(0, SIM_STATE.activeTimeline.length - 1);
+  renderSimTimelinePills();
+  updateSimSliderRange();
+  updatePlayButtonUI(false);
+}
+
+function renderSimTimelinePills() {
+  const wrap = document.getElementById('sim-months-pills-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  const metaMap = {};
+  (SIM_STATE.data?.months_meta || []).forEach(m => { metaMap[m.key] = m; });
+
+  SIM_STATE.activeTimeline.forEach((key, idx) => {
+    const btn = document.createElement('button');
+    btn.className = `sim-month-pill ${idx === SIM_STATE.currentIndex ? 'active' : ''}`;
+    btn.id = `sim-pill-${key}`;
+    const mInfo = metaMap[key];
+    btn.textContent = mInfo ? mInfo.short : key;
+    btn.title = mInfo ? mInfo.label : key;
+    btn.onclick = () => jumpToSimMonth(idx);
+    wrap.appendChild(btn);
+  });
+}
+
+function updateSimSliderRange() {
+  const slider = document.getElementById('sim-range-slider');
+  const txt = document.getElementById('sim-progress-txt');
+  if (!slider) return;
+  slider.min = 0;
+  slider.max = Math.max(0, SIM_STATE.activeTimeline.length - 1);
+  slider.value = SIM_STATE.currentIndex;
+  if (txt) {
+    txt.textContent = `${SIM_STATE.currentIndex + 1} / ${SIM_STATE.activeTimeline.length}`;
+  }
+}
+
+function toggleSimulationBar() {
+  const panel = document.getElementById('master-simulation-panel');
+  const toggleBtn = document.getElementById('header-sim-toggle');
+  if (!panel) return;
+  if (currentActiveView !== 'dashboard') switchView('dashboard');
+
+  const isHidden = window.getComputedStyle(panel).display === 'none';
+  if (isHidden) {
+    panel.style.display = 'flex';
+    toggleBtn?.classList.add('active');
+  } else {
+    toggleBtn?.classList.toggle('active');
+  }
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function toggleSimPlay() {
+  if (SIM_STATE.active) {
+    pauseSimulation();
+  } else {
+    startSimulation('all');
+  }
+}
+
+function startSimulation(targetCard = 'all') {
+  SIM_STATE.targetCard = targetCard;
+  SIM_STATE.active = true;
+
+  if (SIM_STATE.currentIndex >= SIM_STATE.activeTimeline.length - 1) {
+    SIM_STATE.currentIndex = 0;
+  }
+
+  updatePlayButtonUI(true);
+  updateCardSimChipsUI(targetCard, true);
+
+  if (SIM_STATE.timer) clearInterval(SIM_STATE.timer);
+
+  // Apply right away
+  applySimulatedMonth(SIM_STATE.activeTimeline[SIM_STATE.currentIndex]);
+
+  SIM_STATE.timer = setInterval(() => {
+    if (SIM_STATE.currentIndex < SIM_STATE.activeTimeline.length - 1) {
+      SIM_STATE.currentIndex++;
+      applySimulatedMonth(SIM_STATE.activeTimeline[SIM_STATE.currentIndex]);
+    } else {
+      if (SIM_STATE.loop) {
+        SIM_STATE.currentIndex = 0;
+        applySimulatedMonth(SIM_STATE.activeTimeline[SIM_STATE.currentIndex]);
+      } else {
+        pauseSimulation();
+      }
+    }
+  }, SIM_STATE.speedMs);
+}
+
+function pauseSimulation() {
+  SIM_STATE.active = false;
+  if (SIM_STATE.timer) {
+    clearInterval(SIM_STATE.timer);
+    SIM_STATE.timer = null;
+  }
+  updatePlayButtonUI(false);
+  updateCardSimChipsUI(SIM_STATE.targetCard, false);
+}
+
+function resetSimToStart() {
+  pauseSimulation();
+  SIM_STATE.currentIndex = 0;
+  applySimulatedMonth(SIM_STATE.activeTimeline[SIM_STATE.currentIndex], true);
+}
+
+function stepSimMonth(delta) {
+  pauseSimulation();
+  const next = SIM_STATE.currentIndex + delta;
+  if (next >= 0 && next < SIM_STATE.activeTimeline.length) {
+    SIM_STATE.currentIndex = next;
+    applySimulatedMonth(SIM_STATE.activeTimeline[SIM_STATE.currentIndex], true);
+  }
+}
+
+function jumpToSimMonth(index) {
+  if (index >= 0 && index < SIM_STATE.activeTimeline.length) {
+    SIM_STATE.currentIndex = index;
+    applySimulatedMonth(SIM_STATE.activeTimeline[SIM_STATE.currentIndex], true);
+  }
+}
+
+function onSimSliderInput(val) {
+  jumpToSimMonth(parseInt(val, 10));
+}
+
+function changeSimScope(scope) {
+  pauseSimulation();
+  setupSimTimeline(scope);
+}
+
+function setSimSpeed(speedMult, btn) {
+  document.querySelectorAll('[id^="sim-spd-"]').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  SIM_STATE.speedMs = Math.round(1200 / speedMult);
+  if (SIM_STATE.active) {
+    startSimulation(SIM_STATE.targetCard);
+  }
+}
+
+function toggleSimLoop(checked) {
+  SIM_STATE.loop = checked;
+}
+
+function toggleSingleChartSim(cardId) {
+  if (cardId === 'drilldown') {
+    startModalSimulation();
+    return;
+  }
+
+  if (SIM_STATE.active && SIM_STATE.targetCard === cardId) {
+    pauseSimulation();
+  } else {
+    if (currentActiveView !== 'dashboard' && cardId !== 'multi') {
+      switchView('dashboard');
+    }
+    startSimulation(cardId);
+  }
+}
+
+function updatePlayButtonUI(isPlaying) {
+  const btn = document.getElementById('sim-play-btn');
+  const icon = document.getElementById('sim-play-icon');
+  const txt = document.getElementById('sim-play-txt');
+  const dot = document.getElementById('sim-main-dot');
+  const hDot = document.getElementById('header-sim-dot');
+  const badge = document.getElementById('sim-status-badge');
+
+  if (isPlaying) {
+    if (btn) btn.classList.add('running');
+    if (icon) icon.textContent = '⏸';
+    if (txt) txt.textContent = 'Dayandır';
+    if (dot) dot.classList.add('running');
+    if (hDot) hDot.classList.add('running');
+    if (badge) { badge.textContent = 'CANLI AXIN'; badge.className = 'sim-status-badge running'; }
+  } else {
+    if (btn) btn.classList.remove('running');
+    if (icon) icon.textContent = '▶';
+    if (txt) txt.textContent = 'Canlı Başlat';
+    if (dot) dot.classList.remove('running');
+    if (hDot) hDot.classList.remove('running');
+    if (badge) { badge.textContent = 'Gözləmədə'; badge.className = 'sim-status-badge paused'; }
+  }
+}
+
+function updateCardSimChipsUI(targetCard, isPlaying) {
+  const cardChips = {
+    balance: document.getElementById('btn-sim-balance'),
+    yoy: document.getElementById('btn-sim-yoy'),
+    zones: document.getElementById('btn-sim-zones'),
+    humidity: document.getElementById('btn-sim-humidity'),
+    gauge: document.getElementById('btn-sim-gauge'),
+    multi: document.getElementById('btn-sim-multi'),
+    drilldown: document.getElementById('btn-sim-drilldown')
+  };
+
+  Object.entries(cardChips).forEach(([k, el]) => {
+    if (!el) return;
+    const shouldActive = isPlaying && (targetCard === 'all' || targetCard === k);
+    if (shouldActive) {
+      el.classList.add('active');
+      const icon = el.querySelector('.sim-btn-icon');
+      if (icon) icon.textContent = '⏸';
+    } else {
+      el.classList.remove('active');
+      const icon = el.querySelector('.sim-btn-icon');
+      if (icon) icon.textContent = '▶';
+    }
+  });
+}
+
+function updateZonePillars(v1, v2, v3, v4) {
+  const vals = [v1, v2, v3, v4];
+  const ids = ['cmp1', 'cmp2', 'cmp3', 'cmp4'];
+  const minT = 16.0;
+  const maxT = 26.0;
+
+  vals.forEach((v, i) => {
+    const txtEl = document.getElementById(`bar-${ids[i]}-val`);
+    const fillEl = document.getElementById(`bar-${ids[i]}-fill`);
+    if (txtEl) {
+      txtEl.textContent = `${v.toFixed(1)}°C`;
+      txtEl.classList.remove('sim-data-flash');
+      void txtEl.offsetWidth;
+      txtEl.classList.add('sim-data-flash');
+    }
+    if (fillEl) {
+      const pct = Math.max(25, Math.min(100, ((v - minT) / (maxT - minT)) * 100));
+      fillEl.style.height = `${pct.toFixed(0)}%`;
+    }
+  });
+}
+
+function updateArcGauge(score, label) {
+  const path = document.getElementById('arc-gauge-path');
+  const pctEl = document.getElementById('arc-gauge-pct-val');
+  const subEl = document.getElementById('arc-gauge-sub-val');
+
+  if (pctEl) {
+    pctEl.textContent = `${score.toFixed(1)}%`;
+    pctEl.classList.remove('sim-data-flash');
+    void pctEl.offsetWidth;
+    pctEl.classList.add('sim-data-flash');
+  }
+  if (subEl && label) {
+    subEl.textContent = label;
+  }
+  if (path) {
+    const totalLength = 251.2;
+    const offset = totalLength * (1 - (score / 100));
+    path.style.transition = 'stroke-dashoffset 0.6s ease';
+    path.setAttribute('stroke-dashoffset', offset.toFixed(1));
+  }
+}
+
+function applySimulatedMonth(monthKey, isManual = false) {
+  if (!SIM_STATE.data || !SIM_STATE.data.channels) return;
+  const cData = SIM_STATE.data.channels;
+  const metaList = SIM_STATE.data.months_meta || [];
+  const meta = metaList.find(m => m.key === monthKey);
+  const monthNameAz = meta ? meta.label : monthKey;
+
+  // 1. Update Header Ticker & Hero Month Display
+  const mHero = document.getElementById('sim-current-month-display');
+  if (mHero) mHero.textContent = `${monthKey} — ${monthNameAz}`;
+
+  const ticker = document.getElementById('sim-feedback-ticker');
+  if (ticker) {
+    ticker.textContent = `📡 Priva VP9508 paketi: ${monthNameAz} qəbul edildi (+120 yeni oxunuş)`;
+  }
+
+  // 2. Update Slider & Progress
+  const slider = document.getElementById('sim-range-slider');
+  const txt = document.getElementById('sim-progress-txt');
+  if (slider) slider.value = SIM_STATE.currentIndex;
+  if (txt) txt.textContent = `${SIM_STATE.currentIndex + 1} / ${SIM_STATE.activeTimeline.length}`;
+
+  // 3. Highlight Active Month Pill and scroll into view
+  document.querySelectorAll('.sim-month-pill').forEach(p => p.classList.remove('active'));
+  const activePill = document.getElementById(`sim-pill-${monthKey}`);
+  if (activePill) {
+    activePill.classList.add('active');
+    activePill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+
+  // 4. Extract sensor values for this month
+  const getMVal = (cid, fallback) => {
+    const ch = cData[cid];
+    if (ch && ch.monthly && ch.monthly[monthKey] !== undefined) return ch.monthly[monthKey];
+    return fallback;
+  };
+
+  const t10 = getMVal('10', 20.4);
+  const t11 = getMVal('11', 20.1);
+  const t12 = getMVal('12', 20.6);
+  const t13 = getMVal('13', 20.3);
+  const humVal = getMVal('14', 66.5);
+  const co2Val = getMVal('292', 680);
+  const pipeVal = getMVal('22', 44.0);
+  const ventVal = getMVal('26', 28.0);
+  const avgTemp = ((t10 + t11 + t12 + t13) / 4).toFixed(1);
+
+  // 5. Update Header Avg Temp
+  const hAvg = document.getElementById('header-avg-temp');
+  if (hAvg) {
+    hAvg.textContent = `${avgTemp}°C`;
+    hAvg.classList.remove('sim-data-flash');
+    void hAvg.offsetWidth;
+    hAvg.classList.add('sim-data-flash');
+  }
+
+  // 6. Update Card 1: Table Rows
+  const flashEl = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.textContent = val;
+      el.classList.remove('sim-data-flash');
+      void el.offsetWidth;
+      el.classList.add('sim-data-flash');
+    }
+  };
+  flashEl('row-temp-val', `${avgTemp} °C`);
+  flashEl('row-hum-val', `${humVal.toFixed(1)} %`);
+  flashEl('row-co2-val', `${Math.round(co2Val)} ppm`);
+  flashEl('row-pipe-val', `${pipeVal.toFixed(1)} °C`);
+  flashEl('row-vent-val', `${ventVal.toFixed(1)} %`);
+
+  const tCard = SIM_STATE.targetCard;
+
+  // 7. Update Card 2: İqlim Balansı & Orta İstilik
+  if (tCard === 'all' || tCard === 'balance') {
+    flashEl('card-big-temp', `${t10.toFixed(1)}°C`);
+    const sub = document.getElementById('card-balance-sub');
+    if (sub) sub.textContent = `${monthNameAz} ayı üzrə dinamika`;
+
+    const ch10 = cData['10'] || {};
+    const daily = ch10.daily || {};
+    const dKeys = Object.keys(daily).filter(k => k.startsWith(monthKey)).sort();
+    let dLabels = [];
+    let dValues = [];
+
+    if (dKeys.length > 0) {
+      dLabels = dKeys.map(k => k.slice(8) + ' ' + (meta?.short || ''));
+      dValues = dKeys.map(k => daily[k]);
+    } else {
+      const daysCount = 28;
+      for (let d = 1; d <= daysCount; d++) {
+        const dStr = (d < 10 ? '0' : '') + d;
+        dLabels.push(dStr);
+        const noise = Math.sin(d / 4) * 0.9 + (Math.sin(d * 1.5) * 0.3);
+        dValues.push(roundDec(t10 + noise, 1));
+      }
+    }
+    renderBalanceOverviewChart(dLabels, dValues);
+  }
+
+  // 8. Update Card 3: Mövsümi Müqayisə & İllik Trend
+  if (tCard === 'all' || tCard === 'yoy') {
+    const sub = document.getElementById('card-yoy-sub');
+    if (sub) sub.textContent = `2026 vs 2025 — ${monthNameAz}`;
+
+    const monthNum = parseInt(monthKey.slice(5), 10);
+    const yoyIdx = Math.max(0, Math.min(9, monthNum - 1));
+    renderYoYComparisonChart(yoyIdx);
+
+    const yoy2026 = [18.2, 18.9, 19.8, 21.2, 22.5, 23.8, 24.5, 24.2, 21.6, 20.9];
+    const yoy2025 = [17.5, 18.0, 18.8, 20.1, 21.4, 22.8, 23.5, 23.1, 22.2, 22.7];
+    const curVal = yoy2026[yoyIdx];
+    const prevVal = yoy2025[yoyIdx];
+    const diffPct = (((curVal - prevVal) / prevVal) * 100).toFixed(1);
+    const yoyValEl = document.getElementById('card-yoy-val');
+    const yoyBadgeEl = document.getElementById('card-yoy-badge');
+    if (yoyValEl) {
+      yoyValEl.textContent = `${diffPct >= 0 ? '+' : ''}${diffPct}%`;
+      yoyValEl.classList.remove('sim-data-flash');
+      void yoyValEl.offsetWidth;
+      yoyValEl.classList.add('sim-data-flash');
+    }
+    if (yoyBadgeEl) {
+      yoyBadgeEl.textContent = diffPct >= 0 ? 'Müsbət İndeks' : 'Sub-Optimal';
+    }
+  }
+
+  // 9. Update Card 4: Zonalar Üzrə İstilik CMP1-4
+  if (tCard === 'all' || tCard === 'zones') {
+    const sub = document.getElementById('card-zones-sub');
+    if (sub) sub.textContent = `CMP-01 ... CMP-04 — ${monthNameAz}`;
+    updateZonePillars(t10, t11, t12, t13);
+  }
+
+  // 10. Update Card 5: 24 Saatlıq / Günlük Rütubət
+  if (tCard === 'all' || tCard === 'humidity') {
+    flashEl('card-hum-val', `${humVal.toFixed(1)}%`);
+    const sub = document.getElementById('card-hum-sub');
+    if (sub) sub.textContent = `${monthNameAz} nisbi rütubət dalğası`;
+
+    const ch14 = cData['14'] || {};
+    const dailyH = ch14.daily || {};
+    const hKeys = Object.keys(dailyH).filter(k => k.startsWith(monthKey)).sort();
+    let hLabels = [];
+    let hValues = [];
+
+    if (hKeys.length > 0) {
+      hLabels = hKeys.map(k => k.slice(8) + ' ' + (meta?.short || ''));
+      hValues = hKeys.map(k => dailyH[k]);
+    } else {
+      const daysCount = 28;
+      for (let d = 1; d <= daysCount; d++) {
+        const dStr = (d < 10 ? '0' : '') + d;
+        hLabels.push(dStr);
+        const noise = Math.cos(d / 4) * 2.5 + (Math.sin(d) * 0.7);
+        hValues.push(roundDec(humVal + noise, 1));
+      }
+    }
+    renderHumidityWaveChart(hLabels, hValues);
+  }
+
+  // 11. Update Card 6: Arc Gauge (Vegetasiya Uyğunluğu)
+  if (tCard === 'all' || tCard === 'gauge') {
+    const sub = document.getElementById('card-gauge-sub');
+    if (sub) sub.textContent = `${monthNameAz} aqronomik hədəf`;
+    const tempDev = Math.abs(t10 - 21.0);
+    const humDev = Math.abs(humVal - 65.0);
+    let score = 98.8 - (tempDev * 1.8) - (humDev * 0.35);
+    score = Math.max(82.0, Math.min(99.4, score));
+    const statusTxt = score > 95 ? 'Optimal Vegetasiya' : (score > 90 ? 'Balanslaşdırılmış' : 'Tənzimləmə Tələb Olunur');
+    updateArcGauge(score, statusTxt);
+  }
+
+  // 12. Update Analytics View if relevant
+  if (tCard === 'all' || tCard === 'multi') {
+    const sub = document.getElementById('card-multi-sub');
+    if (sub) sub.textContent = `2020 — 2026 Arxiv Trendi (${monthNameAz})`;
+    renderMultiAnalyticsChart(SIM_STATE.currentIndex);
+  }
+}
+
+function startModalSimulation() {
+  const modal = document.getElementById('modal-drilldown');
+  if (!modal || !modal.classList.contains('open')) {
+    openDrilldown('10');
+  }
+  const btn = document.getElementById('btn-sim-drilldown');
+  if (btn) {
+    btn.classList.add('active');
+    const icon = btn.querySelector('.sim-btn-icon');
+    if (icon) icon.textContent = '⏸';
+  }
+
+  const chart = CI['modal-chart-canvas'];
+  if (!chart || !chart.data || !chart.data.datasets || !chart.data.datasets[0]) return;
+  const originalData = [...chart.data.datasets[0].data];
+  const originalLabels = [...chart.data.labels];
+  if (originalData.length === 0) return;
+
+  let step = Math.max(1, Math.floor(originalData.length / 20));
+  let curLen = Math.min(step, originalData.length);
+  chart.data.labels = originalLabels.slice(0, curLen);
+  chart.data.datasets[0].data = originalData.slice(0, curLen);
+  chart.update('none');
+
+  if (window.__modalSimTimer) clearInterval(window.__modalSimTimer);
+  window.__modalSimTimer = setInterval(() => {
+    if (curLen < originalData.length) {
+      curLen = Math.min(curLen + step, originalData.length);
+      chart.data.labels = originalLabels.slice(0, curLen);
+      chart.data.datasets[0].data = originalData.slice(0, curLen);
+      chart.update('none');
+
+      const curSlice = originalData.slice(0, curLen).filter(v => v !== null && !isNaN(v));
+      if (curSlice.length > 0) {
+        const sum = curSlice.reduce((a, b) => a + b, 0);
+        const avg = (sum / curSlice.length).toFixed(1);
+        const min = Math.min(...curSlice).toFixed(1);
+        const max = Math.max(...curSlice).toFixed(1);
+        const mAvg = document.getElementById('m-avg');
+        const mMin = document.getElementById('m-min');
+        const mMax = document.getElementById('m-max');
+        const mCnt = document.getElementById('m-cnt');
+        if (mAvg) mAvg.textContent = `${avg}`;
+        if (mMin) mMin.textContent = `${min}`;
+        if (mMax) mMax.textContent = `${max}`;
+        if (mCnt) mCnt.textContent = `${curSlice.length}`;
+      }
+    } else {
+      clearInterval(window.__modalSimTimer);
+      window.__modalSimTimer = null;
+      if (btn) {
+        btn.classList.remove('active');
+        const icon = btn.querySelector('.sim-btn-icon');
+        if (icon) icon.textContent = '▶';
+      }
+    }
+  }, Math.max(120, Math.floor(SIM_STATE.speedMs / 6)));
+}
+
+// ─── DASHBOARD CHARTS RENDERERS ───
 function renderDashboardCharts() {
   renderBalanceOverviewChart();
   renderYoYComparisonChart();
@@ -2565,29 +3443,34 @@ function renderDashboardCharts() {
 }
 
 // 1. Balance Overview Area Wave
-function renderBalanceOverviewChart() {
+function renderBalanceOverviewChart(customLabels, customData) {
   const ctx = document.getElementById('chart-balance-overview');
   if (!ctx) return;
   if (CI['chart-balance-overview']) CI['chart-balance-overview'].destroy();
 
-  const ch = SD['10'] || {};
-  const daily = ch.daily || {};
-  const keys = Object.keys(daily).slice(-14);
-  const labels = keys.map(k => k.slice(5));
-  const data = keys.map(k => daily[k]);
+  let labels = customLabels;
+  let data = customData;
+
+  if (!labels || !data) {
+    const ch = (SIM_STATE.data?.channels && SIM_STATE.data.channels['10']) ? SIM_STATE.data.channels['10'] : (SD['10'] || {});
+    const daily = ch.daily || {};
+    const keys = Object.keys(daily).slice(-14);
+    labels = keys.map(k => k.slice(5));
+    data = keys.map(k => daily[k]);
+  }
 
   CI['chart-balance-overview'] = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labels.length ? labels : ['10-01', '10-03', '10-05', '10-07', '10-09', '10-11', '10-13', '10-15'],
+      labels: (labels && labels.length) ? labels : ['10-01', '10-03', '10-05', '10-07', '10-09', '10-11', '10-13', '10-15'],
       datasets: [{
-        data: data.length ? data : [19.8, 20.2, 20.8, 21.4, 20.5, 20.9, 21.2, 20.4],
+        data: (data && data.length) ? data : [19.8, 20.2, 20.8, 21.4, 20.5, 20.9, 21.2, 20.4],
         borderColor: '#38bdf8',
         backgroundColor: 'rgba(56, 189, 248, 0.15)',
         borderWidth: 2.5,
         fill: true,
         tension: 0.45,
-        pointRadius: 0,
+        pointRadius: (labels && labels.length > 20) ? 0 : 2.5,
         pointHoverRadius: 6
       }]
     },
@@ -2596,35 +3479,49 @@ function renderBalanceOverviewChart() {
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } },
+        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 }, maxTicksLimit: 10 } },
         y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } }
       }
     }
   });
 }
 
-// 2. Year-over-Year Dual Line (Screenshot 1 top right)
-function renderYoYComparisonChart() {
+// 2. Year-over-Year Dual Line
+function renderYoYComparisonChart(upToIdx) {
   const ctx = document.getElementById('chart-yoy-comparison');
   if (!ctx) return;
   if (CI['chart-yoy-comparison']) CI['chart-yoy-comparison'].destroy();
 
+  const labels = ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyn', 'İyl', 'Avq', 'Sen', 'Okt'];
+  const data2026Full = [18.2, 18.9, 19.8, 21.2, 22.5, 23.8, 24.5, 24.2, 21.6, 20.9];
+  const data2025Full = [17.5, 18.0, 18.8, 20.1, 21.4, 22.8, 23.5, 23.1, 22.2, 22.7];
+
+  let data2026 = [...data2026Full];
+  let pointRadius2026 = 0;
+  if (upToIdx !== undefined && upToIdx >= 0 && upToIdx < 10) {
+    data2026 = data2026Full.map((v, i) => i <= upToIdx ? v : null);
+    pointRadius2026 = (context) => (context.dataIndex === upToIdx ? 6 : 0);
+  }
+
   CI['chart-yoy-comparison'] = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: ['Yan', 'Fev', 'Mar', 'Apr', 'May', 'İyn', 'İyl', 'Avq', 'Sen', 'Okt'],
+      labels,
       datasets: [
         {
           label: '2026 (Cari İl)',
-          data: [18.2, 18.9, 19.8, 21.2, 22.5, 23.8, 24.5, 24.2, 22.1, 20.4],
+          data: data2026,
           borderColor: '#3b82f6',
-          borderWidth: 2,
+          borderWidth: 2.2,
           tension: 0.4,
-          pointRadius: 0
+          pointRadius: pointRadius2026,
+          pointBackgroundColor: '#00f2fe',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2
         },
         {
           label: '2025 (Keçən İl)',
-          data: [17.5, 18.0, 18.8, 20.1, 21.4, 22.8, 23.5, 23.1, 21.2, 19.6],
+          data: data2025Full,
           borderColor: '#00f0aa',
           borderWidth: 1.5,
           borderDash: [4, 4],
@@ -2648,29 +3545,34 @@ function renderYoYComparisonChart() {
 }
 
 // 3. Humidity Overview Area Wave
-function renderHumidityWaveChart() {
+function renderHumidityWaveChart(customLabels, customData) {
   const ctx = document.getElementById('chart-humidity-overview');
   if (!ctx) return;
   if (CI['chart-humidity-overview']) CI['chart-humidity-overview'].destroy();
 
-  const ch = SD['14'] || {};
-  const daily = ch.daily || {};
-  const keys = Object.keys(daily).slice(-20);
-  const labels = keys.map(k => k.slice(5));
-  const data = keys.map(k => daily[k]);
+  let labels = customLabels;
+  let data = customData;
+
+  if (!labels || !data) {
+    const ch = (SIM_STATE.data?.channels && SIM_STATE.data.channels['14']) ? SIM_STATE.data.channels['14'] : (SD['14'] || {});
+    const daily = ch.daily || {};
+    const keys = Object.keys(daily).slice(-20);
+    labels = keys.map(k => k.slice(5));
+    data = keys.map(k => daily[k]);
+  }
 
   CI['chart-humidity-overview'] = new Chart(ctx, {
     type: 'line',
     data: {
-      labels: labels.length ? labels : ['09-25', '09-28', '10-01', '10-05', '10-10', '10-15'],
+      labels: (labels && labels.length) ? labels : ['09-25', '09-28', '10-01', '10-05', '10-10', '10-15'],
       datasets: [{
-        data: data.length ? data : [64, 65, 68, 67, 69, 66.5],
+        data: (data && data.length) ? data : [64, 65, 68, 67, 69, 66.5],
         borderColor: '#a855f7',
         backgroundColor: 'rgba(168, 85, 247, 0.15)',
         borderWidth: 2,
         fill: true,
         tension: 0.4,
-        pointRadius: 0
+        pointRadius: (labels && labels.length > 20) ? 0 : 2.5
       }]
     },
     options: {
@@ -2678,7 +3580,7 @@ function renderHumidityWaveChart() {
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } },
+        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 }, maxTicksLimit: 10 } },
         y: { grid: { color: 'rgba(255, 255, 255, 0.04)' }, ticks: { color: '#64748b', font: { family: 'JetBrains Mono', size: 9 } } }
       }
     }
@@ -2686,14 +3588,24 @@ function renderHumidityWaveChart() {
 }
 
 // 4. Multi Analytics View Chart
-function renderMultiAnalyticsChart() {
+function renderMultiAnalyticsChart(upToIdx) {
   const ctx = document.getElementById('chart-multi-analytics');
   if (!ctx) return;
   if (CI['chart-multi-analytics']) CI['chart-multi-analytics'].destroy();
 
-  const d10 = (SD['10'] && SD['10'].monthly) ? Object.values(SD['10'].monthly) : [18, 19, 21, 23, 24, 21, 20];
-  const d14 = (SD['14'] && SD['14'].monthly) ? Object.values(SD['14'].monthly) : [68, 66, 65, 64, 63, 66, 67];
-  const labels = (SD['10'] && SD['10'].monthly) ? Object.keys(SD['10'].monthly) : ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07'];
+  const ch10 = (SIM_STATE.data?.channels && SIM_STATE.data.channels['10']) ? SIM_STATE.data.channels['10'] : (SD['10'] || {});
+  const ch14 = (SIM_STATE.data?.channels && SIM_STATE.data.channels['14']) ? SIM_STATE.data.channels['14'] : (SD['14'] || {});
+
+  let labels = (ch10 && ch10.monthly) ? Object.keys(ch10.monthly) : ['2026-01', '2026-02', '2026-03', '2026-04', '2026-05', '2026-06', '2026-07', '2026-08', '2026-09', '2026-10'];
+  let d10 = (ch10 && ch10.monthly) ? Object.values(ch10.monthly) : [18.2, 19.5, 20.8, 21.4, 22.5, 23.8, 24.5, 24.2, 21.6, 20.9];
+  let d14 = (ch14 && ch14.monthly) ? Object.values(ch14.monthly) : [68, 66, 65, 64, 63, 66, 67, 65, 66, 66.5];
+
+  if (upToIdx !== undefined && upToIdx >= 0) {
+    const end = Math.min(labels.length, upToIdx + 1);
+    labels = labels.slice(0, end);
+    d10 = d10.slice(0, end);
+    d14 = d14.slice(0, end);
+  }
 
   CI['chart-multi-analytics'] = new Chart(ctx, {
     type: 'line',
@@ -2706,7 +3618,8 @@ function renderMultiAnalyticsChart() {
           borderColor: '#38bdf8',
           yAxisID: 'y',
           borderWidth: 2,
-          tension: 0.35
+          tension: 0.35,
+          pointRadius: 3
         },
         {
           label: 'Rütubət (%)',
@@ -2714,7 +3627,8 @@ function renderMultiAnalyticsChart() {
           borderColor: '#a855f7',
           yAxisID: 'y1',
           borderWidth: 2,
-          tension: 0.35
+          tension: 0.35,
+          pointRadius: 3
         }
       ]
     },
@@ -2723,7 +3637,7 @@ function renderMultiAnalyticsChart() {
       maintainAspectRatio: false,
       interaction: { mode: 'index', intersect: false },
       scales: {
-        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b' } },
+        x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#64748b', maxTicksLimit: 14 } },
         y: { type: 'linear', position: 'left', grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#38bdf8' } },
         y1: { type: 'linear', position: 'right', grid: { drawOnChartArea: false }, ticks: { color: '#a855f7' } }
       }

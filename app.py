@@ -721,6 +721,46 @@ def api_datas_sync():
     })
 
 
+@app.route("/api/simulation-data")
+def api_simulation_data():
+    """Simulyasiya üçün xronoloji aylıq və günlük telemetriya paketini qaytarır."""
+    timeline = sorted(list(SENSOR_DATA.get("10", {}).get("monthly", {}).keys()))
+    months_az = {
+        "01": "Yanvar", "02": "Fevral", "03": "Mart", "04": "Aprel",
+        "05": "May", "06": "İyun", "07": "İyul", "08": "Avqust",
+        "09": "Sentyabr", "10": "Oktyabr", "11": "Noyabr", "12": "Dekabr"
+    }
+    months_meta = []
+    for ym in timeline:
+        parts = ym.split("-")
+        y = parts[0]
+        m = parts[1] if len(parts) > 1 else ""
+        m_name = months_az.get(m, m)
+        months_meta.append({
+            "key": ym,
+            "label": f"{m_name} {y}",
+            "short": f"{m}/{y[2:]}",
+            "year": y,
+            "month": m
+        })
+
+    channels_sim = {}
+    for cid, info in SENSOR_DATA.items():
+        channels_sim[cid] = {
+            "name": info.get("name"),
+            "unit": info.get("unit"),
+            "group": info.get("group"),
+            "monthly": info.get("monthly", {}),
+            "daily": info.get("daily", {})
+        }
+
+    return jsonify({
+        "timeline": timeline,
+        "months_meta": months_meta,
+        "channels": channels_sim
+    })
+
+
 @app.route("/api/schedule-curves", methods=["GET"])
 def api_get_schedule_curves():
     return jsonify(read_schedule_curves())
